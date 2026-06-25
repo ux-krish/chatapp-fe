@@ -17,7 +17,7 @@ const getInitials = (name) => {
 };
 
 function Sidebar() {
-  const { user, logout, updateProfile, apiFetch, setIsAdminPortalOpen, updateSecuritySettings, theme, toggleTheme, deleteAccount } = useAuth();
+  const { user, logout, updateProfile, apiFetch, setIsAdminPortalOpen, updateSecuritySettings, theme, toggleTheme, deleteAccount, handleResponse } = useAuth();
   const { 
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
     respondFriendRequest, createGroup, leaveGroup
@@ -134,10 +134,8 @@ function Sidebar() {
     setSearchLoading(true);
     try {
       const response = await apiFetch(`/api/users/search?query=${encodeURIComponent(userSearchQuery.trim())}`);
-      if (response.ok) {
-        const data = await response.json();
-        setUserSearchResults(data);
-      }
+      const data = await handleResponse(response);
+      setUserSearchResults(data);
     } catch (err) {
       console.error(err);
     } finally {

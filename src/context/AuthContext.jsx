@@ -13,6 +13,31 @@ export function AuthProvider({ children }) {
   // Theme management (light/dark mode)
   const [theme, setTheme] = useState('dark');
 
+  // Helper to safely parse JSON response and handle HTTP errors gracefully
+  const handleResponse = async (res) => {
+    const contentType = res.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        data = await res.json();
+      } catch (err) {
+        data = null;
+      }
+    }
+
+    if (!res.ok) {
+      const errorMsg = (data && data.error) || `Request failed with status ${res.status}`;
+      throw new Error(errorMsg);
+    }
+
+    if (res.status !== 204 && (!contentType || !contentType.includes('application/json'))) {
+      throw new Error(`Expected JSON response but received content-type: ${contentType || 'none'}`);
+    }
+
+    return data;
+  };
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
@@ -64,7 +89,7 @@ export function AuthProvider({ children }) {
         });
 
         if (refreshResponse.ok) {
-          const data = await refreshResponse.json();
+          const data = await handleResponse(refreshResponse);
           setAccessToken(data.accessToken);
           setUser(data.user);
 
@@ -95,7 +120,7 @@ export function AuthProvider({ children }) {
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const data = await handleResponse(response);
           setAccessToken(data.accessToken);
           setUser(data.user);
         }
@@ -116,10 +141,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, mode }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to request OTP.');
-    }
+    const data = await handleResponse(response);
 
     if (data.status === 'admin_auto_login') {
       setAccessToken(data.accessToken);
@@ -136,11 +158,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, otp, displayName, bio }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Invalid OTP.');
-    }
-
+    const data = await handleResponse(response);
     setAccessToken(data.accessToken);
     setUser(data.user);
     return data;
@@ -173,9 +191,10 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ idToken }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      // Clean up Firebase SDK auth session if backend rejects it
+    let data;
+    try {
+      data = await handleResponse(response);
+    } catch (err) {
       if (!isMockUsed) {
         try {
           await auth.signOut();
@@ -183,7 +202,7 @@ export function AuthProvider({ children }) {
           console.error('Error signing out after failed verification:', signOutErr);
         }
       }
-      throw new Error(data.error || 'Google Authentication failed.');
+      throw err;
     }
 
     setAccessToken(data.accessToken);
@@ -198,11 +217,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password, displayName, bio }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to register.');
-    }
-
+    const data = await handleResponse(response);
     setAccessToken(data.accessToken);
     setUser(data.user);
     return data;
@@ -215,11 +230,8 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to login.');
-    }
-
+    const data = await handleResponse(response);
+    
     // If 2FA is required, do NOT set user/token yet. Return to trigger OTP UI.
     if (data.status === '2fa_required') {
       return data;
@@ -237,11 +249,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, otp }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Invalid 2FA code.');
-    }
-
+    const data = await handleResponse(response);
     setAccessToken(data.accessToken);
     setUser(data.user);
     return data;
@@ -253,11 +261,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ password, twoFactorEnabled }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to update security settings.');
-    }
-
+    const data = await handleResponse(response);
     setUser(data.user);
     return data.user;
   };
@@ -319,11 +323,7 @@ export function AuthProvider({ children }) {
       body: formData,
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to update profile.');
-    }
-
+    const data = await handleResponse(response);
     setUser(data.user);
     return data.user;
   };
@@ -333,10 +333,7 @@ export function AuthProvider({ children }) {
       method: 'DELETE',
     });
 
-    if (response.error) {
-      throw new Error(response.error || 'Failed to delete account.');
-    }
-
+    await handleResponse(response);
     logoutState();
   };
 
@@ -359,6 +356,7 @@ export function AuthProvider({ children }) {
     theme,
     toggleTheme,
     deleteAccount,
+    handleResponse,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

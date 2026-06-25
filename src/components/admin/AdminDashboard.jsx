@@ -16,7 +16,7 @@ const getInitials = (name) => {
 };
 
 export default function AdminDashboard({ onClose }) {
-  const { apiFetch, user: currentUser } = useAuth();
+  const { apiFetch, user: currentUser, handleResponse } = useAuth();
   const { socket } = useChat();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'users', 'chats', 'logs'
@@ -55,10 +55,8 @@ export default function AdminDashboard({ onClose }) {
   const fetchStats = async () => {
     try {
       const res = await apiFetch('/api/admin/stats');
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
+      const data = await handleResponse(res);
+      setStats(data);
     } catch (err) {
       console.error('Error fetching admin stats:', err);
     }
@@ -67,10 +65,8 @@ export default function AdminDashboard({ onClose }) {
   const fetchUsers = async () => {
     try {
       const res = await apiFetch('/api/admin/users');
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data);
-      }
+      const data = await handleResponse(res);
+      setUsers(data);
     } catch (err) {
       console.error('Error fetching admin users:', err);
     }
@@ -79,10 +75,8 @@ export default function AdminDashboard({ onClose }) {
   const fetchChats = async () => {
     try {
       const res = await apiFetch('/api/admin/chats');
-      if (res.ok) {
-        const data = await res.json();
-        setChats(data);
-      }
+      const data = await handleResponse(res);
+      setChats(data);
     } catch (err) {
       console.error('Error fetching admin chats:', err);
     }
@@ -166,17 +160,13 @@ export default function AdminDashboard({ onClose }) {
         body: JSON.stringify({ ban: nextBanState === 1 })
       });
 
-      if (res.ok) {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, isBanned: nextBanState, status: nextBanState === 1 ? 'offline' : u.status } : u));
-        addLog('Moderation', `Banned status toggled for "${displayName}" [ID: ${userId}] -> ${nextBanState === 1 ? 'SUSPENDED' : 'ACTIVE'}.`);
-        fetchStats(); // Update online users
-      } else {
-        const errData = await res.json();
-        alert(errData.error || 'Failed to toggle ban state.');
-      }
+      await handleResponse(res);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, isBanned: nextBanState, status: nextBanState === 1 ? 'offline' : u.status } : u));
+      addLog('Moderation', `Banned status toggled for "${displayName}" [ID: ${userId}] -> ${nextBanState === 1 ? 'SUSPENDED' : 'ACTIVE'}.`);
+      fetchStats(); // Update online users
     } catch (err) {
       console.error(err);
-      alert('Network failure processing suspension.');
+      alert(err.message || 'Network failure processing suspension.');
     } finally {
       setActionLoading(null);
     }
@@ -191,16 +181,12 @@ export default function AdminDashboard({ onClose }) {
         body: JSON.stringify({ role: nextRole })
       });
 
-      if (res.ok) {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: nextRole } : u));
-        addLog('Security', `Privilege adjustment: "${displayName}" updated to role [${nextRole.toUpperCase()}].`);
-      } else {
-        const errData = await res.json();
-        alert(errData.error || 'Failed to update user privilege.');
-      }
+      await handleResponse(res);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: nextRole } : u));
+      addLog('Security', `Privilege adjustment: "${displayName}" updated to role [${nextRole.toUpperCase()}].`);
     } catch (err) {
       console.error(err);
-      alert('Network failure updating credentials.');
+      alert(err.message || 'Network failure updating credentials.');
     } finally {
       setActionLoading(null);
     }
@@ -214,17 +200,13 @@ export default function AdminDashboard({ onClose }) {
     setActionLoading(userId);
     try {
       const res = await apiFetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setUsers(prev => prev.filter(u => u.id !== userId));
-        addLog('Moderation', `Deleted user account "${displayName}" [ID: ${userId}] permanently.`);
-        loadAllData(); // Refresh everything
-      } else {
-        const errData = await res.json();
-        alert(errData.error || 'Failed to delete user.');
-      }
+      await handleResponse(res);
+      setUsers(prev => prev.filter(u => u.id !== userId));
+      addLog('Moderation', `Deleted user account "${displayName}" [ID: ${userId}] permanently.`);
+      loadAllData(); // Refresh everything
     } catch (err) {
       console.error(err);
-      alert('Network failure purging user.');
+      alert(err.message || 'Network failure purging user.');
     } finally {
       setActionLoading(null);
     }
@@ -238,20 +220,16 @@ export default function AdminDashboard({ onClose }) {
     setActionLoading(groupId);
     try {
       const res = await apiFetch(`/api/admin/chats/groups/${groupId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setChats(prev => ({
-          ...prev,
-          groups: prev.groups.filter(g => g.id !== groupId)
-        }));
-        addLog('Moderation', `Purged group channel "${groupName}" [ID: ${groupId}] from systems.`);
-        fetchStats();
-      } else {
-        const errData = await res.json();
-        alert(errData.error || 'Failed to delete group.');
-      }
+      await handleResponse(res);
+      setChats(prev => ({
+        ...prev,
+        groups: prev.groups.filter(g => g.id !== groupId)
+      }));
+      addLog('Moderation', `Purged group channel "${groupName}" [ID: ${groupId}] from systems.`);
+      fetchStats();
     } catch (err) {
       console.error(err);
-      alert('Network failure purging group.');
+      alert(err.message || 'Network failure purging group.');
     } finally {
       setActionLoading(null);
     }
@@ -264,15 +242,12 @@ export default function AdminDashboard({ onClose }) {
     setAuditLoading(true);
     try {
       const res = await apiFetch(`/api/chat/history/${chatId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setAuditHistory(data);
-        addLog('Audit', `Loaded historical archives for chat Room [${chatId}].`);
-      } else {
-        alert('Failed to retrieve chat history.');
-      }
+      const data = await handleResponse(res);
+      setAuditHistory(data);
+      addLog('Audit', `Loaded historical archives for chat Room [${chatId}].`);
     } catch (err) {
       console.error(err);
+      alert(err.message || 'Failed to retrieve chat history.');
     } finally {
       setAuditLoading(false);
     }

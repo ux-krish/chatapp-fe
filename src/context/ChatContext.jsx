@@ -5,7 +5,7 @@ import { useSocket } from './SocketContext';
 const ChatContext = createContext(null);
 
 export function ChatProvider({ children }) {
-  const { user, apiFetch, accessToken } = useAuth();
+  const { user, apiFetch, accessToken, handleResponse } = useAuth();
   const { socket, connected } = useSocket();
 
   const [friends, setFriends] = useState([]);
@@ -37,55 +37,49 @@ export function ChatProvider({ children }) {
     if (!user) return;
     try {
       const response = await apiFetch('/api/users/friends');
-      if (response.ok) {
-        const data = await response.json();
-        setFriends(data);
-        
-        // Populate initial online status
-        const onlineSet = new Set();
-        data.forEach(f => {
-          if (f.status === 'online') onlineSet.add(f.id);
-        });
-        setOnlineUsers(prev => {
-          const newSet = new Set(prev);
-          onlineSet.forEach(id => newSet.add(id));
-          return newSet;
-        });
-      }
+      const data = await handleResponse(response);
+      setFriends(data);
+      
+      // Populate initial online status
+      const onlineSet = new Set();
+      data.forEach(f => {
+        if (f.status === 'online') onlineSet.add(f.id);
+      });
+      setOnlineUsers(prev => {
+        const newSet = new Set(prev);
+        onlineSet.forEach(id => newSet.add(id));
+        return newSet;
+      });
     } catch (err) {
       console.error('Failed to load friends:', err);
     }
-  }, [user, apiFetch]);
+  }, [user, apiFetch, handleResponse]);
 
   // Load groups list
   const loadGroups = useCallback(async () => {
     if (!user) return;
     try {
       const response = await apiFetch('/api/chat/groups');
-      if (response.ok) {
-        const data = await response.json();
-        // Ensure every group has a groupId property mapped to its id
-        const mapped = data.map(g => ({ ...g, groupId: g.id }));
-        setGroups(mapped);
-      }
+      const data = await handleResponse(response);
+      // Ensure every group has a groupId property mapped to its id
+      const mapped = data.map(g => ({ ...g, groupId: g.id }));
+      setGroups(mapped);
     } catch (err) {
       console.error('Failed to load groups:', err);
     }
-  }, [user, apiFetch]);
+  }, [user, apiFetch, handleResponse]);
 
   // Load stories feed
   const loadStories = useCallback(async () => {
     if (!user) return;
     try {
       const response = await apiFetch('/api/stories');
-      if (response.ok) {
-        const data = await response.json();
-        setStories(data);
-      }
+      const data = await handleResponse(response);
+      setStories(data);
     } catch (err) {
       console.error('Failed to load stories:', err);
     }
-  }, [user, apiFetch]);
+  }, [user, apiFetch, handleResponse]);
 
   // Triggered on login/initial mount
   useEffect(() => {
@@ -109,22 +103,20 @@ export function ChatProvider({ children }) {
   const loadChatHistory = useCallback(async (chatId) => {
     try {
       const response = await apiFetch(`/api/chat/history/${chatId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(data);
+      const data = await handleResponse(response);
+      setMessages(data);
 
-        // Mark messages as read if they were sent by the other user
-        if (socket && activeChat) {
-          const otherUserId = activeChat.groupId ? null : activeChat.id;
-          if (otherUserId) {
-            socket.emit('mark_as_read', { chatId, senderId: otherUserId });
-          }
+      // Mark messages as read if they were sent by the other user
+      if (socket && activeChat) {
+        const otherUserId = activeChat.groupId ? null : activeChat.id;
+        if (otherUserId) {
+          socket.emit('mark_as_read', { chatId, senderId: otherUserId });
         }
       }
     } catch (err) {
       console.error('Failed to load chat history:', err);
     }
-  }, [apiFetch, socket, activeChat]);
+  }, [apiFetch, socket, activeChat, handleResponse]);
 
   const selectChat = useCallback(async (chat) => {
     setActiveChat(chat);
@@ -141,16 +133,14 @@ export function ChatProvider({ children }) {
     if (isGroup) {
       try {
         const response = await apiFetch(`/api/chat/groups/${chat.id}`);
-        if (response.ok) {
-          const detailedGroup = await response.json();
-          // Ensure we preserve the groupId and state mapping
-          setActiveChat({ ...detailedGroup, groupId: detailedGroup.id });
-        }
+        const detailedGroup = await handleResponse(response);
+        // Ensure we preserve the groupId and state mapping
+        setActiveChat({ ...detailedGroup, groupId: detailedGroup.id });
       } catch (err) {
         console.error('Failed to load group roster:', err);
       }
     }
-  }, [user, apiFetch, get1to1ChatId, loadChatHistory]);
+  }, [user, apiFetch, get1to1ChatId, loadChatHistory, handleResponse]);
 
   // Send a text message
   const sendMessage = useCallback((content, type = 'text') => {
@@ -250,18 +240,14 @@ export function ChatProvider({ children }) {
         body: formData
       });
 
-      if (!response.ok) {
-        throw new Error('File upload failed.');
-      }
-
-      const uploadData = await response.json();
+      const uploadData = await handleResponse(response);
       
       // 2. Send media URL as a chat message
       sendMessage(uploadData.mediaUrl, uploadData.type);
     } catch (err) {
       console.error('Error sending media message:', err);
     }
-  }, [activeChat, sendMessage, apiFetch]);
+  }, [activeChat, sendMessage, apiFetch, handleResponse]);
 
   // Emit typing indicators
   const setTypingIndicator = useCallback((isTyping) => {
@@ -290,17 +276,13 @@ export function ChatProvider({ children }) {
         body: formData
       });
 
-      if (response.ok) {
-        await loadStories();
-      } else {
-        const err = await response.json();
-        throw new Error(err.error || 'Failed to upload status.');
-      }
+      await handleResponse(response);
+      await loadStories();
     } catch (err) {
       console.error('Error posting story:', err);
       throw err;
     }
-  }, [loadStories, apiFetch]);
+  }, [loadStories, apiFetch, handleResponse]);
 
   // View status
   const viewStoryItem = useCallback(async (storyId, storyUserId) => {
@@ -366,19 +348,14 @@ export function ChatProvider({ children }) {
         body: formData
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        await loadGroups();
-        return { ...data.group, groupId: data.group.id };
-      } else {
-        const err = await response.json();
-        throw new Error(err.error || 'Failed to create group.');
-      }
+      const data = await handleResponse(response);
+      await loadGroups();
+      return { ...data.group, groupId: data.group.id };
     } catch (err) {
       console.error('Error creating group:', err);
       throw err;
     }
-  }, [loadGroups, apiFetch]);
+  }, [loadGroups, apiFetch, handleResponse]);
 
   // Add members to an existing group
   const addGroupMembers = useCallback(async (groupId, memberIds) => {
@@ -388,27 +365,22 @@ export function ChatProvider({ children }) {
         body: JSON.stringify({ members: memberIds })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // Update activeChat's members list in state if we're still viewing this group
-        setActiveChat(prev => {
-          if (prev && prev.id === groupId) {
-            return { ...prev, members: data.members };
-          }
-          return prev;
-        });
-        // Refresh groups to sync sidebar member counts
-        await loadGroups();
-        return data;
-      } else {
-        const err = await response.json();
-        throw new Error(err.error || 'Failed to add members.');
-      }
+      const data = await handleResponse(response);
+      // Update activeChat's members list in state if we're still viewing this group
+      setActiveChat(prev => {
+        if (prev && prev.id === groupId) {
+          return { ...prev, members: data.members };
+        }
+        return prev;
+      });
+      // Refresh groups to sync sidebar member counts
+      await loadGroups();
+      return data;
     } catch (err) {
       console.error('Error adding group members:', err);
       throw err;
     }
-  }, [apiFetch, loadGroups]);
+  }, [apiFetch, loadGroups, handleResponse]);
 
   // Leave a group
   const leaveGroupChat = useCallback(async (groupId) => {
