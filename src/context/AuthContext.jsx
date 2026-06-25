@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase.js';
 
+const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -77,13 +79,13 @@ export function AuthProvider({ children }) {
       headers,
     };
 
-    let response = await fetch(url, config);
+    let response = await fetch(`${apiBase}${url}`, config);
 
     // If unauthorized (expired access token), try to refresh
     if (response.status === 401 && accessToken) {
       try {
         console.log('Access token expired. Requesting refresh...');
-        const refreshResponse = await fetch('/api/auth/token/refresh', {
+        const refreshResponse = await fetch(`${apiBase}/api/auth/token/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -95,7 +97,7 @@ export function AuthProvider({ children }) {
 
           // Retry the original request with new token
           headers['Authorization'] = `Bearer ${data.accessToken}`;
-          response = await fetch(url, config);
+          response = await fetch(`${apiBase}${url}`, config);
         } else {
           // Refresh failed (refresh token expired) -> force logout
           console.warn('Session expired. Logging out.');
@@ -114,7 +116,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/token/refresh', {
+        const response = await fetch(`${apiBase}/api/auth/token/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -135,7 +137,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const requestOtp = async (email, mode = 'login') => {
-    const response = await fetch('/api/auth/otp/request', {
+    const response = await fetch(`${apiBase}/api/auth/otp/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, mode }),
@@ -152,7 +154,7 @@ export function AuthProvider({ children }) {
   };
 
   const verifyOtp = async (email, otp, displayName = null, bio = null) => {
-    const response = await fetch('/api/auth/otp/verify', {
+    const response = await fetch(`${apiBase}/api/auth/otp/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otp, displayName, bio }),
@@ -185,7 +187,7 @@ export function AuthProvider({ children }) {
     }
 
     // 3. Send ID Token to Express API Gateway
-    const response = await fetch('/api/auth/google', {
+    const response = await fetch(`${apiBase}/api/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
@@ -211,7 +213,7 @@ export function AuthProvider({ children }) {
   };
 
   const registerWithPassword = async (email, password, displayName, bio = null) => {
-    const response = await fetch('/api/auth/register', {
+    const response = await fetch(`${apiBase}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, displayName, bio }),
@@ -224,7 +226,7 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithPassword = async (email, password) => {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch(`${apiBase}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -243,7 +245,7 @@ export function AuthProvider({ children }) {
   };
 
   const verify2fa = async (email, otp) => {
-    const response = await fetch('/api/auth/verify-2fa', {
+    const response = await fetch(`${apiBase}/api/auth/verify-2fa`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otp }),
@@ -304,7 +306,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(`${apiBase}/api/auth/logout`, { method: 'POST' });
     } catch (err) {
       console.error('Error on logout API call:', err);
     } finally {

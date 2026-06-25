@@ -13,7 +13,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-zinc-950 flex flex-col items-center justify-center">
+      <div className="h-[100dvh] w-screen bg-zinc-950 flex flex-col items-center justify-center">
         {/* Beautiful animated glassmorphic loading spinner */}
         <div className="relative flex items-center justify-center">
           <div className="h-16 w-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
@@ -32,7 +32,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen w-screen bg-zinc-950 text-zinc-100 flex overflow-hidden select-none font-sans">
+    <div className="h-[100dvh] w-screen bg-zinc-950 text-zinc-100 flex overflow-hidden select-none font-sans">
       <AnimatePresence mode="wait">
         {!user ? (
           <motion.div 

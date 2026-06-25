@@ -924,7 +924,7 @@ function Sidebar() {
       </div>
 
       {/* 4. FOOTER TAB SELECTOR */}
-      <div className="p-3 bg-zinc-900/60 border-t border-zinc-800/50 flex items-center justify-around">
+      <div className="px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-zinc-900/60 border-t border-zinc-800/50 flex items-center justify-around">
         <button 
           onClick={() => setActiveTab('chats')}
           className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'chats' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}

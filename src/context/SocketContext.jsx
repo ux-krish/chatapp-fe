@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
+const socketUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+
 const SocketContext = createContext(null);
 
 export function SocketProvider({ children }) {
@@ -19,8 +21,8 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    // Connect to Socket.IO using absolute/relative path since Vite proxies it
-    const newSocket = io({
+    // Connect to Socket.IO using absolute URL if defined (important for mobile), else relative path
+    const newSocket = io(socketUrl || undefined, {
       auth: {
         token: accessToken
       },

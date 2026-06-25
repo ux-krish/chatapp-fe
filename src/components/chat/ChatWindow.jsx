@@ -968,7 +968,7 @@ function ChatWindow() {
       {/* 5. BOTTOM TEXT ENTRY BOX */}
       <form 
         onSubmit={handleSend}
-        className="p-4 bg-zinc-900/60 border-t border-zinc-800/50 backdrop-blur-md flex items-center gap-3 z-10"
+        className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-zinc-900/60 border-t border-zinc-800/50 backdrop-blur-md flex items-center gap-3 z-10"
       >
         <button 
           type="button"
