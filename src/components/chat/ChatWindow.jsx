@@ -360,7 +360,7 @@ function ChatWindow() {
           >
             💬
           </motion.div>
-          <h2 className="text-xl font-bold tracking-tight text-white font-sans">Secure Chat Gateway</h2>
+          <h2 className="text-xl font-bold tracking-tight text-white font-sans">Lynq Gateway</h2>
           <p className="mt-2.5 text-xs text-zinc-400 max-w-[320px] leading-relaxed">
             All conversations are synchronized in real-time. Direct messages, group channels, and media attachments are isolated securely.
           </p>
@@ -966,7 +966,7 @@ function ChatWindow() {
       {/* 5. BOTTOM TEXT ENTRY BOX */}
       <form 
         onSubmit={handleSend}
-        className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-zinc-900/60 border-t border-zinc-800/50 backdrop-blur-md flex items-center gap-3 z-10"
+        className="px-4 h-16 bg-zinc-900/60 border-t border-zinc-800/40 backdrop-blur-md flex items-center gap-2.5 z-10"
       >
         <button 
           type="button"
@@ -974,7 +974,7 @@ function ChatWindow() {
             setShowAttachMenu(prev => !prev);
             setShowEmojiPicker(false);
           }}
-          className={`p-2.5 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded-xl transition duration-200 ${showAttachMenu ? 'bg-zinc-800 text-emerald-400' : ''}`}
+          className={`p-2.5 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-850 rounded-xl transition duration-150 flex-shrink-0 ${showAttachMenu ? 'bg-zinc-850 text-emerald-400' : ''}`}
         >
           <Paperclip className="h-5 w-5" />
         </button>
@@ -1048,7 +1048,7 @@ function ChatWindow() {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            className="block w-full px-4 py-3 bg-zinc-950 border border-zinc-800/80 rounded-2xl text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200"
+            className="block w-full pl-4 pr-11 py-2.5 bg-zinc-950 border border-zinc-800/80 rounded-xl text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-150"
           />
           
           <button 
@@ -1057,7 +1057,7 @@ function ChatWindow() {
               setShowEmojiPicker(prev => !prev);
               setShowAttachMenu(false);
             }}
-            className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-emerald-400 transition ${showEmojiPicker ? 'text-emerald-400' : ''}`}
+            className={`absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-emerald-400 transition ${showEmojiPicker ? 'text-emerald-400' : ''}`}
           >
             <Smile className="h-5 w-5" />
           </button>
@@ -1066,7 +1066,7 @@ function ChatWindow() {
         <button 
           type="submit"
           disabled={!inputText.trim()}
-          className="p-3 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 rounded-2xl shadow-lg shadow-emerald-500/5 transition duration-200 flex-shrink-0"
+          className="p-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 rounded-xl shadow-lg shadow-emerald-500/5 transition duration-150 flex-shrink-0"
         >
           <Send className="h-5 w-5" />
         </button>
@@ -1258,7 +1258,7 @@ function ChatWindow() {
                           <User className="h-3.5 w-3.5 text-zinc-450" /> Personal Bio
                         </span>
                         <p className="text-xs text-zinc-300 bg-zinc-950/30 border border-zinc-850/50 p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap">
-                          {activeChat.bio || 'Hey there! I am using Secure Chat.'}
+                          {activeChat.bio || 'Hey there! I am using Lynq.'}
                         </p>
                       </div>
 

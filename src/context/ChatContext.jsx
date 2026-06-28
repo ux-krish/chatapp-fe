@@ -478,6 +478,110 @@ export function ChatProvider({ children }) {
     });
   }, [socket, activeChat, user, get1to1ChatId]);
 
+  // ---- Chat Settings Functions ----
+
+  // Pin a chat (persisted server-side)
+  const pinChatAction = useCallback(async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/chat/pin', {
+        method: 'POST',
+        body: JSON.stringify({ friendId })
+      });
+      if (response.ok) {
+        setFriends(prev => prev.map(f => f.id === friendId ? { ...f, isPinned: true } : f));
+      }
+    } catch (err) {
+      console.error('Error pinning chat:', err);
+    }
+  }, [apiFetch]);
+
+  // Unpin a chat
+  const unpinChatAction = useCallback(async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/chat/unpin', {
+        method: 'POST',
+        body: JSON.stringify({ friendId })
+      });
+      if (response.ok) {
+        setFriends(prev => prev.map(f => f.id === friendId ? { ...f, isPinned: false } : f));
+      }
+    } catch (err) {
+      console.error('Error unpinning chat:', err);
+    }
+  }, [apiFetch]);
+
+  // Block a user
+  const blockUserAction = useCallback(async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/block', {
+        method: 'POST',
+        body: JSON.stringify({ blockedId: friendId })
+      });
+      if (response.ok) {
+        setFriends(prev => prev.map(f => f.id === friendId ? { ...f, isBlocked: true } : f));
+        // If we have this user as active chat, deselect
+        if (activeChat && activeChat.id === friendId) {
+          selectChat(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error blocking user:', err);
+    }
+  }, [apiFetch, activeChat, selectChat]);
+
+  // Unblock a user
+  const unblockUserAction = useCallback(async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/unblock', {
+        method: 'POST',
+        body: JSON.stringify({ blockedId: friendId })
+      });
+      if (response.ok) {
+        setFriends(prev => prev.map(f => f.id === friendId ? { ...f, isBlocked: false } : f));
+      }
+    } catch (err) {
+      console.error('Error unblocking user:', err);
+    }
+  }, [apiFetch]);
+
+  // Hide chat (remove from sidebar without deleting friendship)
+  const hideChatAction = useCallback(async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/chat/hide', {
+        method: 'POST',
+        body: JSON.stringify({ friendId })
+      });
+      if (response.ok) {
+        setFriends(prev => prev.map(f => f.id === friendId ? { ...f, isHidden: true, isPinned: false } : f));
+        // Deselect if this is the active chat
+        if (activeChat && activeChat.id === friendId) {
+          selectChat(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error hiding chat:', err);
+    }
+  }, [apiFetch, activeChat, selectChat]);
+
+  // Remove friendship entirely
+  const removeFriendshipAction = useCallback(async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/friends/remove', {
+        method: 'DELETE',
+        body: JSON.stringify({ friendId })
+      });
+      if (response.ok) {
+        setFriends(prev => prev.filter(f => f.id !== friendId));
+        // Deselect if this is the active chat
+        if (activeChat && activeChat.id === friendId) {
+          selectChat(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error removing friendship:', err);
+    }
+  }, [apiFetch, activeChat, selectChat]);
+
   // Setup Real-time socket event bindings
   useEffect(() => {
     if (!socket) return;
@@ -693,6 +797,12 @@ export function ChatProvider({ children }) {
     deleteMessage,
     pinMessage,
     reactMessage,
+    pinChatAction,
+    unpinChatAction,
+    blockUserAction,
+    unblockUserAction,
+    hideChatAction,
+    removeFriendshipAction,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

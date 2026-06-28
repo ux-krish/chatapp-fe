@@ -85,7 +85,7 @@ function AuthScreen() {
         await verify2fa(email, otp);
       } else {
         if (authMode === 'register') {
-          await verifyOtp(email, otp, displayName.trim(), bio.trim() || 'Hey there! I am using Secure Chat.');
+          await verifyOtp(email, otp, displayName.trim(), bio.trim() || 'Hey there! I am using Lynq.');
         } else {
           await verifyOtp(email, otp);
         }
@@ -145,7 +145,7 @@ function AuthScreen() {
               ? 'Two-Factor Verification'
               : 'Confirm your Identity' 
             : authMode === 'login' 
-              ? 'Welcome to Secure Chat' 
+              ? 'Welcome to Lynq' 
               : 'Create an Account'
           }
         </h2>

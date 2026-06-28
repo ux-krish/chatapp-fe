@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageSquare, Users, Sparkles, Settings, LogOut, Search, 
   UserPlus, Check, X, Camera, Plus, PlusCircle, Trash2, Users2, ChevronRight, User,
-  Shield, ShieldAlert, Sun, Moon, ArrowLeft, Key, Send, Palette
+  Shield, ShieldAlert, Sun, Moon, ArrowLeft, Key, Send, Palette,
+  MoreVertical, Pin, PinOff, Ban, EyeOff, UserMinus
 } from 'lucide-react';
 
 const getInitials = (name) => {
@@ -24,7 +25,9 @@ function Sidebar() {
   } = useAuth();
   const { 
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
-    respondFriendRequest, createGroup, leaveGroup
+    respondFriendRequest, createGroup, leaveGroup,
+    pinChatAction, unpinChatAction, blockUserAction, unblockUserAction,
+    hideChatAction, removeFriendshipAction
   } = useChat();
 
   const [activeTab, setActiveTab] = useState('chats'); // 'chats', 'friends', 'stories', 'settings'
@@ -41,6 +44,9 @@ function Sidebar() {
   // Modals / Drawers states
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [chatMenuOpen, setChatMenuOpen] = useState(null); // friendId of open menu
+  const [confirmAction, setConfirmAction] = useState(null); // { type, friendId, friendName }
+  const chatMenuRef = useRef(null);
   
   // User Search State
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -73,6 +79,29 @@ function Sidebar() {
     setSelectedThemeColor(themeColor);
     setSelectedFontSize(fontSize);
   }, [themeColor, fontSize]);
+
+  // Click-outside handler for chat settings dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (chatMenuRef.current && !chatMenuRef.current.contains(e.target)) {
+        setChatMenuOpen(null);
+      }
+    };
+    if (chatMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [chatMenuOpen]);
+
+  // Handle confirmed destructive action
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+    const { type, friendId } = confirmAction;
+    if (type === 'block') await blockUserAction(friendId);
+    if (type === 'removeFriendship') await removeFriendshipAction(friendId);
+    if (type === 'removeChat') await hideChatAction(friendId);
+    setConfirmAction(null);
+  };
 
   const handleThemeSave = async (e) => {
     e.preventDefault();
@@ -248,9 +277,15 @@ function Sidebar() {
   // Filters for Chat/Friends
   const filteredFriends = friends.filter(f => 
     f.friendshipStatus === 'accepted' && 
+    !f.isHidden &&
     (f.displayName.toLowerCase().includes(searchQuery.toLowerCase()) || 
      f.email.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  ).sort((a, b) => {
+    // Pinned chats always come first
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return 0;
+  });
 
   const filteredGroups = groups.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -398,7 +433,6 @@ function Sidebar() {
                 );
               })}
 
-              {/* Friends (Direct message chats) listing */}
               {filteredFriends.map(friend => {
                 const isSelected = activeChat && !activeChat.groupId && activeChat.id === friend.id;
                 const isOnline = friend.status === 'online';
@@ -407,7 +441,7 @@ function Sidebar() {
                   <div 
                     key={friend.id}
                     onClick={() => selectChat(friend)}
-                    className={`p-3.5 flex items-center justify-between cursor-pointer transition duration-200 hover:bg-zinc-800/30 ${isSelected ? 'bg-zinc-800/40 border-l-2 border-emerald-500' : ''}`}
+                    className={`group/item relative p-3.5 flex items-center justify-between cursor-pointer transition duration-200 hover:bg-zinc-800/30 ${isSelected ? 'bg-zinc-800/40 border-l-2 border-emerald-500' : ''}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative">
@@ -423,7 +457,15 @@ function Sidebar() {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <h2 className="text-xs font-semibold text-white truncate">{friend.displayName}</h2>
+                        <div className="flex items-center gap-1.5">
+                          <h2 className="text-xs font-semibold text-white truncate">{friend.displayName}</h2>
+                          {friend.isPinned && (
+                            <Pin className="h-3 w-3 text-emerald-400 fill-emerald-400/20 rotate-45 flex-shrink-0" />
+                          )}
+                          {friend.isBlocked && (
+                            <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1 rounded flex-shrink-0">Blocked</span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-zinc-400 truncate mt-0.5">
                           {friend.lastMessage 
                             ? (friend.lastMessage.type === 'text' ? friend.lastMessage.content : `📁 [${friend.lastMessage.type}]`)
@@ -432,23 +474,113 @@ function Sidebar() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end flex-shrink-0 ml-2">
-                      <span className="text-[9px] text-zinc-500 font-medium">
-                        {friend.lastMessage ? formatTime(friend.lastMessage.createdAt) : ''}
-                      </span>
-                      {friend.unreadCount > 0 ? (
-                        <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 mt-1.5 animate-pulse">
-                          {friend.unreadCount}
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-end flex-shrink-0 ml-2">
+                        <span className="text-[9px] text-zinc-500 font-medium">
+                          {friend.lastMessage ? formatTime(friend.lastMessage.createdAt) : ''}
                         </span>
-                      ) : (
-                        friend.lastMessage && friend.lastMessage.senderId === user.id && (
-                          <div className="mt-1.5">
-                            {friend.lastMessage.status === 'sent' && <span className="text-zinc-500">✓</span>}
-                            {friend.lastMessage.status === 'delivered' && <span className="text-zinc-400">✓✓</span>}
-                            {friend.lastMessage.status === 'read' && <span className="text-emerald-400 font-bold">✓✓</span>}
+                        {friend.unreadCount > 0 ? (
+                          <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 mt-1.5 animate-pulse">
+                            {friend.unreadCount}
+                          </span>
+                        ) : (
+                          friend.lastMessage && friend.lastMessage.senderId === user.id && (
+                            <div className="mt-1.5">
+                              {friend.lastMessage.status === 'sent' && <span className="text-zinc-500">✓</span>}
+                              {friend.lastMessage.status === 'delivered' && <span className="text-zinc-400">✓✓</span>}
+                              {friend.lastMessage.status === 'read' && <span className="text-emerald-400 font-bold">✓✓</span>}
+                            </div>
+                          )
+                        )}
+                      </div>
+
+                      {/* Dropdown Options Trigger */}
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setChatMenuOpen(chatMenuOpen === friend.id ? null : friend.id)}
+                          className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800/80 transition duration-200 opacity-0 group-hover/item:opacity-100 focus:opacity-100"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+
+                        {chatMenuOpen === friend.id && (
+                          <div 
+                            ref={chatMenuRef}
+                            className="absolute right-0 top-7 w-48 bg-zinc-950/95 backdrop-blur-md border border-zinc-800/80 rounded-xl shadow-2xl py-1.5 z-50 text-left"
+                          >
+                            <button
+                              onClick={() => {
+                                if (friend.isPinned) {
+                                  unpinChatAction(friend.id);
+                                } else {
+                                  pinChatAction(friend.id);
+                                }
+                                setChatMenuOpen(null);
+                              }}
+                              className="w-full px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800/50 hover:text-white transition flex items-center"
+                            >
+                              {friend.isPinned ? (
+                                <>
+                                  <PinOff className="h-3.5 w-3.5 mr-2 text-zinc-400" />
+                                  Unpin Chat
+                                </>
+                              ) : (
+                                <>
+                                  <Pin className="h-3.5 w-3.5 mr-2 text-emerald-400 rotate-45" />
+                                  Pin Chat
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setConfirmAction({
+                                  type: friend.isBlocked ? 'unblock' : 'block',
+                                  friendId: friend.id,
+                                  friendName: friend.displayName
+                                });
+                                setChatMenuOpen(null);
+                              }}
+                              className="w-full px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800/50 hover:text-white transition flex items-center"
+                            >
+                              <Ban className="h-3.5 w-3.5 mr-2 text-amber-500" />
+                              {friend.isBlocked ? 'Unblock User' : 'Block User'}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setConfirmAction({
+                                  type: 'removeChat',
+                                  friendId: friend.id,
+                                  friendName: friend.displayName
+                                });
+                                setChatMenuOpen(null);
+                              }}
+                              className="w-full px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800/50 hover:text-white transition flex items-center"
+                            >
+                              <EyeOff className="h-3.5 w-3.5 mr-2 text-zinc-400" />
+                              Remove Chat
+                            </button>
+
+                            <div className="border-t border-zinc-800/60 my-1"></div>
+
+                            <button
+                              onClick={() => {
+                                setConfirmAction({
+                                  type: 'removeFriendship',
+                                  friendId: friend.id,
+                                  friendName: friend.displayName
+                                });
+                                setChatMenuOpen(null);
+                              }}
+                              className="w-full px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 transition flex items-center"
+                            >
+                              <UserMinus className="h-3.5 w-3.5 mr-2 text-rose-500" />
+                              Remove Friend
+                            </button>
                           </div>
-                        )
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -1082,10 +1214,10 @@ function Sidebar() {
       </div>
 
       {/* 4. FOOTER TAB SELECTOR */}
-      <div className="px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-zinc-900/60 border-t border-zinc-800/50 flex items-center justify-around">
+      <div className="px-4 h-16 bg-zinc-900/60 border-t border-zinc-800/40 backdrop-blur-md flex items-center justify-around">
         <button 
           onClick={() => setActiveTab('chats')}
-          className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'chats' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'chats' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           <div className="relative">
             <MessageSquare className="h-5 w-5" />
@@ -1099,14 +1231,14 @@ function Sidebar() {
         </button>
         <button 
           onClick={() => setActiveTab('stories')}
-          className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'stories' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'stories' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           <Sparkles className="h-5 w-5" />
           <span>Status</span>
         </button>
         <button 
           onClick={() => setActiveTab('friends')}
-          className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'friends' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'friends' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           <div className="relative">
             <Users className="h-5 w-5" />
@@ -1120,7 +1252,7 @@ function Sidebar() {
         </button>
         <button 
           onClick={() => setActiveTab('settings')}
-          className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'settings' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'settings' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           <Settings className="h-5 w-5" />
           <span>Settings</span>
@@ -1319,6 +1451,70 @@ function Sidebar() {
                   Create Group Chat
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL C: CONFIRM DESTRUCTIVE ACTION (BLOCK, REMOVE FRIEND, REMOVE CHAT) */}
+      <AnimatePresence>
+        {confirmAction && (
+          <div className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm z-30 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-sm p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl relative"
+            >
+              <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                {confirmAction.type === 'block' && <Ban className="h-5 w-5 text-amber-500" />}
+                {confirmAction.type === 'unblock' && <Ban className="h-5 w-5 text-emerald-500" />}
+                {confirmAction.type === 'removeChat' && <EyeOff className="h-5 w-5 text-zinc-400" />}
+                {confirmAction.type === 'removeFriendship' && <UserMinus className="h-5 w-5 text-rose-500" />}
+                Confirm Action
+              </h3>
+
+              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                {confirmAction.type === 'block' && `Are you sure you want to block ${confirmAction.friendName}? You will not receive messages from this user.`}
+                {confirmAction.type === 'unblock' && `Are you sure you want to unblock ${confirmAction.friendName}?`}
+                {confirmAction.type === 'removeChat' && `Are you sure you want to remove the chat history with ${confirmAction.friendName} from your sidebar?`}
+                {confirmAction.type === 'removeFriendship' && `Are you sure you want to remove ${confirmAction.friendName} from your friends list? This will delete the chat history as well.`}
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmAction(null)}
+                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold rounded-xl transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const { type, friendId } = confirmAction;
+                    if (type === 'block') {
+                      await blockUserAction(friendId);
+                    } else if (type === 'unblock') {
+                      await unblockUserAction(friendId);
+                    } else if (type === 'removeChat') {
+                      await hideChatAction(friendId);
+                    } else if (type === 'removeFriendship') {
+                      await removeFriendshipAction(friendId);
+                    }
+                    setConfirmAction(null);
+                  }}
+                  className={`px-4 py-2 text-xs font-semibold rounded-xl transition ${
+                    confirmAction.type === 'removeFriendship'
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                      : confirmAction.type === 'block'
+                      ? 'bg-amber-500 hover:bg-amber-600 text-zinc-950'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-zinc-950'
+                  }`}
+                >
+                  Confirm
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
