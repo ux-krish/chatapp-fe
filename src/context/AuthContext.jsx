@@ -371,7 +371,7 @@ export function AuthProvider({ children }) {
       setApiBase(activeApi);
       const isLocal = activeApi.includes('localhost') || activeApi.includes('127.0.0.1');
       console.log(
-        `%c🌐 Resolved backend target: ${isLocal ? 'LOCAL' : 'ONLINE'} -> ${activeApi}`,
+        `%c🌐 Resolved backend target: ${isLocal ? 'LOCAL' : 'ONLINE'}`,
         'color: #10b981; font-weight: bold; font-size: 12px; padding: 4px; border-radius: 4px;'
       );
 
