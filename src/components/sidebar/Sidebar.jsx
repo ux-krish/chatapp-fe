@@ -487,10 +487,22 @@ function Sidebar() {
                           </span>
                         ) : (
                           friend.lastMessage && friend.lastMessage.senderId === user.id && (
-                            <div className="mt-1.5">
-                              {friend.lastMessage.status === 'sent' && <span className="text-zinc-500">✓</span>}
-                              {friend.lastMessage.status === 'delivered' && <span className="text-zinc-400">✓✓</span>}
-                              {friend.lastMessage.status === 'read' && <span className="text-emerald-400 font-bold">✓✓</span>}
+                            <div className="mt-1.5 flex items-center justify-end">
+                              {friend.lastMessage.status === 'sent' && (
+                                <Check className="h-3 w-3 text-zinc-500 stroke-[2.5]" />
+                              )}
+                              {friend.lastMessage.status === 'delivered' && (
+                                <div className="relative flex items-center w-[14px] h-3">
+                                  <Check className="absolute left-0 h-3 w-3 text-zinc-450 stroke-[2.5]" />
+                                  <Check className="absolute left-[3.5px] h-3 w-3 text-zinc-450 stroke-[2.5]" />
+                                </div>
+                              )}
+                              {friend.lastMessage.status === 'read' && (
+                                <div className="relative flex items-center w-[14px] h-3">
+                                  <Check className="absolute left-0 h-3 w-3 text-sky-400 stroke-[2.5]" />
+                                  <Check className="absolute left-[3.5px] h-3 w-3 text-sky-400 stroke-[2.5]" />
+                                </div>
+                              )}
                             </div>
                           )
                         )}
