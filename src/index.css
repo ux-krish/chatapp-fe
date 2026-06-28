@@ -32,8 +32,10 @@
   --app-font-size: 16px;
 }
 
-/* Apply Root Font Size dynamically */
-html {
+/* Apply Root Font Size and Visual Viewport height dynamically */
+html, body, #root {
+  height: var(--viewport-height, 100dvh);
+  overflow: hidden;
   font-size: var(--app-font-size);
 }
 
