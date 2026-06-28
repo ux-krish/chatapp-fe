@@ -13,7 +13,7 @@ const getInitials = (name) => {
 };
 import { 
   Send, Paperclip, Smile, MoreVertical, MoreHorizontal, ShieldCheck, Phone, Video, 
-  Info, Image as ImageIcon, FileText, Film, Volume2, ArrowLeft, Trash2, LogOut, CheckCheck,
+  Info, Image as ImageIcon, FileText, Film, Volume2, ArrowLeft, Trash2, LogOut, Check, CheckCheck,
   Users2, X, Plus, Reply, Pin, PinOff, Pencil, ChevronDown, Download, Mail, User, Calendar,
   Ban, EyeOff, UserMinus
 } from 'lucide-react';
@@ -853,10 +853,22 @@ function ChatWindow() {
                   </span>
                   
                   {isMe && (
-                    <div className="ml-1">
-                      {msg.status === 'sent' && <span className="text-[10px] text-zinc-500 font-semibold leading-none">✓</span>}
-                      {msg.status === 'delivered' && <span className="text-[10px] text-zinc-400 font-bold leading-none">✓✓</span>}
-                      {msg.status === 'read' && <span className="text-[10px] text-emerald-400 font-bold leading-none">✓✓</span>}
+                    <div className="ml-1 flex items-center">
+                      {msg.status === 'sent' && (
+                        <Check className="h-3 w-3 text-zinc-500 stroke-[2.5]" />
+                      )}
+                      {msg.status === 'delivered' && (
+                        <div className="relative flex items-center w-[14px] h-3">
+                          <Check className="absolute left-0 h-3 w-3 text-zinc-450 stroke-[2.5]" />
+                          <Check className="absolute left-[3.5px] h-3 w-3 text-zinc-450 stroke-[2.5]" />
+                        </div>
+                      )}
+                      {msg.status === 'read' && (
+                        <div className="relative flex items-center w-[14px] h-3">
+                          <Check className="absolute left-0 h-3 w-3 text-emerald-400 stroke-[2.5]" />
+                          <Check className="absolute left-[3.5px] h-3 w-3 text-emerald-400 stroke-[2.5]" />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
