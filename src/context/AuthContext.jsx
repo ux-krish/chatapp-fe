@@ -32,8 +32,16 @@ export function AuthProvider({ children }) {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
-        if (parsed && parsed.id) {
-          return localStorage.getItem(`theme-${parsed.id}`) || 'dark';
+        if (parsed) {
+          if (parsed.theme) return parsed.theme;
+          if (parsed.email) {
+            const savedEmailTheme = localStorage.getItem(`theme-${parsed.email}`);
+            if (savedEmailTheme) return savedEmailTheme;
+          }
+          if (parsed.id) {
+            const savedIdTheme = localStorage.getItem(`theme-${parsed.id}`);
+            if (savedIdTheme) return savedIdTheme;
+          }
         }
       }
     } catch (e) {}
@@ -46,7 +54,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (user) {
-      const savedTheme = localStorage.getItem(`theme-${user.id}`) || 'dark';
+      const savedTheme = user.theme || (user.email && localStorage.getItem(`theme-${user.email}`)) || localStorage.getItem(`theme-${user.id}`) || 'dark';
       setTheme(savedTheme);
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -118,7 +126,7 @@ export function AuthProvider({ children }) {
       // Persist to database via PUT /api/users/profile
       const response = await apiFetch('/api/users/profile', {
         method: 'PUT',
-        body: JSON.stringify({ themeColor: color, fontSize: size }),
+        body: JSON.stringify({ themeColor: color, fontSize: size, theme }),
       });
       const data = await handleResponse(response);
       setUser(data.user);
@@ -164,7 +172,18 @@ export function AuthProvider({ children }) {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     if (user) {
+      localStorage.setItem(`theme-${user.email}`, newTheme);
       localStorage.setItem(`theme-${user.id}`, newTheme);
+      
+      // Update database
+      apiFetch('/api/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ theme: newTheme })
+      }).then(async (response) => {
+        const data = await handleResponse(response);
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }).catch(err => console.error('Failed to sync theme:', err));
     } else {
       localStorage.setItem('theme', newTheme);
     }
@@ -457,7 +476,9 @@ export function AuthProvider({ children }) {
 
   const logoutState = () => {
     // Preserve current theme of this specific user before clearing
-    const currentTheme = user ? localStorage.getItem(`theme-${user.id}`) : localStorage.getItem('theme');
+    const currentTheme = user ? (localStorage.getItem(`theme-${user.email}`) || localStorage.getItem(`theme-${user.id}`)) : localStorage.getItem('theme');
+    const userEmail = user?.email;
+    const userId = user?.id;
 
     setUser(null);
     setAccessToken(null);
@@ -471,6 +492,8 @@ export function AuthProvider({ children }) {
       localStorage.clear();
       if (currentTheme) {
         localStorage.setItem('theme', currentTheme);
+        if (userEmail) localStorage.setItem(`theme-${userEmail}`, currentTheme);
+        if (userId) localStorage.setItem(`theme-${userId}`, currentTheme);
       }
 
       // Clear Cache Storage (Cache API) to purge any cached assets or API responses
