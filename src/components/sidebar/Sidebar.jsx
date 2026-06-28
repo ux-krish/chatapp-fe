@@ -1533,7 +1533,7 @@ function StatusViewer({ feed, onClose, viewStory }) {
         <div className="relative max-w-full max-h-full md:max-w-[90vw] md:max-h-[85vh] flex items-center justify-center p-4">
           {currentStory.mediaType === 'video' ? (
             <video 
-              src={currentStory.mediaUrl} 
+              src={getAvatarUrl(currentStory.mediaUrl)} 
               className="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-all duration-300 ease-in-out" 
               autoPlay 
               muted
@@ -1541,7 +1541,7 @@ function StatusViewer({ feed, onClose, viewStory }) {
             />
           ) : (
             <img 
-              src={currentStory.mediaUrl} 
+              src={getAvatarUrl(currentStory.mediaUrl)} 
               alt="Status" 
               className="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-none select-none transition-all duration-300 ease-in-out" 
             />

@@ -622,9 +622,9 @@ function ChatWindow() {
                                   {parsed.mediaUrl && (
                                     <div className="h-9 w-9 bg-zinc-900 rounded overflow-hidden flex-shrink-0 border border-zinc-800 shadow-sm">
                                       {parsed.mediaType === 'video' ? (
-                                        <video src={parsed.mediaUrl} className="h-full w-full object-cover" muted />
+                                        <video src={getAvatarUrl(parsed.mediaUrl)} className="h-full w-full object-cover" muted />
                                       ) : (
-                                        <img src={parsed.mediaUrl} alt="Status update" className="h-full w-full object-cover" />
+                                        <img src={getAvatarUrl(parsed.mediaUrl)} alt="Status update" className="h-full w-full object-cover" />
                                       )}
                                     </div>
                                   )}
@@ -660,7 +660,7 @@ function ChatWindow() {
                           onClick={() => setLightboxImage(msg.content)}
                           className="cursor-pointer hover:opacity-90 transition duration-200"
                         >
-                          <img src={msg.content} alt="Chat attachment" className="w-full h-auto object-cover max-h-48" />
+                          <img src={getAvatarUrl(msg.content)} alt="Chat attachment" className="w-full h-auto object-cover max-h-48" />
                         </div>
                         <button
                           type="button"
@@ -679,7 +679,7 @@ function ChatWindow() {
                     {/* C: Video Media Attachment */}
                     {msg.type === 'video' && (
                       <div className="relative group/media max-w-[280px] my-1 rounded-xl overflow-hidden border border-zinc-800">
-                        <video src={msg.content} controls className="w-full h-auto max-h-48" />
+                        <video src={getAvatarUrl(msg.content)} controls className="w-full h-auto max-h-48" />
                         <button
                           type="button"
                           onClick={(e) => {
@@ -698,7 +698,7 @@ function ChatWindow() {
                     {msg.type === 'audio' && (
                       <div className="flex items-center gap-3 p-2 bg-zinc-950/40 border border-zinc-800 rounded-xl my-1 min-w-[260px]">
                         <Volume2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
-                        <audio src={msg.content} controls className="w-full h-7 accent-emerald-500" />
+                        <audio src={getAvatarUrl(msg.content)} controls className="w-full h-7 accent-emerald-500" />
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1102,7 +1102,7 @@ function ChatWindow() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              src={lightboxImage} 
+              src={getAvatarUrl(lightboxImage)} 
               alt="Attachment Full size" 
               className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
