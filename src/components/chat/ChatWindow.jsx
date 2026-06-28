@@ -358,7 +358,7 @@ function ChatWindow() {
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="h-20 w-20 bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-lg shadow-emerald-500/5"
+            className="h-20 w-20 bg-gradient-to-tr from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-lg shadow-emerald-500/5"
           >
             💬
           </motion.div>
@@ -396,7 +396,7 @@ function ChatWindow() {
             {activeChat.avatarUrl ? (
               <img src={activeChat.avatarUrl} alt={activeChat.name || activeChat.displayName} className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
             ) : (
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-zinc-800 flex items-center justify-center font-bold text-emerald-400 text-xs uppercase">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-zinc-800 flex items-center justify-center font-bold text-emerald-400 text-xs uppercase">
                 {isGroup ? <Users2 className="h-5 w-5" /> : getInitials(activeChat.displayName)}
               </div>
             )}
@@ -1141,7 +1141,7 @@ function ChatWindow() {
                   {activeChat.avatarUrl ? (
                     <img src={activeChat.avatarUrl} alt="Group" className="h-16 w-16 rounded-full object-cover border border-zinc-800" />
                   ) : (
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-zinc-800 flex items-center justify-center text-emerald-400 font-bold text-lg">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-zinc-800 flex items-center justify-center text-emerald-400 font-bold text-lg">
                       <Users2 className="h-8 w-8" />
                     </div>
                   )}

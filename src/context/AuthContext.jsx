@@ -2,18 +2,138 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase.js';
 
-const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const onlineApiFallback = (import.meta.env.VITE_API_URL || 'https://chatapp-be-3nou.onrender.com').replace(/\/+$/, '');
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  const [accessToken, setAccessToken] = useState(() => {
+    try {
+      return localStorage.getItem('accessToken') || null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
+  const [apiBase, setApiBase] = useState('http://localhost:5001');
   const [isAdminPortalOpen, setIsAdminPortalOpen] = useState(false);
 
   // Theme management (light/dark mode)
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.id) {
+          return localStorage.getItem(`theme-${parsed.id}`) || 'dark';
+        }
+      }
+    } catch (e) {}
+    return localStorage.getItem('theme') || 'dark';
+  });
+
+  // Dynamic user theme and font size preferences (stored per-user in local storage)
+  const [themeColor, setThemeColor] = useState('green');
+  const [fontSize, setFontSize] = useState('medium');
+
+  useEffect(() => {
+    if (user) {
+      const savedTheme = localStorage.getItem(`theme-${user.id}`) || 'dark';
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
+      const savedColor = user.themeColor || 'green';
+      const savedSize = user.fontSize || 'medium';
+      
+      setThemeColor(savedColor);
+      setFontSize(savedSize);
+
+      // Clean up previous theme/size classes
+      const rootClasses = document.documentElement.classList;
+      const classesToRemove = [];
+      rootClasses.forEach(className => {
+        if (className.startsWith('theme-') || className.startsWith('font-size-')) {
+          classesToRemove.push(className);
+        }
+      });
+      classesToRemove.forEach(cls => rootClasses.remove(cls));
+
+      rootClasses.add(`theme-${savedColor}`);
+      rootClasses.add(`font-size-${savedSize}`);
+    } else {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
+      // Defaults if not logged in
+      const rootClasses = document.documentElement.classList;
+      const classesToRemove = [];
+      rootClasses.forEach(className => {
+        if (className.startsWith('theme-') || className.startsWith('font-size-')) {
+          classesToRemove.push(className);
+        }
+      });
+      classesToRemove.forEach(cls => rootClasses.remove(cls));
+      rootClasses.add('theme-green');
+      rootClasses.add('font-size-medium');
+    }
+  }, [user]);
+
+  const updateAppearance = async (color, size) => {
+    if (user) {
+      // Save locally first for instant feedback
+      setThemeColor(color);
+      setFontSize(size);
+      
+      const rootClasses = document.documentElement.classList;
+      
+      const themeClasses = [];
+      const sizeClasses = [];
+      rootClasses.forEach(className => {
+        if (className.startsWith('theme-')) themeClasses.push(className);
+        if (className.startsWith('font-size-')) sizeClasses.push(className);
+      });
+      themeClasses.forEach(cls => rootClasses.remove(cls));
+      sizeClasses.forEach(cls => rootClasses.remove(cls));
+      
+      rootClasses.add(`theme-${color}`);
+      rootClasses.add(`font-size-${size}`);
+
+      // Persist to database via PUT /api/users/profile
+      const response = await apiFetch('/api/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ themeColor: color, fontSize: size }),
+      });
+      const data = await handleResponse(response);
+      setUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data.user;
+    }
+  };
+
+  const updateThemeColor = (color) => {
+    updateAppearance(color, fontSize).catch(err => console.error('Failed to sync theme color:', err));
+  };
+
+  const updateFontSize = (size) => {
+    updateAppearance(themeColor, size).catch(err => console.error('Failed to sync font size:', err));
+  };
 
   // Helper to safely parse JSON response and handle HTTP errors gracefully
   const handleResponse = async (res) => {
@@ -40,20 +160,14 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    if (user) {
+      localStorage.setItem(`theme-${user.id}`, newTheme);
+    } else {
+      localStorage.setItem('theme', newTheme);
+    }
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -85,15 +199,22 @@ export function AuthProvider({ children }) {
     if (response.status === 401 && accessToken) {
       try {
         console.log('Access token expired. Requesting refresh...');
+        const storedRefreshToken = localStorage.getItem('refreshToken');
         const refreshResponse = await fetch(`${apiBase}/api/auth/token/refresh`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${storedRefreshToken || ''}`
+          },
         });
 
         if (refreshResponse.ok) {
           const data = await handleResponse(refreshResponse);
           setAccessToken(data.accessToken);
           setUser(data.user);
+          localStorage.setItem('accessToken', data.accessToken);
+          localStorage.setItem('refreshToken', data.refreshToken || storedRefreshToken);
+          localStorage.setItem('user', JSON.stringify(data.user));
 
           // Retry the original request with new token
           headers['Authorization'] = `Bearer ${data.accessToken}`;
@@ -112,28 +233,75 @@ export function AuthProvider({ children }) {
     return response;
   };
 
-  // Perform silent authentication check on mount
+  // Perform dynamic backend selection and silent authentication check on mount
   useEffect(() => {
-    const checkAuth = async () => {
+    const initAndCheckAuth = async () => {
+      let activeApi = 'http://localhost:5001';
+      
+      // Probe if local API is running
       try {
-        const response = await fetch(`${apiBase}/api/auth/token/refresh`, {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 800); // 800ms fast check
+
+        const response = await fetch('http://localhost:5001/api/health', {
+          method: 'GET',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          activeApi = 'http://localhost:5001';
+        } else {
+          activeApi = onlineApiFallback;
+        }
+      } catch (err) {
+        activeApi = onlineApiFallback;
+      }
+
+      setApiBase(activeApi);
+      const isLocal = activeApi.includes('localhost') || activeApi.includes('127.0.0.1');
+      console.log(
+        `%c🌐 Resolved backend target: ${isLocal ? 'LOCAL' : 'ONLINE'} -> ${activeApi}`,
+        'color: #10b981; font-weight: bold; font-size: 12px; padding: 4px; border-radius: 4px;'
+      );
+
+      // Perform silent authentication check using resolved API base
+      try {
+        const storedRefreshToken = localStorage.getItem('refreshToken');
+        if (!storedRefreshToken) {
+          logoutState();
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${activeApi}/api/auth/token/refresh`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${storedRefreshToken}`
+          },
         });
 
         if (response.ok) {
           const data = await handleResponse(response);
           setAccessToken(data.accessToken);
           setUser(data.user);
+          localStorage.setItem('accessToken', data.accessToken);
+          localStorage.setItem('refreshToken', data.refreshToken || storedRefreshToken);
+          localStorage.setItem('user', JSON.stringify(data.user));
+        } else {
+          // Refresh failed (refresh token expired) -> force logout
+          console.warn('Session expired. Logging out.');
+          logoutState();
         }
       } catch (err) {
-        console.log('Silent auth check failed (not logged in).');
+        console.log('Silent auth check failed (not logged in).', err);
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
+    initAndCheckAuth();
   }, []);
 
   const requestOtp = async (email, mode = 'login') => {
@@ -148,6 +316,9 @@ export function AuthProvider({ children }) {
     if (data.status === 'admin_auto_login') {
       setAccessToken(data.accessToken);
       setUser(data.user);
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
     }
 
     return data; // Returns otp in dev mode
@@ -163,6 +334,9 @@ export function AuthProvider({ children }) {
     const data = await handleResponse(response);
     setAccessToken(data.accessToken);
     setUser(data.user);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   };
 
@@ -209,6 +383,9 @@ export function AuthProvider({ children }) {
 
     setAccessToken(data.accessToken);
     setUser(data.user);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   };
 
@@ -222,6 +399,9 @@ export function AuthProvider({ children }) {
     const data = await handleResponse(response);
     setAccessToken(data.accessToken);
     setUser(data.user);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   };
 
@@ -241,6 +421,9 @@ export function AuthProvider({ children }) {
 
     setAccessToken(data.accessToken);
     setUser(data.user);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   };
 
@@ -254,6 +437,9 @@ export function AuthProvider({ children }) {
     const data = await handleResponse(response);
     setAccessToken(data.accessToken);
     setUser(data.user);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data;
   };
 
@@ -265,10 +451,14 @@ export function AuthProvider({ children }) {
 
     const data = await handleResponse(response);
     setUser(data.user);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data.user;
   };
 
   const logoutState = () => {
+    // Preserve current theme of this specific user before clearing
+    const currentTheme = user ? localStorage.getItem(`theme-${user.id}`) : localStorage.getItem('theme');
+
     setUser(null);
     setAccessToken(null);
 
@@ -278,7 +468,6 @@ export function AuthProvider({ children }) {
       sessionStorage.clear();
 
       // Clear localStorage but preserve user's theme preference to avoid visual flashing
-      const currentTheme = localStorage.getItem('theme');
       localStorage.clear();
       if (currentTheme) {
         localStorage.setItem('theme', currentTheme);
@@ -306,7 +495,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      await fetch(`${apiBase}/api/auth/logout`, { method: 'POST' });
+      await apiFetch('/api/auth/logout', { method: 'POST' });
     } catch (err) {
       console.error('Error on logout API call:', err);
     } finally {
@@ -327,6 +516,7 @@ export function AuthProvider({ children }) {
 
     const data = await handleResponse(response);
     setUser(data.user);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data.user;
   };
 
@@ -343,6 +533,7 @@ export function AuthProvider({ children }) {
     user,
     accessToken,
     loading,
+    apiBase,
     isAdminPortalOpen,
     setIsAdminPortalOpen,
     requestOtp,
@@ -359,6 +550,11 @@ export function AuthProvider({ children }) {
     toggleTheme,
     deleteAccount,
     handleResponse,
+    themeColor,
+    updateThemeColor,
+    fontSize,
+    updateFontSize,
+    updateAppearance,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

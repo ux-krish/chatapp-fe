@@ -294,7 +294,7 @@ export default function AdminDashboard({ onClose }) {
         <div>
           {/* Dashboard Title Header */}
           <div className="p-6 flex items-center gap-3 border-b border-zinc-800/60">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <Shield className="h-5 w-5" />
             </div>
             <div>

@@ -18,6 +18,91 @@
   --zinc-950: 255 255 255; /* light primary window background */
   
   --color-white: 24 24 27;  /* dark charcoal in light mode */
+
+  /* Theme colors - default is Green (WhatsApp Emerald) */
+  --theme-color-50: 240 253 244;
+  --theme-color-100: 220 252 231;
+  --theme-color-300: 110 231 183;
+  --theme-color-400: 52 211 153;
+  --theme-color-500: 16 185 129;
+  --theme-color-600: 5 150 105;
+  --theme-color-700: 4 120 87;
+
+  /* Font size - default is Medium */
+  --app-font-size: 16px;
+}
+
+/* Apply Root Font Size dynamically */
+html {
+  font-size: var(--app-font-size);
+}
+
+/* WhatsApp Accent Color Themes */
+:root.theme-green {
+  --theme-color-50: 240 253 244;
+  --theme-color-100: 220 252 231;
+  --theme-color-300: 110 231 183;
+  --theme-color-400: 52 211 153;
+  --theme-color-500: 16 185 129;
+  --theme-color-600: 5 150 105;
+  --theme-color-700: 4 120 87;
+}
+
+:root.theme-blue {
+  --theme-color-50: 239 246 255;
+  --theme-color-100: 219 234 254;
+  --theme-color-300: 147 197 253;
+  --theme-color-400: 96 165 250;
+  --theme-color-500: 59 130 246;
+  --theme-color-600: 37 99 235;
+  --theme-color-700: 29 78 216;
+}
+
+:root.theme-purple {
+  --theme-color-50: 250 245 255;
+  --theme-color-100: 243 232 255;
+  --theme-color-300: 216 180 254;
+  --theme-color-400: 192 132 252;
+  --theme-color-500: 168 85 247;
+  --theme-color-600: 147 51 234;
+  --theme-color-700: 126 34 206;
+}
+
+:root.theme-rose {
+  --theme-color-50: 255 241 242;
+  --theme-color-100: 255 228 230;
+  --theme-color-300: 253 164 175;
+  --theme-color-400: 251 113 133;
+  --theme-color-500: 244 63 94;
+  --theme-color-600: 225 29 72;
+  --theme-color-700: 190 24 74;
+}
+
+:root.theme-amber {
+  --theme-color-50: 254 252 232;
+  --theme-color-100: 254 249 195;
+  --theme-color-300: 252 211 77;
+  --theme-color-400: 251 191 36;
+  --theme-color-500: 245 158 11;
+  --theme-color-600: 217 119 6;
+  --theme-color-700: 180 83 9;
+}
+
+/* Font Size WhatsApp Toggles */
+:root.font-size-small {
+  --app-font-size: 14px;
+}
+:root.font-size-medium {
+  --app-font-size: 16px;
+}
+:root.font-size-large {
+  --app-font-size: 18px;
+}
+:root.font-size-x-large {
+  --app-font-size: 20px;
+}
+:root.font-size-xx-large {
+  --app-font-size: 22px;
 }
 
 .dark {
@@ -89,9 +174,9 @@
 .chat-bg {
   background-color: var(--zinc-950);
   background-image: 
-    radial-gradient(at 20% 20%, rgba(16, 185, 129, 0.02) 0px, transparent 50%),
-    radial-gradient(at 80% 40%, rgba(59, 130, 246, 0.01) 0px, transparent 50%),
-    radial-gradient(at 40% 80%, rgba(139, 92, 246, 0.02) 0px, transparent 50%);
+    radial-gradient(at 20% 20%, rgb(var(--theme-color-500) / 0.02) 0px, transparent 50%),
+    radial-gradient(at 80% 40%, rgb(var(--theme-color-500) / 0.01) 0px, transparent 50%),
+    radial-gradient(at 40% 80%, rgb(var(--theme-color-500) / 0.02) 0px, transparent 50%);
   position: relative;
 }
 

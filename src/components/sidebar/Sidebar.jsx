@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageSquare, Users, Sparkles, Settings, LogOut, Search, 
   UserPlus, Check, X, Camera, Plus, PlusCircle, Trash2, Users2, ChevronRight, User,
-  Shield, ShieldAlert, Sun, Moon, ArrowLeft, Key, Send
+  Shield, ShieldAlert, Sun, Moon, ArrowLeft, Key, Send, Palette
 } from 'lucide-react';
 
 const getInitials = (name) => {
@@ -17,7 +17,11 @@ const getInitials = (name) => {
 };
 
 function Sidebar() {
-  const { user, logout, updateProfile, apiFetch, setIsAdminPortalOpen, updateSecuritySettings, theme, toggleTheme, deleteAccount, handleResponse } = useAuth();
+  const { 
+    user, logout, updateProfile, apiFetch, setIsAdminPortalOpen, 
+    updateSecuritySettings, theme, toggleTheme, deleteAccount, handleResponse,
+    themeColor, fontSize, updateAppearance
+  } = useAuth();
   const { 
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
     respondFriendRequest, createGroup, leaveGroup
@@ -57,6 +61,33 @@ function Sidebar() {
   const [editAvatarPreview, setEditAvatarPreview] = useState(user?.avatarUrl || null);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
+
+  // Theme and Font Size Settings edit state
+  const [selectedThemeColor, setSelectedThemeColor] = useState(themeColor);
+  const [selectedFontSize, setSelectedFontSize] = useState(fontSize);
+  const [themeSaving, setThemeSaving] = useState(false);
+  const [themeMessage, setThemeMessage] = useState('');
+
+  // Sync theme edit states when active context values update
+  useEffect(() => {
+    setSelectedThemeColor(themeColor);
+    setSelectedFontSize(fontSize);
+  }, [themeColor, fontSize]);
+
+  const handleThemeSave = async (e) => {
+    e.preventDefault();
+    setThemeSaving(true);
+    setThemeMessage('');
+    try {
+      await updateAppearance(selectedThemeColor, selectedFontSize);
+      setThemeMessage('Appearance updated successfully.');
+      setTimeout(() => setThemeMessage(''), 3000);
+    } catch (err) {
+      setThemeMessage('Failed to update appearance.');
+    } finally {
+      setThemeSaving(false);
+    }
+  };
 
   // Security Credentials State
   const [securityPassword, setSecurityPassword] = useState('');
@@ -241,7 +272,7 @@ function Sidebar() {
                 className="h-10 w-10 rounded-full object-cover border border-zinc-800 hover:border-emerald-500 transition duration-300"
               />
             ) : (
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-zinc-800 flex items-center justify-center font-bold text-emerald-400 uppercase text-sm hover:border-emerald-500 transition duration-300">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-zinc-800 flex items-center justify-center font-bold text-emerald-400 uppercase text-sm hover:border-emerald-500 transition duration-300">
                 {getInitials(user?.displayName)}
               </div>
             )}
@@ -645,13 +676,19 @@ function Sidebar() {
                 <div className="space-y-6">
                   {/* User Profile Header Summary */}
                   <div className="flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/60 rounded-2xl">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.displayName} className="h-12 w-12 rounded-full object-cover border border-zinc-700/50" />
-                    ) : (
-                      <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center font-bold text-emerald-400 text-lg uppercase">
-                        {getInitials(user.displayName)}
-                      </div>
-                    )}
+                    <div className="flex flex-col items-center">
+                      {user.avatarUrl ? (
+                        <img src={user.avatarUrl} alt={user.displayName} className="h-12 w-12 rounded-full object-cover border border-zinc-700/50" />
+                      ) : (
+                        <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center font-bold text-emerald-400 text-lg uppercase">
+                          {getInitials(user.displayName)}
+                        </div>
+                      )}
+                      {/* Logged in email under the profile image */}
+                      <span className="text-[9px] text-zinc-400 truncate max-w-[64px] mt-1 text-center font-medium" title={user.email}>
+                        {user.email}
+                      </span>
+                    </div>
                     <div className="min-w-0 text-left">
                       <h3 className="text-sm font-bold text-white truncate leading-snug">{user.displayName}</h3>
                       <p className="text-[10px] text-zinc-500 truncate mt-0.5">{user.bio || "No status set"}</p>
@@ -696,7 +733,25 @@ function Sidebar() {
                       <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
                     </button>
 
-                    {/* Option 3: Logout */}
+                    {/* Option 3: Theme */}
+                    <button
+                      type="button"
+                      onClick={() => setSettingsSubTab('theme')}
+                      className="flex items-center justify-between p-4 hover:bg-zinc-800/30 transition text-left group"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="p-2 bg-purple-500/10 text-purple-400 rounded-xl">
+                          <Palette className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-semibold text-zinc-200 block">Theme</span>
+                          <span className="text-[9px] text-zinc-500 block mt-0.5">Colors, font size, chat appearance</span>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
+                    </button>
+
+                    {/* Option 4: Logout */}
                     <button
                       type="button"
                       onClick={logout}
@@ -772,7 +827,9 @@ function Sidebar() {
                           />
                         </label>
                       </div>
-                      <span className="text-[10px] text-zinc-500 mt-2">Click photo to upload new</span>
+                      {/* Logged in email under the profile image */}
+                      <span className="text-xs font-semibold text-zinc-300 mt-2">{user?.email}</span>
+                      <span className="text-[10px] text-zinc-500 mt-1">Click photo to upload new</span>
                     </div>
 
                     {/* Profile form inputs */}
@@ -798,6 +855,8 @@ function Sidebar() {
                         />
                       </div>
                     </div>
+
+
 
                     {profileMessage && (
                       <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 text-center font-medium">
@@ -886,6 +945,8 @@ function Sidebar() {
                     </button>
                   </form>
 
+
+
                   {/* Account Deletion (Danger Zone) - Regular users only */}
                   {user?.role !== 'admin' && (
                     <div className="pt-6 border-t border-zinc-800/50 space-y-4">
@@ -916,6 +977,87 @@ function Sidebar() {
                       </button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {settingsSubTab === 'theme' && (
+                <div className="space-y-6">
+                  {/* Back button header */}
+                  <button
+                    type="button"
+                    onClick={() => setSettingsSubTab(null)}
+                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition text-xs font-semibold mb-4 bg-zinc-900/40 px-3 py-1.5 rounded-lg border border-zinc-800/65"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Settings</span>
+                  </button>
+
+                  <form onSubmit={handleThemeSave} className="space-y-4">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Theme & Customizations</h4>
+                    
+                    {/* Theme color customizer */}
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Theme Accent Color</label>
+                      <div className="flex items-center gap-3 bg-zinc-950 p-3 border border-zinc-800/80 rounded-xl">
+                        {[
+                          { name: 'green', colorBg: 'bg-emerald-500', nameLabel: 'Emerald (WhatsApp)' },
+                          { name: 'blue', colorBg: 'bg-blue-500', nameLabel: 'Ocean Blue' },
+                          { name: 'purple', colorBg: 'bg-purple-500', nameLabel: 'Viper Purple' },
+                          { name: 'rose', colorBg: 'bg-rose-500', nameLabel: 'Ruby Rose' },
+                          { name: 'amber', colorBg: 'bg-amber-500', nameLabel: 'Amber Sunset' },
+                        ].map((c) => (
+                          <button
+                            key={c.name}
+                            type="button"
+                            onClick={() => setSelectedThemeColor(c.name)}
+                            className={`h-7 w-7 rounded-full ${c.colorBg} cursor-pointer border-2 transition duration-200 hover:scale-110 flex items-center justify-center ${selectedThemeColor === c.name ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                            title={c.nameLabel}
+                          >
+                            {selectedThemeColor === c.name && (
+                              <span className="h-2.5 w-2.5 rounded-full bg-zinc-950"></span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Font size customizer */}
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Font Size</label>
+                      <div className="grid grid-cols-5 gap-1 bg-zinc-950 p-1 border border-zinc-800/80 rounded-xl">
+                        {[
+                          { size: 'small', label: 'Small' },
+                          { size: 'medium', label: 'Medium' },
+                          { size: 'large', label: 'Large' },
+                          { size: 'x-large', label: 'XL' },
+                          { size: 'xx-large', label: 'XXL' },
+                        ].map((s) => (
+                          <button
+                            key={s.size}
+                            type="button"
+                            onClick={() => setSelectedFontSize(s.size)}
+                            className={`py-2 text-[10px] font-bold rounded-lg transition duration-200 text-center ${selectedFontSize === s.size ? 'bg-emerald-500 text-zinc-950 shadow-sm font-extrabold' : 'text-zinc-450 hover:text-white hover:bg-zinc-900'}`}
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {themeMessage && (
+                      <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 text-center font-medium">
+                        {themeMessage}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={themeSaving}
+                      className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-bold rounded-xl shadow transition duration-200 text-xs flex items-center justify-center"
+                    >
+                      {themeSaving ? 'Saving Updates...' : 'Save Changes'}
+                    </button>
+                  </form>
                 </div>
               )}
             </motion.div>
