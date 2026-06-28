@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
+import { useCall } from '../../context/CallContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmojiPicker from './EmojiPicker';
 
@@ -26,6 +27,7 @@ function ChatWindow() {
     pinChatAction, unpinChatAction, blockUserAction, unblockUserAction,
     hideChatAction, removeFriendshipAction
   } = useChat();
+  const { startCall } = useCall();
 
   const isGroup = activeChat ? !!activeChat.groupId : false;
 
@@ -449,7 +451,11 @@ function ChatWindow() {
 
         {/* Action icons */}
         <div className="flex items-center gap-1">
-          <button className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl transition">
+          <button 
+            onClick={() => startCall(activeChat.id, activeChat.displayName, activeChat.avatarUrl)}
+            className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl transition"
+            title="Start Audio Call"
+          >
             <Phone className="h-4 w-4" />
           </button>
           <button className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl transition">
