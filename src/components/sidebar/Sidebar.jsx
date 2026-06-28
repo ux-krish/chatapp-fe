@@ -29,7 +29,7 @@ function Sidebar() {
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
     respondFriendRequest, createGroup, leaveGroup,
     pinChatAction, unpinChatAction, blockUserAction, unblockUserAction,
-    hideChatAction, removeFriendshipAction
+    hideChatAction, removeFriendshipAction, loadFriends
   } = useChat();
 
   const { startCall, callState } = useCall();
@@ -99,6 +99,70 @@ function Sidebar() {
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userSearchResults, setUserSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // Background global search states for the main sidebar search input
+  const [globalSidebarResults, setGlobalSidebarResults] = useState([]);
+  const [globalSidebarLoading, setGlobalSidebarLoading] = useState(false);
+
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setGlobalSidebarResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setGlobalSidebarLoading(true);
+      try {
+        const response = await apiFetch(`/api/users/search?query=${encodeURIComponent(searchQuery.trim())}`);
+        if (response.ok) {
+          const data = await handleResponse(response);
+          // Filter out ourselves and existing accepted friends
+          const filtered = data.filter(u => {
+            if (u.id === user.id) return false;
+            const localFriend = friends.find(f => f.id === u.id);
+            if (localFriend && localFriend.friendshipStatus === 'accepted') return false;
+            return true;
+          });
+          setGlobalSidebarResults(filtered);
+        }
+      } catch (err) {
+        console.error('Failed to search global users in sidebar:', err);
+      } finally {
+        setGlobalSidebarLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, friends, user, apiFetch, handleResponse]);
+
+  const sendSidebarRequest = async (friendId) => {
+    try {
+      const response = await apiFetch('/api/users/friends/request', {
+        method: 'POST',
+        body: JSON.stringify({ friendId })
+      });
+      if (response.ok) {
+        setGlobalSidebarResults(prev => 
+          prev.map(u => u.id === friendId ? { ...u, friendshipStatus: 'pending_sent' } : u)
+        );
+        loadFriends && loadFriends();
+      }
+    } catch (err) {
+      console.error('Failed to send friend request from sidebar search:', err);
+    }
+  };
+
+  const handleAcceptFromSidebar = async (friendId) => {
+    try {
+      await respondFriendRequest(friendId, 'accepted');
+      setGlobalSidebarResults(prev => 
+        prev.map(u => u.id === friendId ? { ...u, friendshipStatus: 'accepted' } : u)
+      );
+      loadFriends && loadFriends();
+    } catch (err) {
+      console.error('Failed to accept friend request from sidebar search:', err);
+    }
+  };
 
   // Group creation wizard state
   const [groupName, setGroupName] = useState('');
@@ -650,6 +714,83 @@ function Sidebar() {
               {filteredFriends.length === 0 && filteredGroups.length === 0 && (
                 <div className="p-8 text-center text-zinc-500 text-xs">
                   No active chats. Use the top icons to add friends or create group chats!
+                </div>
+              )}
+
+              {/* Dynamic Global Search & Friend Add panel */}
+              {searchQuery.trim().length >= 2 && (
+                <div className="mt-4 border-t border-zinc-800/40 pt-4 pb-6">
+                  <div className="px-4 pb-2 flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 flex items-center gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Global Search Results
+                    </span>
+                    {globalSidebarLoading && (
+                      <span className="text-[9px] text-zinc-500 animate-pulse">Searching...</span>
+                    )}
+                  </div>
+
+                  {globalSidebarResults.length > 0 ? (
+                    <div className="divide-y divide-zinc-800/20">
+                      {globalSidebarResults.map(globalUser => {
+                        const isPendingSent = globalUser.friendshipStatus === 'pending_sent';
+                        const isPendingReceived = globalUser.friendshipStatus === 'pending_received';
+                        const isAlreadyFriend = globalUser.friendshipStatus === 'accepted';
+                        
+                        return (
+                          <div 
+                            key={globalUser.id}
+                            className="p-3.5 flex items-center justify-between hover:bg-zinc-800/10 transition duration-150"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              {globalUser.avatarUrl ? (
+                                <img src={getAvatarUrl(globalUser.avatarUrl)} alt={globalUser.displayName} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
+                              ) : (
+                                <div className="h-9 w-9 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-400 font-bold text-[11px] uppercase">
+                                  {getInitials(globalUser.displayName)}
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-semibold text-zinc-200 truncate leading-tight">{globalUser.displayName}</h4>
+                                <p className="text-[10px] text-zinc-500 truncate mt-0.5">@{globalUser.displayName.toLowerCase().replace(/\s+/g, '')}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex-shrink-0 ml-2">
+                              {isAlreadyFriend ? (
+                                <span className="text-[10px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">Friend</span>
+                              ) : isPendingSent ? (
+                                <span className="text-[10px] text-zinc-500 font-medium px-2 py-1 bg-zinc-850 border border-zinc-800 rounded-lg">Request Sent</span>
+                              ) : isPendingReceived ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleAcceptFromSidebar(globalUser.id)}
+                                  className="text-[10px] text-zinc-950 font-bold bg-emerald-500 hover:bg-emerald-400 px-2 py-1 rounded-lg transition shadow-md shadow-emerald-500/10"
+                                >
+                                  Accept
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => sendSidebarRequest(globalUser.id)}
+                                  className="flex items-center gap-1 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 hover:bg-emerald-500 hover:text-zinc-950 px-2.5 py-1 border border-emerald-500/20 hover:border-transparent rounded-lg transition duration-150"
+                                >
+                                  <UserPlus className="h-3 w-3" />
+                                  Add Friend
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    !globalSidebarLoading && (
+                      <div className="p-6 text-center text-zinc-500 text-[11px]">
+                        No matching global users found.
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </motion.div>
