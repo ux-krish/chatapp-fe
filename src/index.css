@@ -180,19 +180,65 @@ html {
   position: relative;
 }
 
+/* ─── Chat Background Pattern Variants ─── */
+/* Default dot grid */
 .chat-bg::before {
   content: "";
   position: absolute;
   inset: 0;
   opacity: 0.06;
-  background-image: radial-gradient(var(--zinc-300) 1px, transparent 1px);
-  background-size: 24px 24px;
   pointer-events: none;
+  background-image: none;
 }
 
-.dark .chat-bg::before {
+/* Pattern: dots — classic dot grid */
+.chat-bg[data-bg-pattern="dots"]::before {
   opacity: 0.15;
   background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Pattern: grid — fine crosshatch lines */
+.chat-bg[data-bg-pattern="grid"]::before {
+  opacity: 0.08;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Pattern: diagonal — 45° hatch lines */
+.chat-bg[data-bg-pattern="diagonal"]::before {
+  opacity: 0.06;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 1px,
+    transparent 16px
+  );
+}
+
+/* Pattern: hexagons — honeycomb-style (SVG encoded) */
+.chat-bg[data-bg-pattern="hexagons"]::before {
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.25'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Pattern: constellation — scattered stars */
+.chat-bg[data-bg-pattern="constellation"]::before {
+  opacity: 0.12;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(16, 185, 129, 0.2) 1px, transparent 1px);
+  background-size: 40px 40px, 70px 70px, 55px 55px;
+  background-position: 0 0, 20px 35px, 10px 15px;
+}
+
+/* Pattern: none — clean background, no pattern */
+.chat-bg[data-bg-pattern="none"]::before {
+  opacity: 0;
 }
 
 /* Custom Message Bubble Tail/Shape */

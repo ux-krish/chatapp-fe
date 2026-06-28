@@ -21,7 +21,7 @@ function Sidebar() {
   const { 
     user, logout, updateProfile, apiFetch, setIsAdminPortalOpen, 
     updateSecuritySettings, theme, toggleTheme, deleteAccount, handleResponse,
-    themeColor, fontSize, updateAppearance, getAvatarUrl
+    themeColor, fontSize, updateAppearance, getAvatarUrl, chatBgPattern
   } = useAuth();
   const { 
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
@@ -71,6 +71,7 @@ function Sidebar() {
   // Theme and Font Size Settings edit state
   const [selectedThemeColor, setSelectedThemeColor] = useState(themeColor);
   const [selectedFontSize, setSelectedFontSize] = useState(fontSize);
+  const [selectedBgPattern, setSelectedBgPattern] = useState(chatBgPattern || 'dots');
   const [themeSaving, setThemeSaving] = useState(false);
   const [themeMessage, setThemeMessage] = useState('');
 
@@ -78,7 +79,8 @@ function Sidebar() {
   useEffect(() => {
     setSelectedThemeColor(themeColor);
     setSelectedFontSize(fontSize);
-  }, [themeColor, fontSize]);
+    setSelectedBgPattern(chatBgPattern || 'dots');
+  }, [themeColor, fontSize, chatBgPattern]);
 
   // Click-outside handler for chat settings dropdown
   useEffect(() => {
@@ -108,7 +110,7 @@ function Sidebar() {
     setThemeSaving(true);
     setThemeMessage('');
     try {
-      await updateAppearance(selectedThemeColor, selectedFontSize);
+      await updateAppearance(selectedThemeColor, selectedFontSize, selectedBgPattern);
       setThemeMessage('Appearance updated successfully.');
       setTimeout(() => setThemeMessage(''), 3000);
     } catch (err) {
@@ -1187,6 +1189,45 @@ function Sidebar() {
                             className={`py-2 text-[10px] font-bold rounded-lg transition duration-200 text-center ${selectedFontSize === s.size ? 'bg-emerald-500 text-zinc-950 shadow-sm font-extrabold' : 'text-zinc-450 hover:text-white hover:bg-zinc-900'}`}
                           >
                             {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Chat Background Pattern Picker */}
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Chat Background</label>
+                      <div className="grid grid-cols-3 gap-2 bg-zinc-950 p-3 border border-zinc-800/80 rounded-xl">
+                        {[
+                          { id: 'dots', label: 'Dots', preview: 'radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px)', size: '12px 12px' },
+                          { id: 'grid', label: 'Grid', preview: 'linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px)', size: '16px 16px' },
+                          { id: 'diagonal', label: 'Diagonal', preview: 'repeating-linear-gradient(45deg, rgba(255,255,255,.15), rgba(255,255,255,.15) 1px, transparent 1px, transparent 8px)', size: 'auto' },
+                          { id: 'hexagons', label: 'Hexagon', preview: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='24' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")", size: 'auto' },
+                          { id: 'constellation', label: 'Stars', preview: 'radial-gradient(rgba(255,255,255,.4) 1px, transparent 1px), radial-gradient(rgba(255,255,255,.2) 1.5px, transparent 1.5px)', size: '20px 20px, 35px 35px' },
+                          { id: 'none', label: 'Clean', preview: 'none', size: 'auto' },
+                        ].map(p => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => setSelectedBgPattern(p.id)}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition duration-200 ${
+                              selectedBgPattern === p.id
+                                ? 'border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/30'
+                                : 'border-zinc-800/60 hover:border-zinc-700 bg-zinc-900/50'
+                            }`}
+                          >
+                            <div
+                              className="w-full h-10 rounded-lg bg-zinc-950 relative overflow-hidden"
+                              style={{
+                                backgroundImage: p.preview,
+                                backgroundSize: p.size,
+                              }}
+                            />
+                            <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                              selectedBgPattern === p.id ? 'text-emerald-400' : 'text-zinc-500'
+                            }`}>
+                              {p.label}
+                            </span>
                           </button>
                         ))}
                       </div>

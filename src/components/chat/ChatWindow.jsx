@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmojiPicker from './EmojiPicker';
+import ParticleCanvas from './ParticleCanvas';
 
 const getInitials = (name) => {
   if (!name) return '?';
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react';
 
 function ChatWindow() {
-  const { user, getAvatarUrl, apiBase, accessToken } = useAuth();
+  const { user, getAvatarUrl, apiBase, accessToken, chatBgPattern } = useAuth();
   const { 
     activeChat, messages, selectChat, sendMessage, sendMediaMessage, 
     setTypingIndicator, typingStatus, leaveGroup, addGroupMembers, friends,
@@ -369,8 +370,9 @@ function ChatWindow() {
   // --- 1. EMPTY CHAT STATE ---
   if (!activeChat) {
     return (
-      <div className="h-full w-full chat-bg flex flex-col items-center justify-center p-8 text-center select-none font-sans">
-        <div className="max-w-md p-8 rounded-3xl glass border border-zinc-800/80 shadow-2xl flex flex-col items-center">
+      <div className="h-full w-full chat-bg flex flex-col items-center justify-center p-8 text-center select-none font-sans relative overflow-hidden" data-bg-pattern={chatBgPattern}>
+        <ParticleCanvas />
+        <div className="max-w-md p-8 rounded-3xl glass border border-zinc-800/80 shadow-2xl flex flex-col items-center relative z-10">
           <motion.div 
             animate={{ 
               y: [0, -6, 0],
@@ -568,7 +570,8 @@ function ChatWindow() {
       })()}
 
       {/* 3. MESSAGES SCROLL LIST */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 chat-bg">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 chat-bg relative" data-bg-pattern={chatBgPattern}>
+        <ParticleCanvas />
         
         {messages.map((msg) => {
           const isMe = msg.senderId === user.id;

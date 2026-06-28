@@ -93,6 +93,27 @@ export function AuthProvider({ children }) {
     return localStorage.getItem('fontSize') || 'medium';
   });
 
+  const [chatBgPattern, setChatBgPattern] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed) {
+          if (parsed.chatBgPattern) return parsed.chatBgPattern;
+          if (parsed.email) {
+            const saved = localStorage.getItem(`chatBgPattern-${parsed.email}`);
+            if (saved) return saved;
+          }
+          if (parsed.id) {
+            const saved = localStorage.getItem(`chatBgPattern-${parsed.id}`);
+            if (saved) return saved;
+          }
+        }
+      }
+    } catch (e) {}
+    return localStorage.getItem('chatBgPattern') || 'dots';
+  });
+
   useEffect(() => {
     if (user) {
       const savedTheme = user.theme || (user.email && localStorage.getItem(`theme-${user.email}`)) || localStorage.getItem(`theme-${user.id}`) || 'dark';
@@ -144,11 +165,12 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  const updateAppearance = async (color, size) => {
+  const updateAppearance = async (color, size, bgPattern) => {
     if (user) {
       // Save locally first for instant feedback
       setThemeColor(color);
       setFontSize(size);
+      if (bgPattern !== undefined) setChatBgPattern(bgPattern);
       
       const rootClasses = document.documentElement.classList;
       
@@ -167,16 +189,20 @@ export function AuthProvider({ children }) {
       if (user.email) {
         localStorage.setItem(`themeColor-${user.email}`, color);
         localStorage.setItem(`fontSize-${user.email}`, size);
+        if (bgPattern !== undefined) localStorage.setItem(`chatBgPattern-${user.email}`, bgPattern);
       }
       if (user.id) {
         localStorage.setItem(`themeColor-${user.id}`, color);
         localStorage.setItem(`fontSize-${user.id}`, size);
+        if (bgPattern !== undefined) localStorage.setItem(`chatBgPattern-${user.id}`, bgPattern);
       }
 
       // Persist to database via PUT /api/users/profile
+      const body = { themeColor: color, fontSize: size, theme };
+      if (bgPattern !== undefined) body.chatBgPattern = bgPattern;
       const response = await apiFetch('/api/users/profile', {
         method: 'PUT',
-        body: JSON.stringify({ themeColor: color, fontSize: size, theme }),
+        body: JSON.stringify(body),
       });
       const data = await handleResponse(response);
       setUser(data.user);
@@ -656,6 +682,8 @@ export function AuthProvider({ children }) {
     updateFontSize,
     getAvatarUrl,
     updateAppearance,
+    chatBgPattern,
+    setChatBgPattern,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
