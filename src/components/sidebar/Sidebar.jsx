@@ -258,6 +258,10 @@ function Sidebar() {
 
   const pendingReceivedRequests = friends.filter(f => f.friendshipStatus === 'pending_received');
 
+  const totalUnreadChats = 
+    friends.filter(f => f.friendshipStatus === 'accepted' && f.unreadCount > 0).length + 
+    groups.filter(g => g.unreadCount > 0).length;
+
   return (
     <div className="h-full w-full flex flex-col bg-zinc-900/40 text-zinc-100 font-sans select-none border-r border-zinc-800/80 relative">
       
@@ -380,9 +384,15 @@ function Sidebar() {
                       <span className="text-[9px] text-zinc-500 font-medium">
                         {group.lastMessage ? formatTime(group.lastMessage.createdAt) : formatTime(group.createdAt)}
                       </span>
-                      <span className="text-[9px] text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-1.5 py-0.5 rounded-full mt-1.5 uppercase tracking-wider font-semibold">
-                        Group
-                      </span>
+                      {group.unreadCount > 0 ? (
+                        <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 mt-1.5 animate-pulse">
+                          {group.unreadCount}
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-1.5 py-0.5 rounded-full mt-1.5 uppercase tracking-wider font-semibold">
+                          Group
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -426,12 +436,18 @@ function Sidebar() {
                       <span className="text-[9px] text-zinc-500 font-medium">
                         {friend.lastMessage ? formatTime(friend.lastMessage.createdAt) : ''}
                       </span>
-                      {friend.lastMessage && friend.lastMessage.senderId === user.id && (
-                        <div className="mt-1.5">
-                          {friend.lastMessage.status === 'sent' && <span className="text-zinc-500">✓</span>}
-                          {friend.lastMessage.status === 'delivered' && <span className="text-zinc-400">✓✓</span>}
-                          {friend.lastMessage.status === 'read' && <span className="text-emerald-400 font-bold">✓✓</span>}
-                        </div>
+                      {friend.unreadCount > 0 ? (
+                        <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 mt-1.5 animate-pulse">
+                          {friend.unreadCount}
+                        </span>
+                      ) : (
+                        friend.lastMessage && friend.lastMessage.senderId === user.id && (
+                          <div className="mt-1.5">
+                            {friend.lastMessage.status === 'sent' && <span className="text-zinc-500">✓</span>}
+                            {friend.lastMessage.status === 'delivered' && <span className="text-zinc-400">✓✓</span>}
+                            {friend.lastMessage.status === 'read' && <span className="text-emerald-400 font-bold">✓✓</span>}
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
@@ -1071,7 +1087,14 @@ function Sidebar() {
           onClick={() => setActiveTab('chats')}
           className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'chats' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
-          <MessageSquare className="h-5 w-5" />
+          <div className="relative">
+            <MessageSquare className="h-5 w-5" />
+            {totalUnreadChats > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 animate-pulse">
+                {totalUnreadChats}
+              </span>
+            )}
+          </div>
           <span>Chats</span>
         </button>
         <button 
@@ -1085,7 +1108,14 @@ function Sidebar() {
           onClick={() => setActiveTab('friends')}
           className={`flex flex-col items-center gap-1.5 text-[10px] font-medium transition ${activeTab === 'friends' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
-          <Users className="h-5 w-5" />
+          <div className="relative">
+            <Users className="h-5 w-5" />
+            {pendingReceivedRequests.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950 animate-pulse">
+                {pendingReceivedRequests.length}
+              </span>
+            )}
+          </div>
           <span>Friends</span>
         </button>
         <button 

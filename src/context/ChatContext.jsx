@@ -120,10 +120,10 @@ export function ChatProvider({ children }) {
     }
   }, [apiFetch, socket, activeChat, handleResponse]);
 
-  const selectChat = useCallback(async (chat) => {
-    setActiveChat(chat);
+  const selectChat = useCallback((chat) => {
     if (!chat) {
       setMessages([]);
+      setActiveChat(null);
       return;
     }
 
@@ -131,18 +131,29 @@ export function ChatProvider({ children }) {
     const chatId = isGroup ? chat.id : get1to1ChatId(user.id, chat.id);
     loadChatHistory(chatId);
 
-    // If this is a group, asynchronously fetch the full group info to get the member roster
+    // Clear unread count for selected chat in friends/groups lists
     if (isGroup) {
-      try {
-        const response = await apiFetch(`/api/chat/groups/${chat.id}`);
-        const detailedGroup = await handleResponse(response);
-        // Ensure we preserve the groupId and state mapping
-        setActiveChat({ ...detailedGroup, groupId: detailedGroup.id });
-      } catch (err) {
-        console.error('Failed to load group roster:', err);
-      }
+      setGroups(prev => prev.map(g => g.id === chat.id ? { ...g, unreadCount: 0 } : g));
+    } else {
+      setFriends(prev => prev.map(f => f.id === chat.id ? { ...f, unreadCount: 0 } : f));
     }
-  }, [user, apiFetch, get1to1ChatId, loadChatHistory, handleResponse]);
+
+    // Set active chat
+    if (isGroup) {
+      // If this is a group, asynchronously fetch the full group info to get the member roster
+      apiFetch(`/api/chat/groups/${chat.id}`)
+        .then(response => handleResponse(response))
+        .then(detailedGroup => {
+          setActiveChat({ ...detailedGroup, groupId: detailedGroup.id, unreadCount: 0 });
+        })
+        .catch(err => {
+          console.error('Failed to load group roster:', err);
+          setActiveChat({ ...chat, unreadCount: 0 });
+        });
+    } else {
+      setActiveChat({ ...chat, unreadCount: 0 });
+    }
+  }, [user, apiFetch, get1to1ChatId, loadChatHistory, handleResponse, setGroups, setFriends]);
 
   // Send a text message
   const sendMessage = useCallback((content, type = 'text') => {
@@ -481,7 +492,9 @@ export function ChatProvider({ children }) {
         ? (activeChat.groupId ? activeChat.id : get1to1ChatId(user.id, activeChat.id))
         : null;
 
-      if (currentChatId === msgChatId) {
+      const isUnread = currentChatId !== msgChatId;
+
+      if (!isUnread) {
         // Play receive audio
         receiveSound.current.cloneNode(true).play().catch(() => {});
 
@@ -494,15 +507,21 @@ export function ChatProvider({ children }) {
       } else {
         // Play receive sound for background chats as well
         receiveSound.current.cloneNode(true).play().catch(() => {});
-        
-        // Optional: show local Toast notification or increment unread counts
       }
 
-      // Update previews in list
+      // Update previews in list and increment unread count if background chat
       if (isGroup) {
-        setGroups(prev => prev.map(g => g.id === msg.groupId ? { ...g, lastMessage: msg } : g));
+        setGroups(prev => prev.map(g => g.id === msg.groupId ? { 
+          ...g, 
+          lastMessage: msg,
+          unreadCount: isUnread ? (g.unreadCount || 0) + 1 : 0
+        } : g));
       } else {
-        setFriends(prev => prev.map(f => f.id === msg.senderId || f.id === msg.receiverId ? { ...f, lastMessage: msg } : f));
+        setFriends(prev => prev.map(f => f.id === msg.senderId || f.id === msg.receiverId ? { 
+          ...f, 
+          lastMessage: msg,
+          unreadCount: isUnread && f.id === msg.senderId ? (f.unreadCount || 0) + 1 : f.unreadCount
+        } : f));
       }
     };
 
@@ -522,11 +541,26 @@ export function ChatProvider({ children }) {
     // C: Status updates (delivered checkmarks)
     const handleMessageStatusUpdate = ({ messageId, chatId, status }) => {
       setMessages(prev => prev.map(m => m.id === messageId ? { ...m, status } : m));
+      // Also update lastMessage status in friends list
+      setFriends(prev => prev.map(f => {
+        if (f.lastMessage && f.lastMessage.id === messageId) {
+          return { ...f, lastMessage: { ...f.lastMessage, status } };
+        }
+        return f;
+      }));
     };
 
     // D: Read status sync (blue double checkmarks!)
     const handleMessagesRead = ({ chatId, readerId }) => {
       setMessages(prev => prev.map(m => m.chatId === chatId && m.senderId === user.id ? { ...m, status: 'read' } : m));
+      // Also update lastMessage status in friends list
+      setFriends(prev => prev.map(f => {
+        const fChatId = [user.id, f.id].sort().join('_');
+        if (fChatId === chatId && f.lastMessage && f.lastMessage.senderId === user.id) {
+          return { ...f, lastMessage: { ...f.lastMessage, status: 'read' } };
+        }
+        return f;
+      }));
     };
 
     // E: Friend online status changes
