@@ -1199,12 +1199,52 @@ function Sidebar() {
                       <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Chat Background</label>
                       <div className="grid grid-cols-3 gap-2 bg-zinc-950 p-3 border border-zinc-800/80 rounded-xl">
                         {[
-                          { id: 'dots', label: 'Dots', preview: 'radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px)', size: '12px 12px' },
-                          { id: 'grid', label: 'Grid', preview: 'linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px)', size: '16px 16px' },
-                          { id: 'diagonal', label: 'Diagonal', preview: 'repeating-linear-gradient(45deg, rgba(255,255,255,.15), rgba(255,255,255,.15) 1px, transparent 1px, transparent 8px)', size: 'auto' },
-                          { id: 'hexagons', label: 'Hexagon', preview: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='24' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")", size: 'auto' },
-                          { id: 'constellation', label: 'Stars', preview: 'radial-gradient(rgba(255,255,255,.4) 1px, transparent 1px), radial-gradient(rgba(255,255,255,.2) 1.5px, transparent 1.5px)', size: '20px 20px, 35px 35px' },
-                          { id: 'none', label: 'Clean', preview: 'none', size: 'auto' },
+                          { 
+                            id: 'dots', 
+                            label: 'Dots', 
+                            preview: theme === 'dark' 
+                              ? 'radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px)' 
+                              : 'radial-gradient(rgba(0,0,0,.2) 1px, transparent 1px)', 
+                            size: '12px 12px' 
+                          },
+                          { 
+                            id: 'grid', 
+                            label: 'Grid', 
+                            preview: theme === 'dark'
+                              ? 'linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px)'
+                              : 'linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px)', 
+                            size: '16px 16px' 
+                          },
+                          { 
+                            id: 'diagonal', 
+                            label: 'Diagonal', 
+                            preview: theme === 'dark'
+                              ? 'repeating-linear-gradient(45deg, rgba(255,255,255,.15), rgba(255,255,255,.15) 1px, transparent 1px, transparent 8px)'
+                              : 'repeating-linear-gradient(45deg, rgba(0,0,0,.08), rgba(0,0,0,.08) 1px, transparent 1px, transparent 8px)', 
+                            size: 'auto' 
+                          },
+                          { 
+                            id: 'hexagons', 
+                            label: 'Hexagon', 
+                            preview: theme === 'dark'
+                              ? "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='24' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
+                              : "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='24' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.12'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")", 
+                            size: 'auto' 
+                          },
+                          { 
+                            id: 'constellation', 
+                            label: 'Stars', 
+                            preview: theme === 'dark'
+                              ? 'radial-gradient(rgba(255,255,255,.4) 1px, transparent 1px), radial-gradient(rgba(255,255,255,.2) 1.5px, transparent 1.5px)'
+                              : 'radial-gradient(rgba(0,0,0,.22) 1px, transparent 1px), radial-gradient(rgba(0,0,0,.1) 1.5px, transparent 1.5px)', 
+                            size: '20px 20px, 35px 35px' 
+                          },
+                          { 
+                            id: 'none', 
+                            label: 'Clean', 
+                            preview: 'none', 
+                            size: 'auto' 
+                          },
                         ].map(p => (
                           <button
                             key={p.id}
