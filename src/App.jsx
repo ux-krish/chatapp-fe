@@ -11,9 +11,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 
 function App() {
-  const { user, loading, isAdminPortalOpen, setIsAdminPortalOpen, getAvatarUrl } = useAuth();
+  const { user, loading: authLoading, isAdminPortalOpen, setIsAdminPortalOpen, getAvatarUrl } = useAuth();
   const { activeChat } = useChat();
-  const { socket } = useSocket();
+  const { socket, connected: socketConnected } = useSocket();
   const [broadcastAlert, setBroadcastAlert] = useState(null);
 
   useEffect(() => {
@@ -64,7 +64,9 @@ function App() {
     };
   }, []);
 
-  if (loading) {
+  const isAppLoading = authLoading || (user && !socketConnected);
+
+  if (isAppLoading) {
     return (
       <div 
         className="w-screen bg-zinc-950 flex flex-col items-center justify-center"
