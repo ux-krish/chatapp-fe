@@ -865,8 +865,8 @@ function ChatWindow() {
                       )}
                       {msg.status === 'read' && (
                         <div className="relative flex items-center w-[14px] h-3">
-                          <Check className="absolute left-0 h-3 w-3 text-emerald-400 stroke-[2.5]" />
-                          <Check className="absolute left-[3.5px] h-3 w-3 text-emerald-400 stroke-[2.5]" />
+                          <Check className="absolute left-0 h-3 w-3 text-sky-400 stroke-[2.5]" />
+                          <Check className="absolute left-[3.5px] h-3 w-3 text-sky-400 stroke-[2.5]" />
                         </div>
                       )}
                     </div>
