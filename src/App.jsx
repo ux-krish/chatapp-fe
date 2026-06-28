@@ -9,9 +9,10 @@ import CallOverlay from './components/chat/CallOverlay';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
+import { App as CapApp } from '@capacitor/app';
 
 function App() {
-  const { user, loading: authLoading, isAdminPortalOpen, setIsAdminPortalOpen, getAvatarUrl } = useAuth();
+  const { user, loading: authLoading, isAdminPortalOpen, setIsAdminPortalOpen, getAvatarUrl, completeTokenLogin } = useAuth();
   const { activeChat } = useChat();
   const { socket, connected: socketConnected } = useSocket();
   const [broadcastAlert, setBroadcastAlert] = useState(null);
@@ -63,6 +64,41 @@ function App() {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Handle Capacitor Deep Links (Android redirect tokens)
+  useEffect(() => {
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const handleDeepLink = (event) => {
+        console.log('🔗 Received deep link intent URL:', event.url);
+        try {
+          const parsedUrl = new URL(event.url);
+          if (parsedUrl.host === 'auth-success') {
+            const accessToken = parsedUrl.searchParams.get('accessToken');
+            const refreshToken = parsedUrl.searchParams.get('refreshToken');
+            if (accessToken && refreshToken) {
+              console.log('🔑 Extracted tokens from deep link. Authenticating...');
+              completeTokenLogin(accessToken, refreshToken);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to parse deep link URL:', err);
+        }
+      };
+
+      CapApp.addListener('appUrlOpen', handleDeepLink);
+
+      // Check for launcher intent URL on cold start
+      CapApp.getLaunchUrl().then((launchUrl) => {
+        if (launchUrl && launchUrl.url) {
+          handleDeepLink(launchUrl);
+        }
+      });
+
+      return () => {
+        CapApp.removeAllListeners();
+      };
+    }
+  }, [completeTokenLogin]);
 
   const isAppLoading = authLoading || (user && !socketConnected);
 

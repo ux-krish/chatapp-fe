@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase.js';
+import { Browser } from '@capacitor/browser';
 
 const onlineApiFallback = (import.meta.env.VITE_API_URL || 'https://chatapp-be-3nou.onrender.com').replace(/\/+$/, '');
 
@@ -455,6 +456,21 @@ export function AuthProvider({ children }) {
                          import.meta.env.VITE_FIREBASE_API_KEY.includes('example') || 
                          (import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID.includes('example'));
 
+    // Check if running inside mobile WebView wrapper (native Capacitor runtime)
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      console.log('📱 Mobile runtime detected: Redirecting Google Login to system browser...');
+      const params = new URLSearchParams({
+        isMock: isMockConfig ? 'true' : 'false',
+        apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+        appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
+      });
+      const gatewayUrl = `${apiBase}/mobile-login-gateway?${params.toString()}`;
+      await Browser.open({ url: gatewayUrl });
+      return;
+    }
+
     let idToken;
     let isMockUsed = false;
 
@@ -497,6 +513,34 @@ export function AuthProvider({ children }) {
     localStorage.setItem('refreshToken', data.refreshToken);
     localStorage.setItem('user', JSON.stringify(data.user));
     return data;
+  };
+
+  const completeTokenLogin = async (newAccessToken, newRefreshToken) => {
+    setLoading(true);
+    try {
+      localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      
+      const response = await fetch(`${apiBase}/api/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${newAccessToken}`
+        }
+      });
+      if (response.ok) {
+        const userData = await handleResponse(response);
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setAccessToken(newAccessToken);
+        console.log('🎉 Android WebView token authentication succeeded!');
+      } else {
+        throw new Error('Failed to fetch user with deep linked token.');
+      }
+    } catch (err) {
+      console.error('Failed to complete deep link token login:', err);
+      logoutState();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const registerWithPassword = async (email, password, displayName, bio = null) => {
@@ -665,6 +709,7 @@ export function AuthProvider({ children }) {
     requestOtp,
     verifyOtp,
     loginWithGoogle,
+    completeTokenLogin,
     logout,
     updateProfile,
     apiFetch,
