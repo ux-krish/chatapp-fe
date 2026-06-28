@@ -455,6 +455,25 @@ export function CallProvider({ children }) {
     };
   }, [socket, callState, user, cleanUpMedia]);
 
+  // Disconnect call if the local socket connection drops mid-call
+  useEffect(() => {
+    if (!socketConnected && callState !== 'idle') {
+      console.log('🔌 Local socket connection dropped. Hanging up call.');
+      endCall();
+    }
+  }, [socketConnected, callState, endCall]);
+
+  // Clean signal transmission if page is closed or refreshed
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      endCall();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [endCall]);
+
   const value = {
     callState,
     isMuted,
