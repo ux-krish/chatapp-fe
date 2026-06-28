@@ -261,7 +261,7 @@ export function CallProvider({ children }) {
     return pc;
   }, [handleIceCandidate]);
 
-  // Start Call (Caller Action - Optimized for Parallel Signaling/Media resolution)
+  // Start Call (Caller Action)
   const startCall = useCallback(async (targetUserId, targetUserName, avatarUrl) => {
     if (!socket || !user) {
       console.error('⚠️ Cannot start call: socket or user is undefined.', { socket: !!socket, user: !!user });
@@ -275,18 +275,22 @@ export function CallProvider({ children }) {
     setCallerDetails({ id: user.id, name: user.displayName, avatarUrl: user.avatarUrl });
 
     try {
-      // 1. Initialize Peer Connection immediately
+      // 1. Fetch Microphone stream input first
+      console.log('📡 Requesting microphone permissions...');
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localStreamRef.current = stream;
+      console.log('📡 Microphone stream obtained successfully.');
+
+      // 2. Initialize Peer Connection (adds local tracks immediately)
       const pc = createPeerConnection(targetUserId);
 
-      // 2. Create WebRTC offer with receiveAudio enabled
-      console.log('📡 Creating WebRTC SDP offer (receiveAudio)...');
-      const offer = await pc.createOffer({
-        offerToReceiveAudio: true
-      });
+      // 3. Create WebRTC offer
+      console.log('📡 Creating WebRTC SDP offer...');
+      const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      // 3. Emit signaling offer immediately to start callee ringing (without blocking on microphone permissions)
-      console.log('📡 Emitting call_user event immediately to start callee ringing...');
+      // 4. Send calling signal to target
+      console.log('📡 Emitting call_user event to backend...');
       socket.emit('call_user', {
         userToCall: targetUserId,
         signalData: { type: offer.type, sdp: offer.sdp },
@@ -294,24 +298,9 @@ export function CallProvider({ children }) {
         name: user.displayName,
         avatarUrl: user.avatarUrl
       });
-
-      // 4. In parallel, request microphone permissions and add tracks as they resolve
-      console.log('📡 Capturing caller microphone stream in background...');
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        localStreamRef.current = stream;
-        console.log('📡 Caller mic stream captured. Adding tracks to peer connection...');
-        stream.getTracks().forEach(track => {
-          if (peerConnectionRef.current) {
-            peerConnectionRef.current.addTrack(track, stream);
-          }
-        });
-      }).catch(micErr => {
-        console.error('⚠️ Caller background mic access failed:', micErr);
-        alert('Could not access microphone. Call will proceed but peer won\'t hear you.');
-      });
-
     } catch (err) {
       console.error('❌ Call initialization failed:', err);
+      alert('Unable to access microphone. Please check system permissions.');
       setCallState('idle');
       cleanUpMedia();
     }
