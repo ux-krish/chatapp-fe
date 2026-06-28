@@ -11,6 +11,13 @@ const getInitials = (name) => {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
+
+const hasOnlyEmojis = (str) => {
+  if (!str || !str.trim()) return false;
+  const cleaned = str.replace(/\s+/g, '');
+  const emojiRegex = /^(?:\p{Extended_Pictographic}|\p{Emoji_Component}|\u200d|\uFE0F)+$/u;
+  return emojiRegex.test(cleaned);
+};
 import { 
   Send, Paperclip, Smile, MoreVertical, MoreHorizontal, ShieldCheck, Phone, Video, 
   Info, Image as ImageIcon, FileText, Film, Volume2, ArrowLeft, Trash2, LogOut, Check, CheckCheck,
@@ -749,7 +756,7 @@ function ChatWindow() {
 
                     {/* A: Text Content */}
                     {msg.type === 'text' && (
-                      <p className="text-xs leading-relaxed whitespace-pre-wrap select-text break-words">
+                      <p className={`leading-relaxed whitespace-pre-wrap select-text break-words ${hasOnlyEmojis(msg.content) ? 'text-3xl py-0.5' : 'text-xs'}`}>
                         {renderMessageContent(msg.content, activeChat.members)}
                       </p>
                     )}
