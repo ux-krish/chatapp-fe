@@ -38,9 +38,38 @@ function App() {
     return () => clearTimeout(timer);
   }, [broadcastAlert]);
 
+  // Dynamic height adjustment to handle mobile virtual keyboards
+  useEffect(() => {
+    const handleResize = () => {
+      const height = window.visualViewport 
+        ? window.visualViewport.height 
+        : window.innerHeight;
+      document.documentElement.style.setProperty('--viewport-height', `${height}px`);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
+    }
+    window.addEventListener('resize', handleResize);
+    
+    handleResize();
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
+      }
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   if (loading) {
     return (
-      <div className="h-[100dvh] w-screen bg-zinc-950 flex flex-col items-center justify-center">
+      <div 
+        className="w-screen bg-zinc-950 flex flex-col items-center justify-center"
+        style={{ height: 'var(--viewport-height, 100dvh)' }}
+      >
         {/* Beautiful animated glassmorphic loading spinner */}
         <div className="relative flex items-center justify-center">
           <div className="h-16 w-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
@@ -59,7 +88,10 @@ function App() {
   }
 
   return (
-    <div className="h-[100dvh] w-screen bg-zinc-950 text-zinc-100 flex overflow-hidden select-none font-sans">
+    <div 
+      className="w-screen bg-zinc-950 text-zinc-100 flex overflow-hidden select-none font-sans"
+      style={{ height: 'var(--viewport-height, 100dvh)' }}
+    >
       <AnimatePresence mode="wait">
         {!user ? (
           <motion.div 
