@@ -5,7 +5,7 @@ import { useSocket } from './SocketContext';
 const ChatContext = createContext(null);
 
 export function ChatProvider({ children }) {
-  const { user, apiFetch, accessToken, handleResponse } = useAuth();
+  const { user, apiFetch, accessToken, handleResponse, loading } = useAuth();
   const { socket, connected } = useSocket();
 
   const [friends, setFriends] = useState([]);
@@ -83,6 +83,8 @@ export function ChatProvider({ children }) {
 
   // Triggered on login/initial mount
   useEffect(() => {
+    if (loading) return; // Wait until backend URL resolution and token refresh are done!
+
     if (user) {
       loadFriends();
       loadGroups();
@@ -97,7 +99,7 @@ export function ChatProvider({ children }) {
       setOnlineUsers(new Set());
       setReplyingTo(null);
     }
-  }, [user, loadFriends, loadGroups, loadStories]);
+  }, [user, loading, loadFriends, loadGroups, loadStories]);
 
   // Retrieve chat history when active chat changes
   const loadChatHistory = useCallback(async (chatId) => {
