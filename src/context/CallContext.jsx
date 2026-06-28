@@ -21,7 +21,6 @@ export function CallProvider({ children }) {
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
-  const audioTimerRef = useRef(null);
   const remoteAudioRef = useRef(null);
 
   // Audio tone generator states
@@ -100,7 +99,6 @@ export function CallProvider({ children }) {
       osc2.frequency.value = freq2;
       
       gainNode.gain.setValueAtTime(volume, ctx.currentTime);
-      // Soft fade out to prevent clicks
       gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
 
       osc1.connect(gainNode);
@@ -120,7 +118,6 @@ export function CallProvider({ children }) {
   const playDialTone = () => {
     stopSound();
     const dialPattern = () => {
-      // Outgoing ringing feedback tone: US ringback (440Hz + 480Hz) playing for 1.5s
       playOscillators(440, 480, 1.5, 0.03);
     };
     dialPattern();
@@ -130,7 +127,6 @@ export function CallProvider({ children }) {
   const playRingTone = () => {
     stopSound();
     const ringPattern = () => {
-      // Incoming call ringing feedback tone: dual-frequency ring tone (400Hz + 450Hz) playing for 1.2s
       playOscillators(400, 450, 1.2, 0.08);
       setTimeout(() => {
         playOscillators(400, 450, 1.2, 0.08);
@@ -153,6 +149,7 @@ export function CallProvider({ children }) {
 
   // Close connection and dispose tracks
   const cleanUpMedia = useCallback(() => {
+    console.log('🧹 Cleaning up WebRTC media and peer connection');
     stopSound();
     
     // Stop local media track inputs
@@ -180,6 +177,7 @@ export function CallProvider({ children }) {
   // WebRTC ICE Candidate Listener
   const handleIceCandidate = useCallback((event, targetUserId) => {
     if (event.candidate && socket) {
+      console.log('📡 Generating ICE candidate, sending to:', targetUserId);
       socket.emit('ice_candidate', {
         to: targetUserId,
         candidate: event.candidate
@@ -189,12 +187,13 @@ export function CallProvider({ children }) {
 
   // Initializing Peer Connection
   const createPeerConnection = useCallback((targetUserId) => {
+    console.log('📡 Instantiating RTCPeerConnection for:', targetUserId);
     const pc = new RTCPeerConnection(iceServers);
 
     pc.onicecandidate = (e) => handleIceCandidate(e, targetUserId);
 
     pc.ontrack = (e) => {
-      console.log('📡 WebRTC track received from peer.');
+      console.log('📡 WebRTC track received from peer. Streams count:', e.streams.length);
       remoteStreamRef.current = e.streams[0];
       if (remoteAudioRef.current) {
         remoteAudioRef.current.srcObject = e.streams[0];
@@ -203,9 +202,12 @@ export function CallProvider({ children }) {
 
     // Add local media tracks if stream exists
     if (localStreamRef.current) {
+      console.log('📡 Adding local stream tracks to RTCPeerConnection:', localStreamRef.current.getTracks().length);
       localStreamRef.current.getTracks().forEach(track => {
         pc.addTrack(track, localStreamRef.current);
       });
+    } else {
+      console.warn('⚠️ No local stream found while creating peer connection.');
     }
 
     peerConnectionRef.current = pc;
@@ -214,8 +216,12 @@ export function CallProvider({ children }) {
 
   // Start Call (Caller Action)
   const startCall = useCallback(async (targetUserId, targetUserName, avatarUrl) => {
-    if (!socket || !user) return;
+    if (!socket || !user) {
+      console.error('⚠️ Cannot start call: socket or user is undefined.', { socket: !!socket, user: !!user });
+      return;
+    }
     
+    console.log(`📡 Starting outbound call to ${targetUserName} (${targetUserId})`);
     initAudioContext();
     setCallState('dialing');
     setCalleeDetails({ id: targetUserId, name: targetUserName, avatarUrl });
@@ -223,26 +229,30 @@ export function CallProvider({ children }) {
 
     try {
       // 1. Fetch Microphone stream input
+      console.log('📡 Requesting microphone permissions...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
+      console.log('📡 Microphone stream obtained successfully.');
 
       // 2. Initialize Peer Connection
       const pc = createPeerConnection(targetUserId);
 
       // 3. Create WebRTC offer
+      console.log('📡 Creating WebRTC SDP offer...');
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      // 4. Send calling signal to target
+      // 4. Send calling signal to target (explicitly plain offer object serialization)
+      console.log('📡 Emitting call_user event to backend...');
       socket.emit('call_user', {
         userToCall: targetUserId,
-        signalData: offer,
+        signalData: { type: offer.type, sdp: offer.sdp },
         from: user.id,
         name: user.displayName,
         avatarUrl: user.avatarUrl
       });
     } catch (err) {
-      console.error('Call initialization failed:', err);
+      console.error('❌ Call initialization failed:', err);
       alert('Unable to access microphone. Please check system permissions.');
       setCallState('idle');
       cleanUpMedia();
@@ -251,33 +261,42 @@ export function CallProvider({ children }) {
 
   // Accept Call (Callee Action)
   const acceptCall = useCallback(async () => {
-    if (!socket || !callerDetails) return;
+    if (!socket || !callerDetails) {
+      console.error('⚠️ Cannot accept call: socket or callerDetails is undefined.');
+      return;
+    }
 
+    console.log(`📡 Accepting incoming call from ${callerDetails.name} (${callerDetails.id})`);
     initAudioContext();
     setCallState('connected');
 
     try {
       // 1. Fetch callee microphone stream
+      console.log('📡 Requesting microphone permissions for callee...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
+      console.log('📡 Callee microphone stream obtained.');
 
       // 2. Initialize callee Peer Connection
       const pc = createPeerConnection(callerDetails.id);
 
       // 3. Set remote WebRTC offer description
+      console.log('📡 Setting remote SDP offer description...', callerDetails.signal?.type);
       await pc.setRemoteDescription(new RTCSessionDescription(callerDetails.signal));
 
       // 4. Create callee Answer description
+      console.log('📡 Creating WebRTC SDP answer...');
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
       // 5. Signal acceptance answer to caller
+      console.log('📡 Emitting answer_call event to backend...');
       socket.emit('answer_call', {
         to: callerDetails.id,
-        signal: answer
+        signal: { type: answer.type, sdp: answer.sdp }
       });
     } catch (err) {
-      console.error('Failed to accept WebRTC session:', err);
+      console.error('❌ Failed to accept WebRTC session:', err);
       socket.emit('reject_call', { to: callerDetails.id });
       setCallState('idle');
       cleanUpMedia();
@@ -287,6 +306,7 @@ export function CallProvider({ children }) {
   // Reject Call (Callee Action)
   const rejectCall = useCallback(() => {
     if (socket && callerDetails) {
+      console.log(`📡 Rejecting incoming call from: ${callerDetails.id}`);
       socket.emit('reject_call', { to: callerDetails.id });
     }
     setCallState('idle');
@@ -300,11 +320,12 @@ export function CallProvider({ children }) {
       ? calleeDetails?.id
       : callerDetails?.id;
 
+    console.log(`📡 Hanging up call with peer: ${peerId}`);
     if (socket && peerId) {
       socket.emit('hangup_call', { to: peerId });
     }
     
-    playBeepTone(300, 0.4); // beep once to signal call end
+    playBeepTone(300, 0.4);
     setCallState('ended');
     setTimeout(() => {
       setCallState('idle');
@@ -322,18 +343,27 @@ export function CallProvider({ children }) {
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
         setIsMuted(!audioTrack.enabled);
+        console.log(`🎙️ Microphone mute toggled: ${!audioTrack.enabled}`);
       }
     }
   }, []);
 
   // Listen to socket signals
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.log('🔌 CallContext: Socket not connected yet.');
+      return;
+    }
+
+    console.log('🔌 Registering WebRTC calling socket listeners.');
 
     // A: Inbound call setup
     const handleIncomingCall = ({ from, name, avatarUrl, signal }) => {
+      console.log(`🔔 Inbound Call Signal received from: ${name} (${from})`);
+      
       // If busy, auto-reject call
       if (callState !== 'idle') {
+        console.log('📡 Callee is busy. Auto-rejecting inbound call from:', from);
         socket.emit('reject_call', { to: from });
         return;
       }
@@ -345,20 +375,25 @@ export function CallProvider({ children }) {
 
     // B: Outbound call accepted
     const handleCallAccepted = async ({ signal }) => {
-      if (peerConnectionRef.current && (callState === 'dialing' || callState === 'idle')) {
+      console.log('🔔 Outbound Call accepted by callee. Setting remote session description...');
+      if (peerConnectionRef.current && (callState === 'dialing' || callState === 'idle' || callState === 'connected')) {
         setCallState('connected');
         try {
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+          console.log('📡 WebRTC peer connection remote SDP successfully set.');
         } catch (e) {
-          console.error('Remote SDP description set failed:', e);
+          console.error('❌ Remote SDP description set failed:', e);
         }
+      } else {
+        console.warn('⚠️ handleCallAccepted fired but peer connection or state is not ready:', { pc: !!peerConnectionRef.current, state: callState });
       }
     };
 
     // C: Call rejected by callee
     const handleCallRejected = () => {
+      console.log('🔔 Call was rejected by callee.');
       playBeepTone(400, 0.25);
-      setTimeout(() => playBeepTone(400, 0.25), 350); // double warning beep for rejected/busy
+      setTimeout(() => playBeepTone(400, 0.25), 350);
       setCallState('ended');
       setTimeout(() => {
         setCallState('idle');
@@ -372,15 +407,17 @@ export function CallProvider({ children }) {
     const handleIceCandidateEvent = async ({ candidate }) => {
       try {
         if (peerConnectionRef.current) {
+          console.log('📡 Adding remote ICE Candidate...');
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
         }
       } catch (e) {
-        console.warn('Error adding ice candidate:', e.message);
+        console.warn('⚠️ Error adding ice candidate:', e.message);
       }
     };
 
     // E: Call hung up by peer
     const handlePeerHungUp = () => {
+      console.log('🔔 Peer hung up the call.');
       playBeepTone(300, 0.4);
       setCallState('ended');
       setTimeout(() => {
@@ -398,6 +435,7 @@ export function CallProvider({ children }) {
     socket.on('peer_hungup', handlePeerHungUp);
 
     return () => {
+      console.log('🔌 Removing WebRTC calling socket listeners.');
       socket.off('incoming_call', handleIncomingCall);
       socket.off('call_accepted', handleCallAccepted);
       socket.off('call_rejected', handleCallRejected);
