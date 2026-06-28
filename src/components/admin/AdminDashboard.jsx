@@ -16,7 +16,7 @@ const getInitials = (name) => {
 };
 
 export default function AdminDashboard({ onClose }) {
-  const { apiFetch, user: currentUser, handleResponse } = useAuth();
+  const { apiFetch, user: currentUser, handleResponse, getAvatarUrl } = useAuth();
   const { socket } = useChat();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'users', 'chats', 'logs'
@@ -625,7 +625,7 @@ export default function AdminDashboard({ onClose }) {
                                   <div className="flex items-center gap-3">
                                     {user.avatarUrl ? (
                                       <img 
-                                        src={user.avatarUrl} 
+                                        src={getAvatarUrl(user.avatarUrl)} 
                                         alt={user.displayName} 
                                         className="h-9 w-9 rounded-full object-cover border border-zinc-800" 
                                       />
@@ -777,7 +777,7 @@ export default function AdminDashboard({ onClose }) {
                           <div key={group.id} className="p-3.5 rounded-2xl bg-zinc-950/20 border border-zinc-900 flex items-center justify-between hover:bg-zinc-800/10 transition">
                             <div className="flex items-center gap-3 min-w-0">
                               {group.avatarUrl ? (
-                                <img src={group.avatarUrl} alt={group.name} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
+                                <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
                               ) : (
                                 <div className="h-9 w-9 rounded-full bg-zinc-800 border border-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
                                   G

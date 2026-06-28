@@ -20,7 +20,7 @@ function Sidebar() {
   const { 
     user, logout, updateProfile, apiFetch, setIsAdminPortalOpen, 
     updateSecuritySettings, theme, toggleTheme, deleteAccount, handleResponse,
-    themeColor, fontSize, updateAppearance
+    themeColor, fontSize, updateAppearance, getAvatarUrl
   } = useAuth();
   const { 
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
@@ -271,7 +271,7 @@ function Sidebar() {
           <div className="relative group cursor-pointer" onClick={() => setActiveTab('settings')}>
             {user?.avatarUrl ? (
               <img 
-                src={user.avatarUrl} 
+                src={getAvatarUrl(user.avatarUrl)} 
                 alt="Me" 
                 className="h-10 w-10 rounded-full object-cover border border-zinc-800 hover:border-emerald-500 transition duration-300"
               />
@@ -364,7 +364,7 @@ function Sidebar() {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {group.avatarUrl ? (
-                        <img src={group.avatarUrl} alt={group.name} className="h-11 w-11 rounded-full object-cover border border-zinc-850" />
+                        <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-11 w-11 rounded-full object-cover border border-zinc-850" />
                       ) : (
                         <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 border border-zinc-850 flex items-center justify-center text-blue-400 font-bold text-sm">
                           <Users2 className="h-5 w-5" />
@@ -412,7 +412,7 @@ function Sidebar() {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative">
                         {friend.avatarUrl ? (
-                          <img src={friend.avatarUrl} alt={friend.displayName} className="h-11 w-11 rounded-full object-cover border border-zinc-850" />
+                          <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-11 w-11 rounded-full object-cover border border-zinc-850" />
                         ) : (
                           <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 border border-zinc-850 flex items-center justify-center text-zinc-300 font-bold text-xs uppercase">
                             {getInitials(friend.displayName)}
@@ -480,7 +480,7 @@ function Sidebar() {
                       <div key={reqUser.id} className="p-3 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-between">
                         <div className="flex items-center gap-2.5 min-w-0">
                           {reqUser.avatarUrl ? (
-                            <img src={reqUser.avatarUrl} alt={reqUser.displayName} className="h-8 w-8 rounded-full object-cover" />
+                            <img src={getAvatarUrl(reqUser.avatarUrl)} alt={reqUser.displayName} className="h-8 w-8 rounded-full object-cover" />
                           ) : (
                             <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-300 uppercase">
                               {getInitials(reqUser.displayName)}
@@ -526,7 +526,7 @@ function Sidebar() {
                       <div className="flex items-center gap-2.5 min-w-0 pointer-events-none select-none">
                         <div className="relative">
                           {friend.avatarUrl ? (
-                            <img src={friend.avatarUrl} alt={friend.displayName} className="h-9 w-9 rounded-full object-cover" />
+                            <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-9 w-9 rounded-full object-cover" />
                           ) : (
                             <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-300 uppercase">
                               {getInitials(friend.displayName)}
@@ -586,7 +586,7 @@ function Sidebar() {
                     <div className="relative">
                       {user.avatarUrl ? (
                         <img 
-                          src={user.avatarUrl} 
+                          src={getAvatarUrl(user.avatarUrl)} 
                           alt="Me" 
                           className={`h-11 w-11 rounded-full object-cover p-[2px] border-2 ${stories.myStories ? 'border-emerald-500' : 'border-zinc-700'}`} 
                         />
@@ -648,7 +648,7 @@ function Sidebar() {
                         <div className="relative">
                           {feed.avatarUrl ? (
                             <img 
-                              src={feed.avatarUrl} 
+                              src={getAvatarUrl(feed.avatarUrl)} 
                               alt={feed.displayName} 
                               className={`h-11 w-11 rounded-full object-cover p-[2px] border-2 ${borderClass}`} 
                             />
@@ -694,7 +694,7 @@ function Sidebar() {
                   <div className="flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/60 rounded-2xl">
                     <div className="flex flex-col items-center">
                       {user.avatarUrl ? (
-                        <img src={user.avatarUrl} alt={user.displayName} className="h-12 w-12 rounded-full object-cover border border-zinc-700/50" />
+                        <img src={getAvatarUrl(user.avatarUrl)} alt={user.displayName} className="h-12 w-12 rounded-full object-cover border border-zinc-700/50" />
                       ) : (
                         <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center font-bold text-emerald-400 text-lg uppercase">
                           {getInitials(user.displayName)}
@@ -826,7 +826,7 @@ function Sidebar() {
                     <div className="flex flex-col items-center justify-center py-2">
                       <div className="relative group cursor-pointer">
                         {editAvatarPreview ? (
-                          <img src={editAvatarPreview} alt="Preview" className="h-20 w-20 rounded-full object-cover border-2 border-zinc-800" />
+                          <img src={getAvatarUrl(editAvatarPreview)} alt="Preview" className="h-20 w-20 rounded-full object-cover border-2 border-zinc-800" />
                         ) : (
                           <div className="h-20 w-20 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-white text-xl uppercase">
                             {getInitials(user.displayName)}
@@ -1175,7 +1175,7 @@ function Sidebar() {
                   <div key={result.id} className="p-3 rounded-2xl bg-zinc-950/40 border border-zinc-850 flex items-center justify-between">
                     <div className="flex items-center gap-2.5 min-w-0">
                       {result.avatarUrl ? (
-                        <img src={result.avatarUrl} alt={result.displayName} className="h-8 w-8 rounded-full object-cover" />
+                        <img src={getAvatarUrl(result.avatarUrl)} alt={result.displayName} className="h-8 w-8 rounded-full object-cover" />
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-300 uppercase">
                           {getInitials(result.displayName)}
@@ -1342,7 +1342,7 @@ function Sidebar() {
 
 // ================= SUB-COMPONENT: FULLSCREEN IMMERSIVE STATUS VIEWER =================
 function StatusViewer({ feed, onClose, viewStory }) {
-  const { user } = useAuth();
+  const { user, getAvatarUrl } = useAuth();
   const { sendStatusReply } = useChat();
   
   const initialIndex = feed.stories.findIndex(s => !s.viewed);
@@ -1498,7 +1498,7 @@ function StatusViewer({ feed, onClose, viewStory }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {feed.avatarUrl ? (
-              <img src={feed.avatarUrl} alt={feed.displayName} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
+              <img src={getAvatarUrl(feed.avatarUrl)} alt={feed.displayName} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
             ) : (
               <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 uppercase">
                 {getInitials(feed.displayName)}

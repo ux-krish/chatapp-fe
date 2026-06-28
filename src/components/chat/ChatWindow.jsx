@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 function ChatWindow() {
-  const { user } = useAuth();
+  const { user, getAvatarUrl } = useAuth();
   const { 
     activeChat, messages, selectChat, sendMessage, sendMediaMessage, 
     setTypingIndicator, typingStatus, leaveGroup, addGroupMembers, friends,
@@ -394,7 +394,7 @@ function ChatWindow() {
 
           <div className="relative cursor-pointer" onClick={() => isGroup && setShowGroupInfo(true)}>
             {activeChat.avatarUrl ? (
-              <img src={activeChat.avatarUrl} alt={activeChat.name || activeChat.displayName} className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
+              <img src={getAvatarUrl(activeChat.avatarUrl)} alt={activeChat.name || activeChat.displayName} className="h-10 w-10 rounded-full object-cover border border-zinc-800" />
             ) : (
               <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-zinc-800 flex items-center justify-center font-bold text-emerald-400 text-xs uppercase">
                 {isGroup ? <Users2 className="h-5 w-5" /> : getInitials(activeChat.displayName)}
@@ -1012,7 +1012,7 @@ function ChatWindow() {
                     >
                       {member.avatarUrl ? (
                         <img 
-                          src={member.avatarUrl} 
+                          src={getAvatarUrl(member.avatarUrl)} 
                           alt={member.displayName} 
                           className="h-6 w-6 rounded-full object-cover border border-zinc-800" 
                         />
@@ -1139,7 +1139,7 @@ function ChatWindow() {
                 {/* Group Details */}
                 <div className="flex flex-col items-center text-center pb-6 border-b border-zinc-850">
                   {activeChat.avatarUrl ? (
-                    <img src={activeChat.avatarUrl} alt="Group" className="h-16 w-16 rounded-full object-cover border border-zinc-800" />
+                    <img src={getAvatarUrl(activeChat.avatarUrl)} alt="Group" className="h-16 w-16 rounded-full object-cover border border-zinc-800" />
                   ) : (
                     <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-zinc-800 flex items-center justify-center text-emerald-400 font-bold text-lg">
                       <Users2 className="h-8 w-8" />
@@ -1165,7 +1165,7 @@ function ChatWindow() {
                       <div key={member.id} className="flex items-center justify-between py-1">
                         <div className="flex items-center gap-2 min-w-0">
                           {member.avatarUrl ? (
-                            <img src={member.avatarUrl} alt={member.displayName} className="h-7 w-7 rounded-full object-cover" />
+                            <img src={getAvatarUrl(member.avatarUrl)} alt={member.displayName} className="h-7 w-7 rounded-full object-cover" />
                           ) : (
                             <div className="h-7 w-7 rounded-full bg-zinc-800 flex items-center justify-center text-[9px] font-bold text-zinc-300 uppercase">
                               {getInitials(member.displayName)}
@@ -1258,7 +1258,7 @@ function ChatWindow() {
                                className="accent-emerald-500 h-4 w-4 rounded border-zinc-750 bg-zinc-950" 
                              />
                              {friend.avatarUrl ? (
-                               <img src={friend.avatarUrl} alt={friend.displayName} className="h-6 w-6 rounded-full object-cover" />
+                               <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-6 w-6 rounded-full object-cover" />
                              ) : (
                                <div className="h-6 w-6 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-400 uppercase">
                                  {getInitials(friend.displayName)}

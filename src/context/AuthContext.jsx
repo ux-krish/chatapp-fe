@@ -252,6 +252,14 @@ export function AuthProvider({ children }) {
     return response;
   };
 
+  const getAvatarUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+    return `${apiBase.replace(/\/+$/, '')}${url}`;
+  };
+
   // Perform dynamic backend selection and silent authentication check on mount
   useEffect(() => {
     const initAndCheckAuth = async () => {
@@ -577,6 +585,7 @@ export function AuthProvider({ children }) {
     updateThemeColor,
     fontSize,
     updateFontSize,
+    getAvatarUrl,
     updateAppearance,
   };
 
