@@ -23,7 +23,9 @@ export function AuthProvider({ children }) {
     }
   });
   const [loading, setLoading] = useState(true);
-  const [apiBase, setApiBase] = useState('http://localhost:5001');
+  const [apiBase, setApiBase] = useState(() => {
+    return (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/+$/, '');
+  });
   const [isAdminPortalOpen, setIsAdminPortalOpen] = useState(false);
 
   // Theme management (light/dark mode)
@@ -311,8 +313,11 @@ export function AuthProvider({ children }) {
   // Perform dynamic backend selection and silent authentication check on mount
   useEffect(() => {
     const initAndCheckAuth = async () => {
-      let activeApi = 'http://localhost:5001';
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const configuredApi = (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/+$/, '');
+      let activeApi = configuredApi;
+      const isLocalHost = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1' || 
+                          window.location.hostname === '[::1]';
       
       // Probe if local API is running
       try {
@@ -320,19 +325,19 @@ export function AuthProvider({ children }) {
         // Use a more lenient 3500ms timeout to prevent premature fallback under high CPU load
         const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-        const response = await fetch('http://localhost:5001/api/health', {
+        const response = await fetch(`${configuredApi}/api/health`, {
           method: 'GET',
           signal: controller.signal
         });
         clearTimeout(timeoutId);
         
         if (response.ok) {
-          activeApi = 'http://localhost:5001';
+          activeApi = configuredApi;
         } else {
-          activeApi = isLocalHost ? 'http://localhost:5001' : onlineApiFallback;
+          activeApi = isLocalHost ? configuredApi : onlineApiFallback;
         }
       } catch (err) {
-        activeApi = isLocalHost ? 'http://localhost:5001' : onlineApiFallback;
+        activeApi = isLocalHost ? configuredApi : onlineApiFallback;
       }
 
       setApiBase(activeApi);
