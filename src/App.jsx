@@ -1,15 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useChat } from './context/ChatContext';
+import { useSocket } from './context/SocketContext';
 import AuthScreen from './components/auth/AuthScreen';
 import Sidebar from './components/sidebar/Sidebar';
 import ChatWindow from './components/chat/ChatWindow';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { AnimatePresence, motion } from 'framer-motion';
+import { AlertTriangle, X } from 'lucide-react';
 
 function App() {
-  const { user, loading, isAdminPortalOpen, setIsAdminPortalOpen } = useAuth();
+  const { user, loading, isAdminPortalOpen, setIsAdminPortalOpen, getAvatarUrl } = useAuth();
   const { activeChat } = useChat();
+  const { socket } = useSocket();
+  const [broadcastAlert, setBroadcastAlert] = useState(null);
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleBroadcast = (data) => {
+      setBroadcastAlert(data);
+    };
+
+    socket.on('system_broadcast', handleBroadcast);
+    return () => {
+      socket.off('system_broadcast', handleBroadcast);
+    };
+  }, [socket]);
+
+  // Auto-dismiss broadcast after 12 seconds
+  useEffect(() => {
+    if (!broadcastAlert) return;
+    const timer = setTimeout(() => {
+      setBroadcastAlert(null);
+    }, 12000);
+    return () => clearTimeout(timer);
+  }, [broadcastAlert]);
 
   if (loading) {
     return (
@@ -77,6 +103,48 @@ function App() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Real-time System Broadcast Alert Overlay */}
+      <AnimatePresence>
+        {broadcastAlert && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.95, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: -50, scale: 0.95, x: '-50%' }}
+            className="fixed top-4 left-1/2 z-[9999] w-[90%] max-w-md p-4 rounded-2xl bg-zinc-900/90 border border-white/10 backdrop-blur-xl shadow-2xl flex gap-3.5 items-start cursor-pointer select-text"
+            onClick={() => setBroadcastAlert(null)}
+          >
+            <div className={`p-2 rounded-xl flex-shrink-0 ${
+              broadcastAlert.severity === 'danger' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+              broadcastAlert.severity === 'warning' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+            }`}>
+              <AlertTriangle className="h-5 w-5 animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  System Broadcast
+                </span>
+                <span className="text-[9px] text-zinc-500">
+                  {new Date(broadcastAlert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-white mt-1 leading-relaxed">
+                {broadcastAlert.message}
+              </p>
+              {broadcastAlert.mediaUrl && (
+                <div className="mt-2.5 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950/45 max-h-32 flex justify-center items-center">
+                  <img src={getAvatarUrl(broadcastAlert.mediaUrl)} alt="Broadcast attachment" className="max-w-full max-h-32 object-contain" />
+                </div>
+              )}
+            </div>
+            <button className="text-zinc-500 hover:text-white p-0.5 rounded-lg hover:bg-zinc-800/50">
+              <X className="h-3.5 w-3.5" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -628,7 +628,7 @@ function Sidebar() {
 
               {/* Friends statuses */}
               <div className="space-y-2">
-                <h3 className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Friends' Statuses ({stories.friendsStories.length})</h3>
+                <h3 className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Recent Updates ({stories.friendsStories.length})</h3>
                 <div className="space-y-2">
                   {stories.friendsStories.map(feed => {
                     const allViewed = feed.stories.every(s => s.viewed);
