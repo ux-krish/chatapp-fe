@@ -17,14 +17,69 @@ export function ChatProvider({ children }) {
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [replyingTo, setReplyingTo] = useState(null);
   
-  // Custom sound triggers
-  const sendSound = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2357/2357-84.wav'));
-  const receiveSound = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2633/2633-84.wav'));
-  
-  // Volume adjustments
-  useEffect(() => {
-    sendSound.current.volume = 0.3;
-    receiveSound.current.volume = 0.35;
+  const playSynthesizedChime = useCallback((type) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      
+      const ctx = new AudioCtx();
+      
+      if (type === 'send') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+      } else if (type === 'message') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+        osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.08); // A5
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      } else if (type === 'friend') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); // G5
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime + 0.16);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } else if (type === 'group') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime); // G5
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime + 0.1); // D5
+        osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.2); // E5
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch (e) {
+      console.warn('Synthesizer play failed:', e);
+    }
   }, []);
 
   // Helper to determine chatId for 1-to-1 chat between two users
@@ -173,7 +228,7 @@ export function ChatProvider({ children }) {
     };
 
     // Play send audio
-    sendSound.current.cloneNode(true).play().catch(() => {});
+    playSynthesizedChime('send');
 
     socket.emit('send_message', messagePayload, (savedMsg) => {
       if (savedMsg.error) {
@@ -221,7 +276,7 @@ export function ChatProvider({ children }) {
     };
 
     // Play send audio
-    sendSound.current.cloneNode(true).play().catch(() => {});
+    playSynthesizedChime('send');
 
     socket.emit('send_message', messagePayload, (savedMsg) => {
       if (savedMsg.error) {
@@ -600,7 +655,7 @@ export function ChatProvider({ children }) {
 
       if (!isUnread) {
         // Play receive audio
-        receiveSound.current.cloneNode(true).play().catch(() => {});
+        playSynthesizedChime('message');
 
         setMessages(prev => [...prev, msg]);
         
@@ -610,7 +665,7 @@ export function ChatProvider({ children }) {
         }
       } else {
         // Play receive sound for background chats as well
-        receiveSound.current.cloneNode(true).play().catch(() => {});
+        playSynthesizedChime('message');
       }
 
       // Update previews in list and increment unread count if background chat
@@ -689,12 +744,12 @@ export function ChatProvider({ children }) {
 
     // F: Friend requests and acceptances in real-time
     const handleFriendRequest = ({ sender }) => {
-      receiveSound.current.cloneNode(true).play().catch(() => {});
+      playSynthesizedChime('friend');
       loadFriends();
     };
 
     const handleFriendAccept = ({ friend }) => {
-      receiveSound.current.cloneNode(true).play().catch(() => {});
+      playSynthesizedChime('friend');
       loadFriends();
       loadStories();
     };
@@ -710,7 +765,7 @@ export function ChatProvider({ children }) {
         if (prev.some(g => g.id === mappedGroup.id)) return prev;
         return [mappedGroup, ...prev];
       });
-      receiveSound.current.cloneNode(true).play().catch(() => {});
+      playSynthesizedChime('group');
     };
 
     const handleMessageEdited = ({ messageId, content }) => {
