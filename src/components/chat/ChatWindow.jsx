@@ -134,6 +134,16 @@ function ChatWindow() {
     setShowMentionDropdown(false);
   }, [activeChat?.id]);
 
+  // Auto-focus text input box when active chat changes
+  useEffect(() => {
+    if (activeChat) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [activeChat?.id]);
+
   // Close message options dropdown when clicking anywhere else
   useEffect(() => {
     const handleOutsideClick = (e) => {
