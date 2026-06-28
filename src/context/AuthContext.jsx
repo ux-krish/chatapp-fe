@@ -49,8 +49,47 @@ export function AuthProvider({ children }) {
   });
 
   // Dynamic user theme and font size preferences (stored per-user in local storage)
-  const [themeColor, setThemeColor] = useState('green');
-  const [fontSize, setFontSize] = useState('medium');
+  const [themeColor, setThemeColor] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed) {
+          if (parsed.themeColor) return parsed.themeColor;
+          if (parsed.email) {
+            const savedEmailColor = localStorage.getItem(`themeColor-${parsed.email}`);
+            if (savedEmailColor) return savedEmailColor;
+          }
+          if (parsed.id) {
+            const savedIdColor = localStorage.getItem(`themeColor-${parsed.id}`);
+            if (savedIdColor) return savedIdColor;
+          }
+        }
+      }
+    } catch (e) {}
+    return localStorage.getItem('themeColor') || 'green';
+  });
+
+  const [fontSize, setFontSize] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed) {
+          if (parsed.fontSize) return parsed.fontSize;
+          if (parsed.email) {
+            const savedEmailSize = localStorage.getItem(`fontSize-${parsed.email}`);
+            if (savedEmailSize) return savedEmailSize;
+          }
+          if (parsed.id) {
+            const savedIdSize = localStorage.getItem(`fontSize-${parsed.id}`);
+            if (savedIdSize) return savedIdSize;
+          }
+        }
+      }
+    } catch (e) {}
+    return localStorage.getItem('fontSize') || 'medium';
+  });
 
   useEffect(() => {
     if (user) {
@@ -62,8 +101,8 @@ export function AuthProvider({ children }) {
         document.documentElement.classList.remove('dark');
       }
 
-      const savedColor = user.themeColor || 'green';
-      const savedSize = user.fontSize || 'medium';
+      const savedColor = user.themeColor || (user.email && localStorage.getItem(`themeColor-${user.email}`)) || localStorage.getItem(`themeColor-${user.id}`) || 'green';
+      const savedSize = user.fontSize || (user.email && localStorage.getItem(`fontSize-${user.email}`)) || localStorage.getItem(`fontSize-${user.id}`) || 'medium';
       
       setThemeColor(savedColor);
       setFontSize(savedSize);
@@ -122,6 +161,15 @@ export function AuthProvider({ children }) {
       
       rootClasses.add(`theme-${color}`);
       rootClasses.add(`font-size-${size}`);
+
+      if (user.email) {
+        localStorage.setItem(`themeColor-${user.email}`, color);
+        localStorage.setItem(`fontSize-${user.email}`, size);
+      }
+      if (user.id) {
+        localStorage.setItem(`themeColor-${user.id}`, color);
+        localStorage.setItem(`fontSize-${user.id}`, size);
+      }
 
       // Persist to database via PUT /api/users/profile
       const response = await apiFetch('/api/users/profile', {
@@ -483,8 +531,10 @@ export function AuthProvider({ children }) {
   };
 
   const logoutState = () => {
-    // Preserve current theme of this specific user before clearing
+    // Preserve current theme, themeColor, and fontSize of this specific user before clearing
     const currentTheme = user ? (localStorage.getItem(`theme-${user.email}`) || localStorage.getItem(`theme-${user.id}`)) : localStorage.getItem('theme');
+    const currentColor = user ? (localStorage.getItem(`themeColor-${user.email}`) || localStorage.getItem(`themeColor-${user.id}`)) : localStorage.getItem('themeColor');
+    const currentSize = user ? (localStorage.getItem(`fontSize-${user.email}`) || localStorage.getItem(`fontSize-${user.id}`)) : localStorage.getItem('fontSize');
     const userEmail = user?.email;
     const userId = user?.id;
 
@@ -502,6 +552,16 @@ export function AuthProvider({ children }) {
         localStorage.setItem('theme', currentTheme);
         if (userEmail) localStorage.setItem(`theme-${userEmail}`, currentTheme);
         if (userId) localStorage.setItem(`theme-${userId}`, currentTheme);
+      }
+      if (currentColor) {
+        localStorage.setItem('themeColor', currentColor);
+        if (userEmail) localStorage.setItem(`themeColor-${userEmail}`, currentColor);
+        if (userId) localStorage.setItem(`themeColor-${userId}`, currentColor);
+      }
+      if (currentSize) {
+        localStorage.setItem('fontSize', currentSize);
+        if (userEmail) localStorage.setItem(`fontSize-${userEmail}`, currentSize);
+        if (userId) localStorage.setItem(`fontSize-${userId}`, currentSize);
       }
 
       // Clear Cache Storage (Cache API) to purge any cached assets or API responses
