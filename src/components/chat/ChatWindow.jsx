@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 function ChatWindow() {
-  const { user, getAvatarUrl } = useAuth();
+  const { user, getAvatarUrl, apiBase, accessToken } = useAuth();
   const { 
     activeChat, messages, selectChat, sendMessage, sendMediaMessage, 
     setTypingIndicator, typingStatus, leaveGroup, addGroupMembers, friends,
@@ -45,24 +45,22 @@ function ChatWindow() {
   // Helper function to download files locally (forces local browser download)
   const handleDownload = async (url, originalFilename) => {
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Download failed');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      
-      // Extract or set filename
-      const filename = originalFilename || url.split('/').pop() || 'download';
-      link.download = filename;
+      // Local blob or base64 preview URLs can be downloaded directly
+      if (url.startsWith('blob:') || url.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = originalFilename || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      // Proxy remote (Firebase Storage) or server-stored files through the backend to avoid CORS and force local folder save
+      const downloadUrl = `${apiBase}/api/chat/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(originalFilename || '')}&token=${accessToken}`;
+      window.open(downloadUrl, '_blank');
     } catch (err) {
       console.error('Failed to download file:', err);
-      // Fallback to opening in a new tab if fetch fails
       window.open(url, '_blank');
     }
   };
