@@ -312,11 +312,13 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const initAndCheckAuth = async () => {
       let activeApi = 'http://localhost:5001';
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       
       // Probe if local API is running
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 800); // 800ms fast check
+        // Use a more lenient 3500ms timeout to prevent premature fallback under high CPU load
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
 
         const response = await fetch('http://localhost:5001/api/health', {
           method: 'GET',
@@ -327,10 +329,10 @@ export function AuthProvider({ children }) {
         if (response.ok) {
           activeApi = 'http://localhost:5001';
         } else {
-          activeApi = onlineApiFallback;
+          activeApi = isLocalHost ? 'http://localhost:5001' : onlineApiFallback;
         }
       } catch (err) {
-        activeApi = onlineApiFallback;
+        activeApi = isLocalHost ? 'http://localhost:5001' : onlineApiFallback;
       }
 
       setApiBase(activeApi);
