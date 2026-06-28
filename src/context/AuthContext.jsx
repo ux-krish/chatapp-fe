@@ -319,25 +319,27 @@ export function AuthProvider({ children }) {
                           window.location.hostname === '127.0.0.1' || 
                           window.location.hostname === '[::1]';
       
-      // Probe if local API is running
-      try {
-        const controller = new AbortController();
-        // Use a more lenient 3500ms timeout to prevent premature fallback under high CPU load
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-
-        const response = await fetch(`${configuredApi}/api/health`, {
-          method: 'GET',
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          activeApi = configuredApi;
-        } else {
-          activeApi = isLocalHost ? configuredApi : onlineApiFallback;
+      if (isLocalHost) {
+        // Only probe when running locally — detect if dev server is up
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const response = await fetch(`${configuredApi}/api/health`, {
+            method: 'GET',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          activeApi = response.ok ? configuredApi : onlineApiFallback;
+        } catch {
+          // Local dev server isn't running — fall back to online API
+          activeApi = onlineApiFallback;
         }
-      } catch (err) {
-        activeApi = isLocalHost ? configuredApi : onlineApiFallback;
+      } else {
+        // Live site: always trust the configured VITE_API_URL (or hardcoded fallback).
+        // Never probe — Render cold starts can take 30+ seconds and would cause a timeout.
+        activeApi = configuredApi.includes('localhost') || configuredApi.includes('127.0.0.1')
+          ? onlineApiFallback
+          : configuredApi;
       }
 
       setApiBase(activeApi);
