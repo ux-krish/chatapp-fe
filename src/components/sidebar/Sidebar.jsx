@@ -7,8 +7,10 @@ import {
   MessageSquare, Users, Sparkles, Settings, LogOut, Search, 
   UserPlus, Check, X, Camera, Plus, PlusCircle, Trash2, Users2, ChevronRight, User,
   Shield, ShieldAlert, Sun, Moon, ArrowLeft, Key, Send, Palette,
-  MoreVertical, Pin, PinOff, Ban, EyeOff, UserMinus
+  MoreVertical, Pin, PinOff, Ban, EyeOff, UserMinus,
+  Phone, PhoneCall, PhoneIncoming, PhoneOutgoing, PhoneMissed
 } from 'lucide-react';
+import { useCall } from '../../context/CallContext';
 
 const getInitials = (name) => {
   if (!name) return '?';
@@ -30,8 +32,53 @@ function Sidebar() {
     hideChatAction, removeFriendshipAction
   } = useChat();
 
-  const [activeTab, setActiveTab] = useState('chats'); // 'chats', 'friends', 'stories', 'settings'
+  const { startCall, callState } = useCall();
+
+  const [activeTab, setActiveTab] = useState('chats'); // 'chats', 'calls', 'friends', 'stories', 'settings'
   const [settingsSubTab, setSettingsSubTab] = useState(null); // null, 'profile', 'account'
+
+  const [callHistory, setCallHistory] = useState([]);
+  const [loadingCalls, setLoadingCalls] = useState(false);
+
+  const loadCallHistory = useCallback(async () => {
+    if (!user) return;
+    setLoadingCalls(true);
+    try {
+      const response = await apiFetch('/api/calls');
+      if (response.ok) {
+        const data = await handleResponse(response);
+        setCallHistory(data);
+      }
+    } catch (err) {
+      console.error('Error fetching call history:', err);
+    } finally {
+      setLoadingCalls(false);
+    }
+  }, [user, apiFetch, handleResponse]);
+
+  const clearCallHistoryHandler = async () => {
+    if (!confirm('Are you sure you want to clear your call history?')) return;
+    try {
+      const response = await apiFetch('/api/calls', { method: 'DELETE' });
+      if (response.ok) {
+        setCallHistory([]);
+      }
+    } catch (err) {
+      console.error('Error clearing calls:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'calls') {
+      loadCallHistory();
+    }
+  }, [activeTab, loadCallHistory]);
+
+  useEffect(() => {
+    if (activeTab === 'calls' && callState === 'idle') {
+      loadCallHistory();
+    }
+  }, [callState, activeTab, loadCallHistory]);
 
   // Reset settings sub-tab when active tab changes
   useEffect(() => {
@@ -605,6 +652,135 @@ function Sidebar() {
                   No active chats. Use the top icons to add friends or create group chats!
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* CALLS TAB */}
+          {activeTab === 'calls' && (
+            <motion.div 
+              key="calls-tab"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 flex flex-col min-h-0"
+            >
+              {/* Header with clear logs */}
+              <div className="px-4 py-3 flex items-center justify-between border-b border-zinc-800/40">
+                <span className="text-xs font-bold text-zinc-400">Call Logs</span>
+                {callHistory.length > 0 && (
+                  <button
+                    onClick={clearCallHistoryHandler}
+                    className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-rose-400 transition"
+                    title="Clear history"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Clear logs</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Call logs list */}
+              <div className="flex-1 overflow-y-auto divide-y divide-zinc-800/30">
+                {loadingCalls ? (
+                  <div className="p-8 text-center text-zinc-500 text-xs">
+                    Loading call history...
+                  </div>
+                ) : (
+                  (() => {
+                    const filteredLogs = callHistory.filter(log => {
+                      const isOutgoing = log.callerId === user.id;
+                      const peerName = isOutgoing ? log.receiverName : log.callerName;
+                      return peerName?.toLowerCase().includes(searchQuery.toLowerCase());
+                    });
+
+                    if (filteredLogs.length === 0) {
+                      return (
+                        <div className="p-8 text-center text-zinc-500 text-xs">
+                          {searchQuery ? 'No calls match your search.' : 'No recent calls.'}
+                        </div>
+                      );
+                    }
+
+                    return filteredLogs.map((log) => {
+                      const isOutgoing = log.callerId === user.id;
+                      const peerId = isOutgoing ? log.receiverId : log.callerId;
+                      const peerName = isOutgoing ? log.receiverName : log.callerName;
+                      const peerAvatar = isOutgoing ? log.receiverAvatar : log.callerAvatar;
+                      const wasConnected = log.status === 'connected';
+
+                      let statusIcon = null;
+                      let statusText = '';
+                      
+                      if (isOutgoing) {
+                        statusIcon = <PhoneOutgoing className="h-3 w-3 text-sky-400" />;
+                        statusText = wasConnected ? 'Outgoing' : 'Outgoing (Cancelled)';
+                      } else {
+                        if (wasConnected) {
+                          statusIcon = <PhoneIncoming className="h-3 w-3 text-emerald-400" />;
+                          statusText = 'Incoming';
+                        } else {
+                          statusIcon = <PhoneMissed className="h-3 w-3 text-rose-500" />;
+                          statusText = 'Missed';
+                        }
+                      }
+
+                      const formatDuration = (secs) => {
+                        if (!secs || secs <= 0) return '';
+                        if (secs < 60) return ` (${secs}s)`;
+                        const m = Math.floor(secs / 60);
+                        const s = secs % 60;
+                        return s > 0 ? ` (${m}m ${s}s)` : ` (${m}m)`;
+                      };
+
+                      return (
+                        <div 
+                          key={log.id} 
+                          className="px-4 py-3 hover:bg-zinc-800/20 transition flex items-center justify-between group/call-item"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative flex-shrink-0">
+                              {peerAvatar ? (
+                                <img
+                                  src={getAvatarUrl(peerAvatar)}
+                                  alt={peerName}
+                                  className="h-10 w-10 rounded-xl object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
+                                  {getInitials(peerName)}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-semibold text-zinc-200 truncate">
+                                {peerName}
+                              </h4>
+                              <div className="flex items-center gap-1.5 mt-1 text-[10px] text-zinc-500">
+                                {statusIcon}
+                                <span className={!isOutgoing && !wasConnected ? 'text-rose-400 font-semibold' : ''}>
+                                  {statusText}
+                                </span>
+                                <span>•</span>
+                                <span>{formatTime(log.createdAt)}</span>
+                                <span>{formatDuration(log.duration)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => startCall(peerId, peerName, peerAvatar)}
+                            className="p-2 rounded-xl text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition duration-200 shadow-sm"
+                            title={`Call ${peerName} back`}
+                          >
+                            <Phone className="h-4 w-4" />
+                          </button>
+                        </div>
+                      );
+                    });
+                  })()
+                )}
+              </div>
             </motion.div>
           )}
 
@@ -1328,6 +1504,13 @@ function Sidebar() {
         >
           <Sparkles className="h-5 w-5" />
           <span>Status</span>
+        </button>
+        <button 
+          onClick={() => setActiveTab('calls')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'calls' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+        >
+          <Phone className="h-5 w-5" />
+          <span>Calls</span>
         </button>
         <button 
           onClick={() => setActiveTab('friends')}

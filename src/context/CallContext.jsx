@@ -6,7 +6,7 @@ const CallContext = createContext(null);
 
 export function CallProvider({ children }) {
   const { socket, connected: socketConnected } = useSocket();
-  const { user } = useAuth();
+  const { user, apiBase, accessToken } = useAuth();
 
   // Call States: 'idle', 'dialing' (outgoing), 'ringing' (incoming), 'connected' (active), 'ended'
   const [callState, setCallState] = useState('idle');
@@ -64,6 +64,53 @@ export function CallProvider({ children }) {
       if (interval) clearInterval(interval);
     };
   }, [callState]);
+
+  const callerDetailsRef = useRef(null);
+  const calleeDetailsRef = useRef(null);
+  const callStateRef = useRef('idle');
+  const callDurationRef = useRef(0);
+
+  useEffect(() => {
+    callerDetailsRef.current = callerDetails;
+    calleeDetailsRef.current = calleeDetails;
+    callStateRef.current = callState;
+  }, [callerDetails, calleeDetails, callState]);
+
+  useEffect(() => {
+    callDurationRef.current = callDuration;
+  }, [callDuration]);
+
+  const logCallEnded = useCallback((statusOverride) => {
+    const caller = callerDetailsRef.current;
+    const callee = calleeDetailsRef.current;
+    const state = callStateRef.current;
+    const durationVal = callDurationRef.current;
+
+    // Only the call initiator should submit the log to avoid double-logging
+    const isInitiator = caller?.id === user?.id;
+    if (!isInitiator || !callee?.id) return;
+
+    let logStatus = 'missed';
+    if (state === 'connected' || statusOverride === 'connected') {
+      logStatus = 'connected';
+    }
+
+    console.log(`📡 Logging call history: ${user.id} -> ${callee.id} (${logStatus}, duration: ${durationVal}s)`);
+
+    fetch(`${apiBase || ''}/api/calls`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        callerId: user.id,
+        receiverId: callee.id,
+        status: logStatus,
+        duration: durationVal
+      })
+    }).catch(err => console.warn('⚠️ Call log failed:', err));
+  }, [user, apiBase, accessToken]);
 
   // Clean up sounds on call state changes
   useEffect(() => {
@@ -336,6 +383,8 @@ export function CallProvider({ children }) {
       socket.emit('hangup_call', { to: peerId });
     }
     
+    logCallEnded();
+
     playBeepTone(300, 0.4);
     setCallState('ended');
     setTimeout(() => {
@@ -345,7 +394,7 @@ export function CallProvider({ children }) {
     }, 1000);
     
     cleanUpMedia();
-  }, [socket, callState, callerDetails, calleeDetails, cleanUpMedia]);
+  }, [socket, callState, callerDetails, calleeDetails, cleanUpMedia, logCallEnded]);
 
   // Toggle audio track mute input
   const toggleMute = useCallback(() => {
@@ -403,6 +452,7 @@ export function CallProvider({ children }) {
     // C: Call rejected by callee
     const handleCallRejected = () => {
       console.log('🔔 Call was rejected by callee.');
+      logCallEnded();
       playBeepTone(400, 0.25);
       setTimeout(() => playBeepTone(400, 0.25), 350);
       setCallState('ended');
@@ -429,6 +479,7 @@ export function CallProvider({ children }) {
     // E: Call hung up by peer
     const handlePeerHungUp = () => {
       console.log('🔔 Peer hung up the call.');
+      logCallEnded();
       playBeepTone(300, 0.4);
       setCallState('ended');
       setTimeout(() => {
@@ -453,7 +504,7 @@ export function CallProvider({ children }) {
       socket.off('ice_candidate', handleIceCandidateEvent);
       socket.off('peer_hungup', handlePeerHungUp);
     };
-  }, [socket, callState, user, cleanUpMedia]);
+  }, [socket, callState, user, cleanUpMedia, logCallEnded]);
 
   // Disconnect call if the local socket connection drops mid-call
   useEffect(() => {
