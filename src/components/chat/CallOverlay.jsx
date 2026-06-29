@@ -145,6 +145,9 @@ export default function CallOverlay() {
 
   if (!peer) return null;
 
+  const hasRemoteVideo = remoteStream && remoteStream.getVideoTracks().length > 0 && remoteStream.getVideoTracks()[0].enabled;
+  const hasLocalVideo = localStream && localStream.getVideoTracks().length > 0 && localStream.getVideoTracks()[0].enabled;
+
   // ─── AUDIO-ONLY CALL OVERLAY (original card-style) ───
   if (!isVideoCall) {
     return (
@@ -322,7 +325,7 @@ export default function CallOverlay() {
         )}
 
         {/* Fallback overlay (shows avatar/metadata when dialing/ringing, or if remote video isn't ready) */}
-        {(callState !== 'connected' || !remoteStream) && (
+        {(callState !== 'connected' || !hasRemoteVideo) && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 ${
             isVideoCall
               ? 'bg-black/35 backdrop-blur-[1px]'
@@ -422,7 +425,7 @@ export default function CallOverlay() {
             onMouseDown={handlePipMouseDown}
             onTouchStart={handlePipTouchStart}
           >
-            {isCameraOff ? (
+            {isCameraOff || !hasLocalVideo ? (
               <div className="w-full h-full bg-zinc-900 flex flex-col items-center justify-center gap-2">
                 <CameraOff className="h-8 w-8 text-zinc-600" />
                 <span className="text-[10px] text-zinc-500 font-medium">Camera Off</span>

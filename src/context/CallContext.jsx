@@ -423,7 +423,13 @@ export function CallProvider({ children }) {
       } catch (err) {
         console.warn('⚠️ Callee getUserMedia with preferred constraints failed. Trying fallback...', err);
         if (isVideo) {
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+          } catch (fallbackErr) {
+            console.warn('⚠️ Callee has no webcam/camera or blocked permission. Falling back to audio-only stream...', fallbackErr);
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setIsCameraOff(true);
+          }
         } else {
           throw err;
         }
