@@ -202,7 +202,7 @@ function AuthScreen() {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start sm:justify-center p-4 sm:p-8 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
+    <div className="relative w-full h-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
       {/* Animated Aurora Mesh Background */}
       <div className="auth-aurora" aria-hidden="true">
         <div className="blob blob-b" />
