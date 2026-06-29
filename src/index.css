@@ -363,3 +363,8 @@ html, body, #root {
     opacity: .3;
   }
 }
+
+/* Mirror local selfie video (WhatsApp-style PiP) */
+.mirror-video {
+  transform: scaleX(-1);
+}
