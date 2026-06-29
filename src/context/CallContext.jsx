@@ -24,8 +24,10 @@ export function CallProvider({ children }) {
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
+
+  // States for binding to video elements reactively
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
 
   // Audio tone generator states
   const audioContextRef = useRef(null);
@@ -229,6 +231,8 @@ export function CallProvider({ children }) {
     }
 
     remoteStreamRef.current = null;
+    setLocalStream(null);
+    setRemoteStream(null);
     setIsMuted(false);
     setIsCameraOff(false);
   }, []);
@@ -254,15 +258,11 @@ export function CallProvider({ children }) {
     pc.ontrack = (e) => {
       console.log('📡 WebRTC track received from peer. Kind:', e.track.kind, 'Streams count:', e.streams.length);
       remoteStreamRef.current = e.streams[0];
+      setRemoteStream(e.streams[0]);
       
       // Attach audio stream
       if (remoteAudioRef.current) {
         remoteAudioRef.current.srcObject = e.streams[0];
-      }
-      
-      // Attach video stream to remote video element
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = e.streams[0];
       }
     };
 
@@ -303,14 +303,20 @@ export function CallProvider({ children }) {
         : { audio: true };
       
       console.log(`📡 Requesting ${isVideo ? 'camera + microphone' : 'microphone'} permissions...`);
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      localStreamRef.current = stream;
-      console.log(`📡 Media stream obtained. Tracks: ${stream.getTracks().map(t => t.kind).join(', ')}`);
-
-      // Attach local video preview
-      if (isVideo && localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        console.warn('⚠️ getUserMedia with preferred constraints failed. Trying fallback...', err);
+        if (isVideo) {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        } else {
+          throw err;
+        }
       }
+      localStreamRef.current = stream;
+      setLocalStream(stream);
+      console.log(`📡 Media stream obtained. Tracks: ${stream.getTracks().map(t => t.kind).join(', ')}`);
 
       // 2. Initialize Peer Connection (adds local tracks immediately)
       const pc = createPeerConnection(targetUserId);
@@ -332,7 +338,11 @@ export function CallProvider({ children }) {
       });
     } catch (err) {
       console.error('❌ Call initialization failed:', err);
-      alert(`Unable to access ${isVideo ? 'camera/microphone' : 'microphone'}. Please check system permissions.`);
+      if (!window.isSecureContext) {
+        alert('WebRTC camera/microphone access is blocked on non-secure connections. Please serve your application over HTTPS or access it via localhost.');
+      } else {
+        alert(`Unable to access ${isVideo ? 'camera/microphone' : 'microphone'}. Please verify device permissions.`);
+      }
       setCallState('idle');
       setIsVideoCall(false);
       cleanUpMedia();
@@ -358,14 +368,20 @@ export function CallProvider({ children }) {
         : { audio: true };
 
       console.log(`📡 Requesting ${isVideo ? 'camera + microphone' : 'microphone'} permissions for callee...`);
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      localStreamRef.current = stream;
-      console.log('📡 Callee media stream obtained.');
-
-      // Attach local video preview
-      if (isVideo && localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        console.warn('⚠️ Callee getUserMedia with preferred constraints failed. Trying fallback...', err);
+        if (isVideo) {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        } else {
+          throw err;
+        }
       }
+      localStreamRef.current = stream;
+      setLocalStream(stream);
+      console.log('📡 Callee media stream obtained.');
 
       // 2. Initialize callee Peer Connection
       const pc = createPeerConnection(callerDetails.id);
@@ -387,6 +403,11 @@ export function CallProvider({ children }) {
       });
     } catch (err) {
       console.error('❌ Failed to accept WebRTC session:', err);
+      if (!window.isSecureContext) {
+        alert('WebRTC camera/microphone access is blocked on non-secure connections. Please serve your application over HTTPS or access it via localhost.');
+      } else {
+        alert('Unable to access camera or microphone to answer call. Please check device permissions.');
+      }
       socket.emit('reject_call', { to: callerDetails.id });
       setCallState('idle');
       setIsVideoCall(false);
@@ -585,8 +606,8 @@ export function CallProvider({ children }) {
     callDuration,
     callerDetails,
     calleeDetails,
-    localVideoRef,
-    remoteVideoRef,
+    localStream,
+    remoteStream,
     startCall,
     acceptCall,
     rejectCall,

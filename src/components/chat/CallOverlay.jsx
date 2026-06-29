@@ -27,8 +27,8 @@ export default function CallOverlay() {
     callDuration,
     callerDetails,
     calleeDetails,
-    localVideoRef,
-    remoteVideoRef,
+    localStream,
+    remoteStream,
     acceptCall,
     rejectCall,
     endCall,
@@ -49,30 +49,18 @@ export default function CallOverlay() {
   const [showControls, setShowControls] = useState(true);
   const controlsTimerRef = useRef(null);
 
-  // Sync video refs from context to local DOM refs
+  // Directly bind streams to local video elements reactively
   useEffect(() => {
-    if (localVideoRef) {
-      localVideoRef.current = localVidRef.current;
+    if (localVidRef.current) {
+      localVidRef.current.srcObject = localStream;
     }
-  }, [localVideoRef, callState]);
+  }, [localStream, callState]);
 
   useEffect(() => {
-    if (remoteVideoRef) {
-      remoteVideoRef.current = remoteVidRef.current;
+    if (remoteVidRef.current) {
+      remoteVidRef.current.srcObject = remoteStream;
     }
-  }, [remoteVideoRef, callState]);
-
-  // Attach remote stream to remote video element when tracks arrive
-  useEffect(() => {
-    if (!remoteVidRef.current) return;
-    const checkStream = setInterval(() => {
-      const stream = remoteVideoRef?.current?.srcObject;
-      if (stream && remoteVidRef.current && remoteVidRef.current.srcObject !== stream) {
-        remoteVidRef.current.srcObject = stream;
-      }
-    }, 500);
-    return () => clearInterval(checkStream);
-  }, [callState, isVideoCall]);
+  }, [remoteStream, callState]);
 
   // Auto-hide controls for connected video calls
   useEffect(() => {
@@ -314,17 +302,31 @@ export default function CallOverlay() {
         onClick={handleOverlayInteraction}
         onMouseMove={handleOverlayInteraction}
       >
-        {/* Remote Video (fullscreen background) */}
-        <video
-          ref={remoteVidRef}
-          autoPlay
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {/* Fullscreen Video Background */}
+        {isVideoCall && callState !== 'connected' ? (
+          <video
+            ref={localVidRef}
+            autoPlay
+            playsInline
+            muted
+            className="absolute inset-0 w-full h-full object-cover mirror-video"
+          />
+        ) : (
+          <video
+            ref={remoteVidRef}
+            autoPlay
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
 
-        {/* Fallback if no remote video yet — show avatar */}
-        {(callState !== 'connected' || !remoteVidRef.current?.srcObject) && (
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black flex flex-col items-center justify-center z-10">
+        {/* Fallback overlay (shows avatar/metadata when dialing/ringing, or if remote video isn't ready) */}
+        {(callState !== 'connected' || !remoteStream) && (
+          <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 ${
+            isVideoCall
+              ? 'bg-black/35 backdrop-blur-[1px]'
+              : 'bg-gradient-to-b from-zinc-900 via-zinc-950 to-black'
+          }`}>
             {/* Peer Avatar */}
             <div className="relative flex items-center justify-center h-36 w-36 mb-6">
               {(callState === 'dialing' || callState === 'ringing') && (
