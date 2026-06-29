@@ -18,8 +18,8 @@ const hasOnlyEmojis = (str) => {
   const emojiRegex = /^(?:\p{Extended_Pictographic}|\p{Emoji_Component}|\u200d|\uFE0F)+$/u;
   return emojiRegex.test(cleaned);
 };
-import { 
-  Send, Paperclip, Smile, MoreVertical, MoreHorizontal, ShieldCheck, Phone, Video, 
+import {
+  Send, Paperclip, Smile, MoreVertical, MoreHorizontal, ShieldCheck, Phone, Video,
   Info, Image as ImageIcon, FileText, Film, Volume2, ArrowLeft, Trash2, LogOut, Check, CheckCheck,
   Users2, X, Plus, Reply, Pin, PinOff, Pencil, ChevronDown, Download, Mail, User, Calendar,
   Ban, EyeOff, UserMinus
@@ -27,8 +27,8 @@ import {
 
 function ChatWindow() {
   const { user, getAvatarUrl, apiBase, accessToken, chatBgPattern } = useAuth();
-  const { 
-    activeChat, messages, selectChat, sendMessage, sendMediaMessage, 
+  const {
+    activeChat, messages, selectChat, sendMessage, sendMediaMessage,
     setTypingIndicator, typingStatus, leaveGroup, addGroupMembers, friends,
     replyingTo, setReplyingTo, editMessage, deleteMessage, pinMessage, reactMessage,
     pinChatAction, unpinChatAction, blockUserAction, unblockUserAction,
@@ -46,7 +46,7 @@ function ChatWindow() {
   const [isTyping, setIsTyping] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [selectedFriendsToGroup, setSelectedFriendsToGroup] = useState([]);
-  
+
   // Chat actions dropdown (header MoreVertical)
   const [showChatMenu, setShowChatMenu] = useState(false);
   const chatMenuRef = useRef(null);
@@ -106,7 +106,7 @@ function ChatWindow() {
     const before = text.substring(0, start);
     const after = text.substring(end);
     setInputText(before + emoji + after);
-    
+
     const newCursorPos = start + emoji.length;
     setTimeout(() => {
       ref.focus();
@@ -114,7 +114,7 @@ function ChatWindow() {
       ref.selectionEnd = newCursorPos;
     }, 0);
   };
-  
+
   // Mentions State
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionSearchQuery, setMentionSearchQuery] = useState('');
@@ -124,10 +124,10 @@ function ChatWindow() {
 
   const filteredMembers = isGroup && activeChat?.members
     ? activeChat.members
-        .filter(m => m.id !== user?.id)
-        .filter(m => m.displayName.toLowerCase().includes(mentionSearchQuery.toLowerCase()))
+      .filter(m => m.id !== user?.id)
+      .filter(m => m.displayName.toLowerCase().includes(mentionSearchQuery.toLowerCase()))
     : [];
-  
+
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -185,7 +185,7 @@ function ChatWindow() {
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputText(val);
-    
+
     if (!isTyping) {
       setIsTyping(true);
       setTypingIndicator(true);
@@ -205,11 +205,11 @@ function ChatWindow() {
       const selectionStart = e.target.selectionStart || 0;
       const textBeforeCursor = val.slice(0, selectionStart);
       const lastAtOffset = textBeforeCursor.lastIndexOf('@');
-      
+
       if (lastAtOffset !== -1) {
         // Check if the '@' is at the start or preceded by a space
         const isTriggered = lastAtOffset === 0 || textBeforeCursor[lastAtOffset - 1] === ' ';
-        
+
         if (isTriggered) {
           const query = textBeforeCursor.slice(lastAtOffset + 1);
           // Only show dropdown if the query doesn't contain spaces
@@ -253,7 +253,7 @@ function ChatWindow() {
     const newText = `${textBeforeMention}@${member.displayName} ${textAfterCursor}`;
     setInputText(newText);
     setShowMentionDropdown(false);
-    
+
     // Maintain focus and set cursor position right after the mention space
     setTimeout(() => {
       if (inputRef.current) {
@@ -268,10 +268,10 @@ function ChatWindow() {
   const handleSend = (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-    
+
     sendMessage(inputText.trim(), 'text');
     setInputText('');
-    
+
     // Clear typing status immediately on send
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -284,7 +284,7 @@ function ChatWindow() {
   const handleFileUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     setShowAttachMenu(false);
     try {
       await sendMediaMessage(file);
@@ -306,51 +306,50 @@ function ChatWindow() {
 
     // Sort members by display name length descending to avoid partial matching bugs (e.g., matching "John" in "John Doe")
     const sortedMembers = [...members].sort((a, b) => b.displayName.length - a.displayName.length);
-    
+
     // Escape special characters in display names to build a safe regex
     const escapedNames = sortedMembers.map(m => m.displayName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
     if (escapedNames.length === 0) return content;
 
     // Match exact display names preceded by '@' and followed by space, punctuation, or end of string
     const regex = new RegExp(`@(${escapedNames.join('|')})(?=\\s|$|[.,!?;:])`, 'g');
-    
+
     const parts = [];
     let lastIndex = 0;
     let match;
-    
+
     regex.lastIndex = 0;
     while ((match = regex.exec(content)) !== null) {
       const matchIndex = match.index;
       const matchText = match[0];
       const nameOnly = match[1];
-      
+
       if (matchIndex > lastIndex) {
         parts.push(content.substring(lastIndex, matchIndex));
       }
-      
+
       const member = sortedMembers.find(m => m.displayName === nameOnly);
       const isCurrentUserMentioned = member?.id === user?.id;
-      
+
       parts.push(
-        <span 
-          key={matchIndex} 
-          className={`font-semibold px-1 rounded-md transition-colors ${
-            isCurrentUserMentioned 
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold font-sans' 
-              : 'text-emerald-400 hover:underline cursor-pointer font-sans'
-          }`}
+        <span
+          key={matchIndex}
+          className={`font-semibold px-1 rounded-md transition-colors ${isCurrentUserMentioned
+            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold font-sans'
+            : 'text-emerald-400 hover:underline cursor-pointer font-sans'
+            }`}
         >
           {matchText}
         </span>
       );
-      
+
       lastIndex = regex.lastIndex;
     }
-    
+
     if (lastIndex < content.length) {
       parts.push(content.substring(lastIndex));
     }
-    
+
     return parts.length > 0 ? parts : content;
   };
 
@@ -360,9 +359,9 @@ function ChatWindow() {
     const isGroup = !!activeChat.groupId;
     const chatId = isGroup ? activeChat.id : [user.id, activeChat.id].sort().join('_');
     const chatTypers = typingStatus[chatId];
-    
+
     if (!chatTypers || Object.keys(chatTypers).length === 0) return null;
-    
+
     if (isGroup) {
       const names = Object.keys(chatTypers)
         .filter(id => id !== user.id)
@@ -370,7 +369,7 @@ function ChatWindow() {
           const member = activeChat.members?.find(m => m.id === id);
           return member ? member.displayName : 'Someone';
         });
-      
+
       if (names.length === 0) return null;
       if (names.length === 1) return `${names[0]} is typing...`;
       return `${names.slice(0, 2).join(', ')} are typing...`;
@@ -390,20 +389,20 @@ function ChatWindow() {
     return (
       <div className="h-full w-full chat-bg flex flex-col items-center justify-center p-8 text-center select-none font-sans relative overflow-hidden" data-bg-pattern={chatBgPattern}>
         <div className="max-w-md p-8 rounded-3xl glass border border-zinc-800/80 shadow-2xl flex flex-col items-center relative z-10">
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               y: [0, -6, 0],
             }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
             }}
             className="h-20 w-20 bg-gradient-to-tr from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-lg shadow-emerald-500/5"
           >
             💬
           </motion.div>
-          <h2 className="text-xl font-bold tracking-tight text-white font-sans">Lynq Gateway</h2>
+          <h2 className="text-xl font-bold tracking-tight text-white font-sans">Talkzen</h2>
           <p className="mt-2.5 text-xs text-zinc-400 max-w-[320px] leading-relaxed">
             All conversations are synchronized in real-time. Direct messages, group channels, and media attachments are isolated securely.
           </p>
@@ -422,11 +421,11 @@ function ChatWindow() {
 
   return (
     <div className="h-full w-full flex flex-col bg-zinc-950 font-sans relative overflow-hidden">
-      
+
       {/* 2. CHAT WINDOW HEADER */}
       <div className="p-4 bg-zinc-900/60 border-b border-zinc-800/50 backdrop-blur-md flex items-center justify-between z-10">
         <div className="flex items-center gap-3 min-w-0">
-          <button 
+          <button
             onClick={() => selectChat(null)}
             className="lg:hidden p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition mr-1"
           >
@@ -458,7 +457,7 @@ function ChatWindow() {
               ) : isOnline ? (
                 'online'
               ) : (
-                activeChat.lastSeen 
+                activeChat.lastSeen
                   ? `last seen ${new Date(activeChat.lastSeen).toLocaleDateString()} at ${formatTime(activeChat.lastSeen)}`
                   : 'offline'
               )}
@@ -468,7 +467,7 @@ function ChatWindow() {
 
         {/* Action icons */}
         <div className="flex items-center gap-1">
-          <button 
+          <button
             onClick={() => startCall(activeChat.id, activeChat.displayName, activeChat.avatarUrl)}
             className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl transition"
             title="Start Audio Call"
@@ -479,7 +478,7 @@ function ChatWindow() {
             <Video className="h-4 w-4" />
           </button>
           {isGroup ? (
-            <button 
+            <button
               onClick={() => setShowGroupInfo(true)}
               className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl transition"
             >
@@ -559,7 +558,7 @@ function ChatWindow() {
         const pinnedMessage = [...messages].reverse().find(m => m.isPinned === 1);
         if (!pinnedMessage) return null;
         return (
-          <div 
+          <div
             onClick={() => scrollToMessage(pinnedMessage.id)}
             className="px-4 py-2 bg-zinc-900/95 border-b border-zinc-850/60 flex items-center justify-between cursor-pointer hover:bg-zinc-850/60 transition backdrop-blur-md z-10"
           >
@@ -568,15 +567,15 @@ function ChatWindow() {
               <div className="min-w-0 text-left">
                 <span className="text-[9px] font-bold text-emerald-400 block leading-none font-sans">Pinned Message</span>
                 <span className="text-[10px] text-zinc-300 truncate block mt-0.5">
-                  {pinnedMessage.type === 'deleted' 
-                    ? 'This message was deleted' 
-                    : pinnedMessage.type === 'text' 
-                      ? pinnedMessage.content 
+                  {pinnedMessage.type === 'deleted'
+                    ? 'This message was deleted'
+                    : pinnedMessage.type === 'text'
+                      ? pinnedMessage.content
                       : `[${pinnedMessage.type}]`}
                 </span>
               </div>
             </div>
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 pinMessage(pinnedMessage.id, false);
@@ -592,11 +591,11 @@ function ChatWindow() {
 
       {/* 3. MESSAGES SCROLL LIST */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 chat-bg relative" data-bg-pattern={chatBgPattern}>
-        
+
         {messages.map((msg) => {
           const isMe = msg.senderId === user.id;
           const isHighlighted = highlightedMessageId === msg.id;
-          
+
           // Render group system notifications differently
           if (!msg.receiverId && !msg.groupId && !msg.senderId) {
             // It's a system notice
@@ -608,7 +607,7 @@ function ChatWindow() {
               </div>
             );
           }
-          
+
           // System message check (fallback based on content)
           const isSystem = msg.content.includes('created') || msg.content.includes('added') || msg.content.includes('left') || msg.content.includes('was added');
           if (isSystem && isGroup) {
@@ -622,15 +621,15 @@ function ChatWindow() {
           }
 
           return (
-            <div 
-              key={msg.id} 
+            <div
+              key={msg.id}
               ref={el => {
                 if (el) messageRefs.current.set(msg.id, el);
                 else messageRefs.current.delete(msg.id);
               }}
               className={`flex ${isMe ? 'justify-end' : 'justify-start'} group relative`}
             >
-              <div 
+              <div
                 onDoubleClick={() => {
                   if (msg.type !== 'deleted') {
                     setReplyingTo(msg);
@@ -639,13 +638,11 @@ function ChatWindow() {
                     }
                   }
                 }}
-                className={`relative max-w-[75%] py-2 px-3.5 rounded-2xl shadow-md flex flex-col transition-all duration-300 ${
-                  isHighlighted ? 'ring-2 ring-emerald-500/60 scale-[1.02] bg-emerald-500/10' : ''
-                } ${
-                  isMe 
-                    ? 'bg-gradient-to-tr from-emerald-500/15 to-emerald-400/5 border border-emerald-500/20 text-white bubble-out' 
+                className={`relative max-w-[75%] py-2 px-3.5 rounded-2xl shadow-md flex flex-col transition-all duration-300 ${isHighlighted ? 'ring-2 ring-emerald-500/60 scale-[1.02] bg-emerald-500/10' : ''
+                  } ${isMe
+                    ? 'bg-gradient-to-tr from-emerald-500/15 to-emerald-400/5 border border-emerald-500/20 text-white bubble-out'
                     : 'bg-zinc-900/85 backdrop-blur-sm border border-zinc-800/80 text-zinc-200 bubble-in'
-                }`}
+                  }`}
                 title={msg.type !== 'deleted' ? "Double-click to reply" : undefined}
               >
                 {/* Sender Name in Groups */}
@@ -657,7 +654,7 @@ function ChatWindow() {
 
                 {/* Reply Context Block */}
                 {msg.parentMessageId && (
-                  <div 
+                  <div
                     onClick={() => scrollToMessage(msg.parentMessageId)}
                     className="mb-1.5 p-2 bg-zinc-950/40 hover:bg-zinc-950/60 transition border-l-2 border-emerald-500 rounded-r-lg text-left cursor-pointer select-none max-w-full"
                   >
@@ -665,10 +662,10 @@ function ChatWindow() {
                       {msg.parentMessageSenderId === user.id ? 'You' : msg.parentMessageSenderName}
                     </span>
                     <span className="text-[10px] text-zinc-400 truncate block mt-0.5 font-sans">
-                      {msg.parentMessageType === 'deleted' 
+                      {msg.parentMessageType === 'deleted'
                         ? 'This message was deleted'
-                        : msg.parentMessageType === 'text' 
-                          ? msg.parentMessageContent 
+                        : msg.parentMessageType === 'text'
+                          ? msg.parentMessageContent
                           : `[${msg.parentMessageType}]`}
                     </span>
                   </div>
@@ -764,7 +761,7 @@ function ChatWindow() {
                     {/* B: Image Media Attachment */}
                     {msg.type === 'image' && (
                       <div className="relative group/media max-w-[280px] my-1 rounded-xl overflow-hidden border border-zinc-800">
-                        <div 
+                        <div
                           onClick={() => setLightboxImage(msg.content)}
                           className="cursor-pointer hover:opacity-90 transition duration-200"
                         >
@@ -823,7 +820,7 @@ function ChatWindow() {
 
                     {/* E: Generic File Attachment */}
                     {msg.type === 'file' && (
-                      <div 
+                      <div
                         onClick={() => handleDownload(msg.content, 'attachment')}
                         className="flex items-center justify-between gap-3 p-2.5 bg-zinc-950/40 border border-zinc-800 rounded-xl my-1 hover:bg-zinc-800/20 transition duration-200 cursor-pointer min-w-[200px]"
                       >
@@ -858,7 +855,7 @@ function ChatWindow() {
                   <span className="text-[9px] text-zinc-500 font-medium">
                     {formatTime(msg.createdAt)}
                   </span>
-                  
+
                   {isMe && (
                     <div className="ml-1 flex items-center">
                       {msg.status === 'sent' && (
@@ -889,10 +886,9 @@ function ChatWindow() {
 
                 {/* Quick Hover Actions Bar (WhatsApp Style) */}
                 {msg.type !== 'deleted' && (
-                  <div 
-                    className={`absolute top-1/2 -translate-y-1/2 z-30 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 bg-zinc-900/95 border border-zinc-800/80 p-1 rounded-full shadow-xl backdrop-blur-md ${
-                      isMe ? 'right-full mr-2.5' : 'left-full ml-2.5'
-                    }`}
+                  <div
+                    className={`absolute top-1/2 -translate-y-1/2 z-30 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5 bg-zinc-900/95 border border-zinc-800/80 p-1 rounded-full shadow-xl backdrop-blur-md ${isMe ? 'right-full mr-2.5' : 'left-full ml-2.5'
+                      }`}
                   >
                     {/* Reply Icon Button */}
                     <button
@@ -939,9 +935,8 @@ function ChatWindow() {
 
                       {/* Glassmorphic Dropdown Actions Menu */}
                       {activeMenuMessageId === msg.id && (
-                        <div className={`message-dropdown-container absolute z-40 w-36 p-1.5 bg-zinc-900/95 border border-zinc-800 rounded-xl shadow-2xl flex flex-col gap-0.5 backdrop-blur-md ${
-                          isMe ? 'right-0 top-8' : 'left-0 top-8'
-                        }`}>
+                        <div className={`message-dropdown-container absolute z-40 w-36 p-1.5 bg-zinc-900/95 border border-zinc-800 rounded-xl shadow-2xl flex flex-col gap-0.5 backdrop-blur-md ${isMe ? 'right-0 top-8' : 'left-0 top-8'
+                          }`}>
                           {/* Emojis Reaction Row inside Dropdown */}
                           <div className="flex justify-between items-center border-b border-zinc-800/60 pb-1.5 pt-0.5 px-1 mb-1 gap-0.5">
                             {emojis.slice(0, 5).map(emoji => (
@@ -1025,7 +1020,7 @@ function ChatWindow() {
       {/* 4. CHAT INPUT ATTACHMENT MENU / QUICK ACTION MENU */}
       <AnimatePresence>
         {showAttachMenu && (
-          <motion.div 
+          <motion.div
             initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 15, opacity: 0 }}
@@ -1066,13 +1061,13 @@ function ChatWindow() {
               <span className="text-[10px] text-zinc-300 truncate block mt-0.5 font-sans">
                 {replyingTo.type === 'deleted'
                   ? 'This message was deleted'
-                  : replyingTo.type === 'text' 
-                    ? replyingTo.content 
+                  : replyingTo.type === 'text'
+                    ? replyingTo.content
                     : `[${replyingTo.type}]`}
               </span>
             </div>
           </div>
-          <button 
+          <button
             type="button"
             onClick={() => setReplyingTo(null)}
             className="p-1 text-zinc-500 hover:text-zinc-300 rounded-lg transition"
@@ -1084,11 +1079,11 @@ function ChatWindow() {
       )}
 
       {/* 5. BOTTOM TEXT ENTRY BOX */}
-      <form 
+      <form
         onSubmit={handleSend}
         className="px-4 h-16 bg-zinc-900/60 border-t border-zinc-800/40 backdrop-blur-md flex items-center gap-2.5 z-10"
       >
-        <button 
+        <button
           type="button"
           onClick={() => {
             setShowAttachMenu(prev => !prev);
@@ -1122,17 +1117,16 @@ function ChatWindow() {
                         selectMention(member);
                       }}
                       onMouseEnter={() => setMentionSelectedIndex(idx)}
-                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition duration-150 ${
-                        isSelected 
-                          ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500' 
-                          : 'text-zinc-300 hover:bg-zinc-800/40'
-                      }`}
+                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition duration-150 ${isSelected
+                        ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500'
+                        : 'text-zinc-300 hover:bg-zinc-800/40'
+                        }`}
                     >
                       {member.avatarUrl ? (
-                        <img 
-                          src={getAvatarUrl(member.avatarUrl)} 
-                          alt={member.displayName} 
-                          className="h-6 w-6 rounded-full object-cover border border-zinc-800" 
+                        <img
+                          src={getAvatarUrl(member.avatarUrl)}
+                          alt={member.displayName}
+                          className="h-6 w-6 rounded-full object-cover border border-zinc-800"
                         />
                       ) : (
                         <div className="h-6 w-6 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center font-bold text-[10px] text-zinc-400 uppercase">
@@ -1170,8 +1164,8 @@ function ChatWindow() {
             placeholder="Type a message..."
             className="block w-full pl-4 pr-11 py-2.5 bg-zinc-950 border border-zinc-800/80 rounded-xl text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-150"
           />
-          
-          <button 
+
+          <button
             type="button"
             onClick={() => {
               setShowEmojiPicker(prev => !prev);
@@ -1183,7 +1177,7 @@ function ChatWindow() {
           </button>
         </div>
 
-        <button 
+        <button
           type="submit"
           disabled={!inputText.trim()}
           className="p-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 rounded-xl shadow-lg shadow-emerald-500/5 transition duration-150 flex-shrink-0"
@@ -1195,13 +1189,13 @@ function ChatWindow() {
       {/* 7. FULLSCREEN LIGHTBOX FOR IMAGES */}
       <AnimatePresence>
         {lightboxImage && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
             onClick={() => setLightboxImage(null)}
           >
             {/* Action Bar inside Lightbox */}
             <div className="absolute top-4 right-4 flex gap-3" onClick={(e) => e.stopPropagation()}>
-              <button 
+              <button
                 type="button"
                 onClick={() => handleDownload(lightboxImage, 'image.png')}
                 className="p-2 bg-zinc-900 text-white hover:text-emerald-400 rounded-full border border-zinc-800 hover:bg-zinc-800 transition duration-150 shadow-lg"
@@ -1209,7 +1203,7 @@ function ChatWindow() {
               >
                 <Download className="h-5 w-5" />
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setLightboxImage(null)}
                 className="p-2 bg-zinc-900 text-white rounded-full border border-zinc-800 hover:bg-zinc-800 transition duration-150 shadow-lg"
@@ -1218,12 +1212,12 @@ function ChatWindow() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <motion.img 
+            <motion.img
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              src={getAvatarUrl(lightboxImage)} 
-              alt="Attachment Full size" 
+              src={getAvatarUrl(lightboxImage)}
+              alt="Attachment Full size"
               className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
@@ -1236,7 +1230,7 @@ function ChatWindow() {
       <AnimatePresence>
         {showGroupInfo && (
           <div className="absolute inset-0 bg-black/40 backdrop-blur-xs z-30 flex justify-end">
-            <motion.div 
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -1248,7 +1242,7 @@ function ChatWindow() {
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Group Info</h3>
-                    <button 
+                    <button
                       onClick={() => setShowGroupInfo(false)}
                       className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition"
                     >
@@ -1295,12 +1289,11 @@ function ChatWindow() {
                               <span className="text-xs font-semibold text-white truncate block">{member.displayName}</span>
                             </div>
                           </div>
-                          
-                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
-                            member.role === 'admin' 
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                              : 'bg-zinc-800 text-zinc-400'
-                          }`}>
+
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md ${member.role === 'admin'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : 'bg-zinc-800 text-zinc-400'
+                            }`}>
                             {member.role}
                           </span>
                         </div>
@@ -1328,7 +1321,7 @@ function ChatWindow() {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-sm font-bold text-white uppercase tracking-wider">Friend Profile</h3>
-                      <button 
+                      <button
                         onClick={() => setShowGroupInfo(false)}
                         className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition"
                       >
@@ -1351,11 +1344,10 @@ function ChatWindow() {
                         )}
                       </div>
                       <h4 className="text-base font-bold text-white mt-4 leading-tight">{activeChat.displayName}</h4>
-                      <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mt-2 inline-block ${
-                        activeChat.status === 'online'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/15'
-                          : 'bg-zinc-800 text-zinc-450 border border-zinc-750'
-                      }`}>
+                      <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mt-2 inline-block ${activeChat.status === 'online'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/15'
+                        : 'bg-zinc-800 text-zinc-450 border border-zinc-750'
+                        }`}>
                         {activeChat.status === 'online' ? 'Active now' : 'Offline'}
                       </span>
                     </div>
@@ -1378,7 +1370,7 @@ function ChatWindow() {
                           <User className="h-3.5 w-3.5 text-zinc-450" /> Personal Bio
                         </span>
                         <p className="text-xs text-zinc-300 bg-zinc-950/30 border border-zinc-850/50 p-2.5 rounded-xl leading-relaxed whitespace-pre-wrap">
-                          {activeChat.bio || 'Hey there! I am using Lynq.'}
+                          {activeChat.bio || 'Hey there! I am using Talkzen.'}
                         </p>
                       </div>
 
@@ -1466,21 +1458,21 @@ function ChatWindow() {
               className="w-full max-w-sm p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-4">
-                {confirmAction.type === 'block'    && <Ban      className="h-5 w-5 text-amber-500" />}
-                {confirmAction.type === 'unblock'  && <Ban      className="h-5 w-5 text-emerald-500" />}
-                {confirmAction.type === 'removeChat'       && <EyeOff   className="h-5 w-5 text-zinc-400" />}
+                {confirmAction.type === 'block' && <Ban className="h-5 w-5 text-amber-500" />}
+                {confirmAction.type === 'unblock' && <Ban className="h-5 w-5 text-emerald-500" />}
+                {confirmAction.type === 'removeChat' && <EyeOff className="h-5 w-5 text-zinc-400" />}
                 {confirmAction.type === 'removeFriendship' && <UserMinus className="h-5 w-5 text-rose-500" />}
                 <h3 className="text-sm font-bold text-white">
-                  {confirmAction.type === 'block'    && 'Block User'}
-                  {confirmAction.type === 'unblock'  && 'Unblock User'}
-                  {confirmAction.type === 'removeChat'       && 'Remove Chat'}
+                  {confirmAction.type === 'block' && 'Block User'}
+                  {confirmAction.type === 'unblock' && 'Unblock User'}
+                  {confirmAction.type === 'removeChat' && 'Remove Chat'}
                   {confirmAction.type === 'removeFriendship' && 'Remove Friend'}
                 </h3>
               </div>
               <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                {confirmAction.type === 'block'    && `Are you sure you want to block ${confirmAction.friendName}? You will no longer receive messages from them.`}
-                {confirmAction.type === 'unblock'  && `Are you sure you want to unblock ${confirmAction.friendName}?`}
-                {confirmAction.type === 'removeChat'       && `Remove the chat history with ${confirmAction.friendName} from your sidebar?`}
+                {confirmAction.type === 'block' && `Are you sure you want to block ${confirmAction.friendName}? You will no longer receive messages from them.`}
+                {confirmAction.type === 'unblock' && `Are you sure you want to unblock ${confirmAction.friendName}?`}
+                {confirmAction.type === 'removeChat' && `Remove the chat history with ${confirmAction.friendName} from your sidebar?`}
                 {confirmAction.type === 'removeFriendship' && `Remove ${confirmAction.friendName} from your friends list? This will also delete your chat history.`}
               </p>
               <div className="flex gap-3">
@@ -1492,11 +1484,10 @@ function ChatWindow() {
                 </button>
                 <button
                   onClick={handleConfirmChatAction}
-                  className={`flex-1 py-2.5 px-4 font-semibold rounded-xl text-xs transition ${
-                    confirmAction.type === 'removeFriendship' || confirmAction.type === 'block'
-                      ? 'bg-rose-500 hover:bg-rose-400 text-white'
-                      : 'bg-emerald-500 hover:bg-emerald-400 text-zinc-950'
-                  }`}
+                  className={`flex-1 py-2.5 px-4 font-semibold rounded-xl text-xs transition ${confirmAction.type === 'removeFriendship' || confirmAction.type === 'block'
+                    ? 'bg-rose-500 hover:bg-rose-400 text-white'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-zinc-950'
+                    }`}
                 >
                   Confirm
                 </button>
@@ -1510,13 +1501,13 @@ function ChatWindow() {
       <AnimatePresence>
         {showAddMemberModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="w-full max-w-sm p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl relative"
             >
-              <button 
+              <button
                 onClick={() => {
                   setShowAddMemberModal(false);
                   setSelectedFriendsToGroup([]);
@@ -1525,7 +1516,7 @@ function ChatWindow() {
               >
                 <X className="h-4 w-4" />
               </button>
-              
+
               <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
                 <Users2 className="h-5 w-5 text-emerald-400" /> Add Members to Group
               </h3>
@@ -1538,36 +1529,36 @@ function ChatWindow() {
                       .filter(f => f.friendshipStatus === 'accepted')
                       .filter(f => !activeChat.members?.some(m => m.id === f.id))
                       .map(friend => {
-                         const isChecked = selectedFriendsToGroup.includes(friend.id);
-                         return (
-                           <div 
-                             key={friend.id} 
-                             onClick={() => {
-                               setSelectedFriendsToGroup(prev => 
-                                 prev.includes(friend.id) 
-                                   ? prev.filter(id => id !== friend.id) 
-                                   : [...prev, friend.id]
-                               );
-                             }}
-                             className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-zinc-850 cursor-pointer text-left transition"
-                           >
-                             <input 
-                               type="checkbox" 
-                               checked={isChecked}
-                               readOnly
-                               className="accent-emerald-500 h-4 w-4 rounded border-zinc-750 bg-zinc-950" 
-                             />
-                             {friend.avatarUrl ? (
-                               <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-6 w-6 rounded-full object-cover" />
-                             ) : (
-                               <div className="h-6 w-6 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-400 uppercase">
-                                 {getInitials(friend.displayName)}
-                               </div>
-                             )}
-                             <span className="text-xs font-medium text-zinc-200">{friend.displayName}</span>
-                           </div>
-                         );
-                       })}
+                        const isChecked = selectedFriendsToGroup.includes(friend.id);
+                        return (
+                          <div
+                            key={friend.id}
+                            onClick={() => {
+                              setSelectedFriendsToGroup(prev =>
+                                prev.includes(friend.id)
+                                  ? prev.filter(id => id !== friend.id)
+                                  : [...prev, friend.id]
+                              );
+                            }}
+                            className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-zinc-850 cursor-pointer text-left transition"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              readOnly
+                              className="accent-emerald-500 h-4 w-4 rounded border-zinc-750 bg-zinc-950"
+                            />
+                            {friend.avatarUrl ? (
+                              <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-6 w-6 rounded-full object-cover" />
+                            ) : (
+                              <div className="h-6 w-6 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-400 uppercase">
+                                {getInitials(friend.displayName)}
+                              </div>
+                            )}
+                            <span className="text-xs font-medium text-zinc-200">{friend.displayName}</span>
+                          </div>
+                        );
+                      })}
 
                     {friends.filter(f => f.friendshipStatus === 'accepted').filter(f => !activeChat.members?.some(m => m.id === f.id)).length === 0 && (
                       <div className="text-center py-6 text-zinc-500 text-xs">All active friends are already members of this group.</div>

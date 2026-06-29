@@ -1,9 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase.js';
+import { auth, googleProvider, hasValidConfig } from '../config/firebase.js';
 import { Browser } from '@capacitor/browser';
 
-const onlineApiFallback = (import.meta.env.VITE_API_URL || 'https://chatapp-be-3nou.onrender.com').replace(/\/+$/, '');
+const onlineApiFallback = (import.meta.env.VITE_API_URL || 'https://mychatapp-be-z1nx.onrender.com').replace(/\/+$/, '');
 
 const AuthContext = createContext(null);
 
@@ -337,37 +337,108 @@ export function AuthProvider({ children }) {
     return `${apiBase.replace(/\/+$/, '')}${url}`;
   };
 
+  // Build list of candidate local backend URLs to probe.
+  // On the same machine we try localhost / 127.0.0.1; when the page is
+  // loaded from a different host (e.g. deployed Vercel site, mobile browser)
+  // we additionally try the user's LAN IP so a dev backend running on
+  // their laptop is still reachable from a phone on the same Wi-Fi.
+  const buildLocalCandidates = () => {
+    const candidates = new Set();
+
+    const push = (host) => {
+      if (!host) return;
+      candidates.add(`http://${host}:5001`);
+    };
+
+    // 1. The page's own hostname (works on `npm run dev`)
+    if (window.location.hostname) push(window.location.hostname);
+
+    // 2. Loopback aliases (always works when running on the same machine)
+    push('localhost');
+    push('127.0.0.1');
+    push('[::1]');
+
+    // 3. If we can infer the user's LAN IP (e.g. 192.168.1.42) try that too.
+    //    We get this hint from the public STUN servers used by WebRTC.
+    return new Promise((resolve) => {
+      const finalize = () => resolve(Array.from(candidates));
+
+      try {
+        // Only attempt ICE candidate gathering if RTCPeerConnection is available.
+        if (typeof RTCPeerConnection === 'undefined') return finalize();
+
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        let resolved = false;
+
+        const finish = (extraHost) => {
+          if (resolved) return;
+          resolved = true;
+          try { pc.close(); } catch (_) {}
+          if (extraHost) push(extraHost);
+          finalize();
+        };
+
+        pc.onicecandidate = (e) => {
+          if (!e || !e.candidate || !e.candidate.candidate) return;
+          const match = /([0-9]{1,3}(?:\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);
+          if (match && match[1]) finish(match[1]);
+        };
+
+        pc.createDataChannel('');
+        pc.createOffer()
+          .then((offer) => pc.setLocalDescription(offer))
+          .catch(() => finish(null));
+
+        // Safety net: if no candidate arrives in 1.5s, proceed without it
+        setTimeout(() => finish(null), 1500);
+      } catch (_) {
+        finalize();
+      }
+    });
+  };
+
+  // Race a list of local URLs against the online fallback — pick the first
+  // one that responds OK to /api/health within the per-request timeout.
+  const resolveBackend = async () => {
+    const configuredApi = (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/+$/, '');
+    const candidates = await buildLocalCandidates();
+
+    const probe = (url, timeoutMs) => new Promise((resolve) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      fetch(`${url}/api/health`, { method: 'GET', signal: controller.signal, mode: 'cors' })
+        .then((res) => {
+          clearTimeout(timer);
+          if (res.ok) resolve(url);
+          else resolve(null);
+        })
+        .catch(() => {
+          clearTimeout(timer);
+          resolve(null);
+        });
+    });
+
+    // Race all candidates in parallel
+    const probes = candidates.map((url) => probe(url, 2000));
+    const firstHit = await Promise.race([
+      ...probes,
+      // Fallback timeout — if nothing responds in 2.5s use the configured/online URL
+      new Promise((resolve) => setTimeout(() => resolve(null), 2500)),
+    ]);
+
+    if (firstHit) return firstHit;
+
+    // Use the online fallback (or any configured non-local URL)
+    if (!configuredApi.includes('localhost') && !configuredApi.includes('127.0.0.1')) {
+      return configuredApi;
+    }
+    return onlineApiFallback;
+  };
+
   // Perform dynamic backend selection and silent authentication check on mount
   useEffect(() => {
     const initAndCheckAuth = async () => {
-      const configuredApi = (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/+$/, '');
-      let activeApi = configuredApi;
-      const isLocalHost = window.location.hostname === 'localhost' || 
-                          window.location.hostname === '127.0.0.1' || 
-                          window.location.hostname === '[::1]';
-      
-      if (isLocalHost) {
-        // Only probe when running locally — detect if dev server is up
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3500);
-          const response = await fetch(`${configuredApi}/api/health`, {
-            method: 'GET',
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-          activeApi = response.ok ? configuredApi : onlineApiFallback;
-        } catch {
-          // Local dev server isn't running — fall back to online API
-          activeApi = onlineApiFallback;
-        }
-      } else {
-        // Live site: always trust the configured VITE_API_URL (or hardcoded fallback).
-        // Never probe — Render cold starts can take 30+ seconds and would cause a timeout.
-        activeApi = configuredApi.includes('localhost') || configuredApi.includes('127.0.0.1')
-          ? onlineApiFallback
-          : configuredApi;
-      }
+      const activeApi = await resolveBackend();
 
       setApiBase(activeApi);
       const isLocal = activeApi.includes('localhost') || activeApi.includes('127.0.0.1');
@@ -452,9 +523,7 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = async () => {
-    const isMockConfig = !import.meta.env.VITE_FIREBASE_API_KEY || 
-                         import.meta.env.VITE_FIREBASE_API_KEY.includes('example') || 
-                         (import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID.includes('example'));
+    const isMockConfig = !hasValidConfig;
 
     // Check if running inside mobile WebView wrapper (native Capacitor runtime)
     if (window.Capacitor && window.Capacitor.isNativePlatform()) {
@@ -478,6 +547,8 @@ export function AuthProvider({ children }) {
       console.warn('⚠️ Firebase Client config contains example placeholders. Using mock Google login for development.');
       idToken = 'mock_google_id_token';
       isMockUsed = true;
+    } else if (!auth || !googleProvider) {
+      throw new Error('Google Sign-In is unavailable. Firebase is not configured — please set valid VITE_FIREBASE_* environment variables.');
     } else {
       // 1. Trigger Google login popup via Firebase Client SDK
       const userCredential = await signInWithPopup(auth, googleProvider);
@@ -497,7 +568,7 @@ export function AuthProvider({ children }) {
     try {
       data = await handleResponse(response);
     } catch (err) {
-      if (!isMockUsed) {
+      if (!isMockUsed && auth) {
         try {
           await auth.signOut();
         } catch (signOutErr) {
@@ -543,11 +614,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const registerWithPassword = async (email, password, displayName, bio = null) => {
+  const registerWithPassword = async (email, password, displayName, bio = null, otp = null) => {
     const response = await fetch(`${apiBase}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, displayName, bio }),
+      body: JSON.stringify({ email, password, displayName, bio, otp }),
     });
 
     const data = await handleResponse(response);
@@ -659,7 +730,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       // Sign out from Firebase Client SDK to clear Google OAuth session state
-      await auth.signOut();
+      if (auth) await auth.signOut();
     } catch (firebaseErr) {
       console.error('Error signing out of Firebase SDK:', firebaseErr);
     }
@@ -704,6 +775,7 @@ export function AuthProvider({ children }) {
     accessToken,
     loading,
     apiBase,
+    isLocalBackend: apiBase.includes('localhost') || apiBase.includes('127.0.0.1'),
     isAdminPortalOpen,
     setIsAdminPortalOpen,
     requestOtp,

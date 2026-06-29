@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Lynq</string>
-    <string name="title_activity_main">Lynq</string>
-    <string name="package_name">com.lynq.app</string>
-    <string name="custom_url_scheme">com.lynq.app</string>
+    <string name="app_name">Talkzen</string>
+    <string name="title_activity_main">Talkzen</string>
+    <string name="package_name">com.Talkzen.app</string>
+    <string name="custom_url_scheme">com.Talkzen.app</string>
 </resources>
