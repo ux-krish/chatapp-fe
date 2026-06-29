@@ -258,12 +258,25 @@ export function CallProvider({ children }) {
 
     pc.ontrack = (e) => {
       console.log('📡 WebRTC track received from peer. Kind:', e.track.kind, 'Streams count:', e.streams.length);
-      remoteStreamRef.current = e.streams[0];
-      setRemoteStream(e.streams[0]);
+      
+      let stream = e.streams[0];
+      if (!stream) {
+        if (!remoteStreamRef.current) {
+          remoteStreamRef.current = new MediaStream();
+        }
+        remoteStreamRef.current.addTrack(e.track);
+        stream = remoteStreamRef.current;
+      } else {
+        remoteStreamRef.current = stream;
+      }
+
+      // Instantiate a new MediaStream reactively so that the video element
+      // is notified when multiple tracks (audio then video) arrive at separate times.
+      setRemoteStream(new MediaStream(remoteStreamRef.current.getTracks()));
       
       // Attach audio stream
       if (remoteAudioRef.current) {
-        remoteAudioRef.current.srcObject = e.streams[0];
+        remoteAudioRef.current.srcObject = remoteStreamRef.current;
       }
     };
 

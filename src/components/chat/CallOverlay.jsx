@@ -316,6 +316,7 @@ export default function CallOverlay() {
             ref={remoteVidRef}
             autoPlay
             playsInline
+            muted
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
