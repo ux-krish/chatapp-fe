@@ -202,7 +202,7 @@ function AuthScreen() {
   };
 
   return (
-    <div className="relative w-full h-full min-h-0 flex items-center justify-center px-4 py-6 sm:py-8 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
+    <div className="relative w-full h-full flex flex-col items-center justify-start sm:justify-center p-4 sm:p-8 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
       {/* Animated Aurora Mesh Background */}
       <div className="auth-aurora" aria-hidden="true">
         <div className="blob blob-b" />
@@ -223,9 +223,9 @@ function AuthScreen() {
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="auth-card relative z-10 w-full max-w-[min(420px,100%)] sm:max-w-md mx-auto p-6 sm:p-8 flex flex-col max-h-[90dvh]"
+        className="auth-card relative z-10 w-full max-w-[min(420px,100%)] sm:max-w-md my-auto p-6 sm:p-8"
       >
-        <div className="relative z-10 flex flex-col items-center flex-1 min-h-0 overflow-y-auto pr-1">
+        <div className="relative z-10 flex flex-col items-center">
           {/* Logo with animated glow */}
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
