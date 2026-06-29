@@ -24,6 +24,7 @@ export function CallProvider({ children }) {
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
+  const endCallRef = useRef(null);
 
   // States for binding to video elements reactively
   const [localStream, setLocalStream] = useState(null);
@@ -266,6 +267,24 @@ export function CallProvider({ children }) {
       }
     };
 
+    // Connection state failure handler (replaces fragile socket drop check)
+    const handleConnectionFailure = () => {
+      const state = pc.connectionState || pc.iceConnectionState;
+      console.log(`📡 RTCPeerConnection State changed: ${state}`);
+      if (state === 'failed') {
+        // Wait a brief moment to check if it's a transient disconnect or absolute failure
+        setTimeout(() => {
+          if (pc.connectionState === 'failed' || pc.iceConnectionState === 'failed') {
+            console.log('📡 WebRTC peer connection failure confirmed. Ending call.');
+            if (endCallRef.current) endCallRef.current();
+          }
+        }, 3000);
+      }
+    };
+
+    pc.onconnectionstatechange = handleConnectionFailure;
+    pc.oniceconnectionstatechange = handleConnectionFailure;
+
     // Add local media tracks if stream exists
     if (localStreamRef.current) {
       console.log('📡 Adding local stream tracks to RTCPeerConnection:', localStreamRef.current.getTracks().length);
@@ -452,6 +471,11 @@ export function CallProvider({ children }) {
     cleanUpMedia();
   }, [socket, callState, callerDetails, calleeDetails, cleanUpMedia, logCallEnded]);
 
+  // Keep endCallRef in sync
+  useEffect(() => {
+    endCallRef.current = endCall;
+  }, [endCall]);
+
   // Toggle audio track mute input
   const toggleMute = useCallback(() => {
     if (localStreamRef.current) {
@@ -578,14 +602,6 @@ export function CallProvider({ children }) {
       socket.off('peer_hungup', handlePeerHungUp);
     };
   }, [socket, callState, user, cleanUpMedia, logCallEnded]);
-
-  // Disconnect call if the local socket connection drops mid-call
-  useEffect(() => {
-    if (!socketConnected && callState !== 'idle') {
-      console.log('🔌 Local socket connection dropped. Hanging up call.');
-      endCall();
-    }
-  }, [socketConnected, callState, endCall]);
 
   // Clean signal transmission if page is closed or refreshed
   useEffect(() => {
