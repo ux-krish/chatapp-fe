@@ -25,6 +25,7 @@ export function CallProvider({ children }) {
   const remoteStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const endCallRef = useRef(null);
+  const iceCandidatesQueueRef = useRef([]);
 
   // States for binding to video elements reactively
   const [localStream, setLocalStream] = useState(null);
@@ -232,10 +233,26 @@ export function CallProvider({ children }) {
     }
 
     remoteStreamRef.current = null;
+    iceCandidatesQueueRef.current = [];
     setLocalStream(null);
     setRemoteStream(null);
     setIsMuted(false);
     setIsCameraOff(false);
+  }, []);
+
+  const processIceQueue = useCallback(async () => {
+    const pc = peerConnectionRef.current;
+    if (!pc || !pc.remoteDescription || !pc.remoteDescription.type) return;
+    
+    console.log(`📡 Processing ${iceCandidatesQueueRef.current.length} queued remote ICE candidates...`);
+    while (iceCandidatesQueueRef.current.length > 0) {
+      const candidate = iceCandidatesQueueRef.current.shift();
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (e) {
+        console.warn('⚠️ Error adding queued remote ICE candidate:', e.message);
+      }
+    }
   }, []);
 
   // WebRTC ICE Candidate Listener
@@ -421,6 +438,7 @@ export function CallProvider({ children }) {
       // 3. Set remote WebRTC offer description
       console.log('📡 Setting remote SDP offer description...', callerDetails.signal?.type);
       await pc.setRemoteDescription(new RTCSessionDescription(callerDetails.signal));
+      await processIceQueue();
 
       // 4. Create callee Answer description
       console.log('📡 Creating WebRTC SDP answer...');
@@ -549,6 +567,7 @@ export function CallProvider({ children }) {
         try {
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
           console.log('📡 WebRTC peer connection remote SDP successfully set.');
+          await processIceQueue();
         } catch (e) {
           console.error('❌ Remote SDP description set failed:', e);
         }
@@ -576,9 +595,13 @@ export function CallProvider({ children }) {
     // D: Remote Ice Candidate received
     const handleIceCandidateEvent = async ({ candidate }) => {
       try {
-        if (peerConnectionRef.current) {
+        const pc = peerConnectionRef.current;
+        if (pc && pc.remoteDescription && pc.remoteDescription.type) {
           console.log('📡 Adding remote ICE Candidate...');
-          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } else {
+          console.log('📡 Queueing remote ICE Candidate (PC or remoteDescription not ready)...');
+          iceCandidatesQueueRef.current.push(candidate);
         }
       } catch (e) {
         console.warn('⚠️ Error adding ice candidate:', e.message);
