@@ -3,21 +3,41 @@
 @tailwind utilities;
 
 :root {
-  /* Premium Light Theme Colors (Inverted Zinc Palette in RGB format) */
-  --zinc-50: 9 9 11;       /* darkest charcoal text */
-  --zinc-100: 24 24 27;    /* dark text */
-  --zinc-200: 39 39 42;    /* primary body text */
-  --zinc-300: 63 63 70;    /* secondary text */
-  --zinc-400: 82 82 91;    /* muted text */
-  --zinc-500: 113 113 122; /* gray text */
-  --zinc-600: 161 161 170; /* borders / disabled elements */
-  --zinc-700: 212 212 216; /* light panel borders */
-  --zinc-850: 228 228 231;
-  --zinc-800: 228 228 231; /* secondary light panel background */
-  --zinc-900: 244 244 245; /* light sidebar background */
-  --zinc-950: 255 255 255; /* light primary window background */
-  
-  --color-white: 24 24 27;  /* dark charcoal in light mode */
+  /* ──────────────────────────────────────────────
+     Material 3 Surface Tokens — LIGHT MODE (default)
+     Warm-neutral whites & high-emphasis dark text
+     (consistent with Google Chat / Gmail / Calendar)
+     ────────────────────────────────────────────── */
+  --background:           248 250 252; /* slate-50 — app canvas */
+  --surface:              255 255 255; /* pure white — hero cards */
+  --surface-container:    241 245 249; /* slate-100 — chat areas */
+  --surface-container-low:247 249 251; /* slate-50/100 mixed */
+  --surface-container-high: 226 232 240; /* slate-200 — buttons / hovers */
+  --surface-container-highest: 203 213 225; /* slate-300 */
+  --outline:              226 232 240; /* slate-200 — default borders */
+  --outline-variant:      241 245 249; /* slate-100 — subtle dividers */
+  --on-surface:           15 23 42;    /* slate-900 — primary text */
+  --on-surface-variant:   71 85 105;   /* slate-600 — secondary text */
+  --on-surface-muted:    100 116 139;  /* slate-500 — muted text */
+  --on-surface-faint:    148 163 184;  /* slate-400 — disabled / icons */
+  --shadow-rgb:          15 23 42;      /* RGB for rgba($shadow-rgb / .08) shadows */
+
+  /* Legacy zinc palette kept for chat-bg patterns / specific overrides
+     (light mode = warm-white tints so dot patterns render in dark grey) */
+  --zinc-50:  15 23 42;
+  --zinc-100: 30 41 59;
+  --zinc-200: 51 65 85;
+  --zinc-300: 71 85 105;
+  --zinc-400: 100 116 139;
+  --zinc-500: 120 135 153;
+  --zinc-600: 148 163 184;
+  --zinc-700: 203 213 225;
+  --zinc-800: 226 232 240;
+  --zinc-850: 235 240 246;
+  --zinc-900: 241 245 249;
+  --zinc-950: 248 250 252;
+
+  --color-white: 15 23 42;
 
   /* Theme colors - default is Green (WhatsApp Emerald) */
   --theme-color-50: 240 253 244;
@@ -28,7 +48,15 @@
   --theme-color-600: 5 150 105;
   --theme-color-700: 4 120 87;
 
-  /* Font size - default is Medium */
+  /* Spacing & radius (Google Material 3 rhythm) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-3xl: 36px;
+  --radius-full: 9999px;
+
   --app-font-size: 16px;
 }
 
@@ -108,8 +136,26 @@ html, body, #root {
 }
 
 .dark {
-  /* Premium Dark Theme Colors (Standard Zinc Palette in RGB format) */
-  --zinc-50: 250 250 250;
+  /* ──────────────────────────────────────────────
+     Material 3 Surface Tokens — DARK MODE
+     Deep neutral + high-emphasis text (Google Chat dark)
+     ────────────────────────────────────────────── */
+  --background:           12 14 18;   /* near-black canvas */
+  --surface:              24 26 30;   /* hero cards */
+  --surface-container:    20 22 26;   /* chat areas / sidebar */
+  --surface-container-low: 16 18 22;
+  --surface-container-high:  30 33 38;
+  --surface-container-highest: 40 44 52;
+  --outline:              44 48 56;   /* subtle borders */
+  --outline-variant:      30 33 38;
+  --on-surface:           240 244 248; /* slate-50 — primary text */
+  --on-surface-variant:   180 188 200; /* slate-300 — secondary */
+  --on-surface-muted:    140 150 165; /* slate-400 — muted */
+  --on-surface-faint:    96 104 118;   /* slate-500 — icons / disabled */
+  --shadow-rgb:          0 0 0;
+
+  /* Legacy zinc restored to standard dark palette */
+  --zinc-50:  250 250 250;
   --zinc-100: 244 244 245;
   --zinc-200: 228 228 231;
   --zinc-300: 212 212 216;
@@ -120,15 +166,15 @@ html, body, #root {
   --zinc-850: 39 39 42;
   --zinc-800: 39 39 42;
   --zinc-900: 24 24 27;
-  --zinc-950: 9 9 11;
-  
-  --color-white: 255 255 255; /* pure white in dark mode */
+  --zinc-950: 12 14 18;
+
+  --color-white: 255 255 255;
 }
 
-/* Core Premium Scrollbars */
+/* Core Premium Scrollbars — Google-product slim, theme-aware */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -136,56 +182,198 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(120, 120, 120, 0.25);
+  background: rgba(var(--on-surface-faint) / 0.35);
   border-radius: 9999px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 120, 120, 0.4);
+  background: rgba(var(--on-surface-muted) / 0.6);
+  background-clip: padding-box;
+  border: 2px solid transparent;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  background-clip: padding-box;
+}
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
+  background-clip: padding-box;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Utilities — Material 3 surface tokens */
 .glass {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(var(--surface) / 0.55);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 1px 2px rgba(var(--shadow-rgb) / 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 24px rgba(var(--shadow-rgb) / 0.05);
 }
 
 .dark .glass {
-  background: rgba(24, 24, 27, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(var(--surface) / 0.45);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .glass-light {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(var(--surface) / 0.65);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.glass-strong {
+  background: rgba(var(--surface) / 0.78);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 12px 40px rgba(var(--shadow-rgb) / 0.08);
+}
+.dark .glass-strong {
+  background: rgba(var(--surface) / 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Soft glass border that catches ambient light */
+.glass-border {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+.dark .glass-border {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom-divider helper — uses outline-variant token */
+.divider {
+  border-color: rgb(var(--outline-variant));
+}
+
+/* ──────────────────────────────────────────────
+   Global App Shell Aurora — applies to body/
+   any container with .app-aurora so every
+   surface sitting on top of it gets a glass
+   reflection that picks up the colors.
+   ────────────────────────────────────────────── */
+.app-aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.app-aurora::before,
+.app-aurora::after,
+.app-aurora .blob {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform;
+}
+
+/* Re-map hardcoded text-white on plain (non-gradient) chrome surfaces
+   so light-mode glass surfaces stay readable. The exceptions are
+   descendants of `.bubble-out` (gradient) — they stay pure white. */
+:root:not(.dark) .text-white:not(.bubble-out *) {
+  color: rgb(var(--on-surface));
+}
+:root:not(.dark) .bubble-out.text-white,
+:root:not(.dark) .bubble-out * {
+  color: #fff;
+}
+
+/* Light-mode aurora — pastel, behind white glass */
+.app-aurora::before {
+  width: 620px;
+  height: 620px;
+  top: -18%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.45), transparent 70%);
+  animation: aurora-drift-a 22s ease-in-out infinite alternate;
+}
+.app-aurora::after {
+  width: 680px;
+  height: 680px;
+  bottom: -22%;
+  right: -18%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.4), transparent 70%);
+  animation: aurora-drift-b 26s ease-in-out infinite alternate;
+}
+.app-aurora .blob-a {
+  width: 440px;
+  height: 440px;
+  top: 40%;
+  left: 50%;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.32), transparent 70%);
+  animation: aurora-drift-c 28s ease-in-out infinite alternate;
+}
+.app-aurora .blob-b {
+  width: 380px;
+  height: 380px;
+  top: 8%;
+  right: 25%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent 70%);
+  animation: aurora-drift-d 30s ease-in-out infinite alternate;
+}
+
+/* Dark-mode aurora — neon, behind deep glass */
+.dark .app-aurora::before {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.55), transparent 70%);
+}
+.dark .app-aurora::after {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.55), transparent 70%);
+}
+.dark .app-aurora .blob-a {
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.45), transparent 70%);
+}
+.dark .app-aurora .blob-b {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent 70%);
+}
+
+@keyframes aurora-drift-d {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(20px, 30px) scale(1.1); }
+  100% { transform: translate(-25px, -15px) scale(0.95); }
 }
 
 /* Custom Chat Background Parallax Grid & Antigravity glow themes */
 .chat-bg {
-  background-color: var(--zinc-950);
+  background-color: rgb(var(--background));
   position: relative;
-  transition: background-image 0.5s ease;
+  transition: background-image 0.5s ease, background-color 0.5s ease;
 }
 
 /* Default & Dots pattern theme: Emerald glow */
 .chat-bg,
 .chat-bg[data-bg-pattern="dots"] {
-  background-image: 
-    radial-gradient(at 20% 20%, rgba(16, 185, 129, 0.04) 0px, transparent 50%),
-    radial-gradient(at 80% 40%, rgba(16, 185, 129, 0.02) 0px, transparent 50%),
-    radial-gradient(at 40% 80%, rgba(16, 185, 129, 0.03) 0px, transparent 50%);
+  background-image:
+    radial-gradient(at 20% 20%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+    radial-gradient(at 80% 40%, rgba(16, 185, 129, 0.04) 0px, transparent 50%),
+    radial-gradient(at 40% 80%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+}
+
+.dark .chat-bg,
+.dark .chat-bg[data-bg-pattern="dots"] {
+  background-image:
+    radial-gradient(at 20% 20%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+    radial-gradient(at 80% 40%, rgba(16, 185, 129, 0.04) 0px, transparent 50%),
+    radial-gradient(at 40% 80%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
 }
 
 /* Grid pattern theme: Slate/Steel glow */
@@ -564,6 +752,394 @@ html, body, #root {
 }
 .input-shake {
   animation: input-shake 0.4s ease-in-out;
+}
+
+/* ──────────────────────────────────────────────
+   Playful Chat — Animations & Gradient Bubbles
+   Trending "alive" feel for the message UI
+   ────────────────────────────────────────────── */
+
+/* Pop in animation for messages */
+@keyframes msg-pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.msg-enter {
+  animation: msg-pop-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Float-up reaction emoji */
+@keyframes float-up {
+  0%   { opacity: 0; transform: translate(-50%, 0) scale(0.6) rotate(-8deg); }
+  15%  { opacity: 1; transform: translate(-50%, -10px) scale(1.15) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -70px) scale(0.85) rotate(6deg); }
+}
+.react-float {
+  position: absolute;
+  font-size: 1.6rem;
+  pointer-events: none;
+  z-index: 50;
+  animation: float-up 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Confetti burst for the send button */
+@keyframes confetti-pop {
+  0%   { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.5); }
+  100% { opacity: 0; transform: var(--confetti-end) scale(1); }
+}
+.confetti-piece {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: confetti-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Wiggle / bounce micro-interactions */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-12deg); }
+  75%      { transform: rotate(12deg); }
+}
+.hover-wiggle:hover { animation: wiggle 0.45s ease-in-out; }
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.hover-pop { transition: transform 0.18s ease; }
+.hover-pop:hover { transform: scale(1.12); }
+.hover-pop:active { transform: scale(0.92); }
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%      { transform: scale(1.18); }
+  28%      { transform: scale(1); }
+  42%      { transform: scale(1.12); }
+  70%      { transform: scale(1); }
+}
+.heartbeat { animation: heartbeat 1.4s ease-in-out infinite; }
+
+/* Online status glow ring */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+.status-online-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.66, 0, 0, 1) infinite;
+}
+
+/* Conic gradient spin for rings (used on avatar/profile) */
+@keyframes conic-spin {
+  to { transform: rotate(360deg); }
+}
+.conic-spin-slow { animation: conic-spin 6s linear infinite; }
+
+/* Soft gradient mesh for empty-avatar avatars */
+@keyframes mesh-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.mesh-avatar {
+  background: linear-gradient(120deg, #10b981, #6366f1, #ec4899, #f59e0b, #10b981);
+  background-size: 300% 300%;
+  animation: mesh-shift 8s ease-in-out infinite;
+}
+
+/* ──────────────────────────────────────────────
+   Animated Conic-Gradient Border Ring
+   Used around input boxes, OTP cells, send
+   button, and any "alive" border. The ring sits
+   behind the element with a padding of 1–2px.
+   Spin is slow (6s) by default; pause on idle.
+   ────────────────────────────────────────────── */
+.ring-rotate {
+  position: relative;
+  background:
+    conic-gradient(
+      from var(--ring-angle, 0deg),
+      rgb(var(--ring-c1, 16 185 129)) 0deg,
+      rgb(var(--ring-c2, 99 102 241)) 110deg,
+      rgb(var(--ring-c3, 236 72 153)) 220deg,
+      rgb(var(--ring-c4, 245 158 11)) 320deg,
+      rgb(var(--ring-c1, 16 185 129)) 360deg
+    );
+  animation: ring-spin 5s linear infinite;
+}
+@property --ring-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes ring-spin { to { --ring-angle: 360deg; } }
+
+/* Inner mask creates the "ring" effect via radial cutoff */
+.ring-rotate-inner {
+  background: rgb(var(--surface));
+  border-radius: inherit;
+}
+
+/* Highlight halo around accent elements */
+.ring-spotlight {
+  box-shadow: 0 0 0 0 rgb(var(--ring-c1, 16 185 129) / 0.4);
+  transition: box-shadow 0.3s ease;
+}
+.ring-spotlight:hover,
+.ring-spotlight:focus-within {
+  box-shadow: 0 0 0 4px rgb(var(--ring-c1, 16 185 129) / 0.18);
+}
+
+/* When applied to an input wrapper, the gradient ring is only visible on focus. */
+.input-ring-anim {
+  position: relative;
+  border-radius: 1.5rem;
+  padding: 1.5px;
+  background:
+    conic-gradient(
+      from var(--ring-angle, 0deg),
+      rgb(var(--theme-color-400)) 0deg,
+      rgb(99 102 241) 120deg,
+      rgb(236 72 153) 240deg,
+      rgb(var(--theme-color-400)) 360deg
+    );
+  transition: background 0.25s ease, opacity 0.25s ease;
+  animation: ring-spin 6s linear infinite;
+  animation-play-state: paused;
+  opacity: 0.55;
+}
+.input-ring-anim input,
+.input-ring-anim textarea {
+  background: rgb(var(--surface) / 0.85);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-radius: calc(1.5rem - 2px);
+  width: 100%;
+}
+.input-ring-anim:focus-within {
+  animation-play-state: running;
+  opacity: 1;
+}
+.input-ring-anim:focus-within input,
+.input-ring-anim:focus-within textarea {
+  background: rgb(var(--surface));
+}
+
+/* Outgoing message bubble — gradient */
+.bubble-out {
+  background: linear-gradient(135deg,
+    rgb(var(--theme-color-600) / 0.85) 0%,
+    rgb(var(--theme-color-500) / 0.95) 60%,
+    rgb(99 102 241 / 0.85) 120%);
+  color: #fff;
+  border: 1px solid rgb(var(--theme-color-400) / 0.4);
+  box-shadow:
+    0 8px 20px -6px rgb(var(--theme-color-500) / 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+.bubble-out::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+.bubble-out:hover::before {
+  transform: translateX(100%);
+}
+
+/* Incoming message bubble — Material 3 surface-container, theme-aware */
+.bubble-in {
+  background: rgb(var(--surface-container-high) / 0.85);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  color: rgb(var(--on-surface));
+  border: 1px solid rgb(var(--outline) / 0.6);
+  box-shadow:
+    0 1px 2px rgba(var(--shadow-rgb) / 0.04),
+    0 6px 14px -6px rgba(var(--shadow-rgb) / 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dark .bubble-in {
+  background: rgb(var(--surface-container-high) / 0.78);
+}
+
+/* Gradient highlight "shine" used on the send button */
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+.shine-effect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+.shine-effect:hover::after {
+  animation: shine-sweep 0.9s ease forwards;
+}
+@keyframes shine-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ──────────────────────────────────────────────
+   Composing input — animated gradient BORDER on focus.
+   Uses the conic-gradient + masked ::before trick so
+   the gradient appears only as a 1px-thick spinning
+   ring around the input (Linear / Stripe / Vercel style).
+   ────────────────────────────────────────────── */
+@property --input-ring-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.input-glow-ring {
+  position: relative;
+  border-radius: 1rem; /* mirrors the input's rounded-2xl */
+  padding: 1.5px;       /* ring thickness */
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.input-glow-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--input-ring-angle),
+    rgba(16, 185, 129, 0.0),
+    rgb(var(--theme-color-400)),
+    rgb(99 102 241),
+    rgb(236 72 153),
+    rgb(var(--theme-color-400)),
+    rgba(16, 185, 129, 0.0)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.input-glow-ring:focus-within::before {
+  opacity: 1;
+  animation: input-ring-spin 3s linear infinite;
+}
+
+@keyframes input-ring-spin {
+  to { --input-ring-angle: 360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input-glow-ring:focus-within::before {
+    animation: none;
+    background: conic-gradient(
+      from 0deg,
+      rgb(var(--theme-color-400)),
+      rgb(99 102 241),
+      rgb(236 72 153),
+      rgb(var(--theme-color-400))
+    );
+  }
+}
+
+/* Inner wrapper — keeps the glass surface + input intact,
+   sits inside the spinning ring. */
+.input-glow-ring > .input-glow-ring__inner {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(1rem - 1.5px);
+  background: rgb(var(--surface-container-high) / 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgb(var(--outline) / 0.5);
+}
+
+/* Day separator pill */
+.day-pill {
+  background: linear-gradient(90deg, rgba(99,102,241,0.18), rgba(236,72,153,0.18));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Floating emoji reactions hover scale */
+.emoji-react:hover { transform: scale(1.35) rotate(-6deg); }
+
+/* Subtle ambient background pattern with floating shapes for empty chat */
+.chat-bg-playful {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.18), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(236, 72, 153, 0.16), transparent 45%),
+    radial-gradient(circle at 50% 95%, rgba(16, 185, 129, 0.14), transparent 40%);
+  animation: ambient-float 14s ease-in-out infinite alternate;
+}
+@keyframes ambient-float {
+  0%   { background-position: 0% 0%, 100% 0%, 0% 0%; }
+  100% { background-position: 10% 6%, 90% 100%, 50% 110%; }
+}
+
+/* Tab indicator (active pill in sidebar footer) */
+.tab-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg,
+    rgb(var(--theme-color-500) / 0.18),
+    rgb(99 102 241 / 0.18));
+  border: 1px solid rgb(var(--theme-color-400) / 0.3);
+  z-index: 0;
+}
+
+/* Reduce motion: kill heavy looping animations */
+@media (prefers-reduced-motion: reduce) {
+  .msg-enter,
+  .react-float,
+  .hover-wiggle:hover,
+  .hover-pop,
+  .heartbeat,
+  .status-online-ring,
+  .conic-spin-slow,
+  .mesh-avatar,
+  .chat-bg-playful,
+  .ambient-float,
+  .shine-effect::after,
+  .typing-dot,
+  .loader-pulse {
+    animation: none !important;
+  }
+}
+
+/* Respect prefers-reduced-motion for the animated input ring */
+@media (prefers-reduced-motion: reduce) {
+  .input-glow-ring:focus-within::before {
+    animation: none !important;
+  }
 }
 
 /* Mobile safe-area helper */

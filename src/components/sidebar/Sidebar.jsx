@@ -454,70 +454,81 @@ function Sidebar() {
     groups.filter(g => g.unreadCount > 0).length;
 
   return (
-    <div className="h-full w-full flex flex-col bg-zinc-900/40 text-zinc-100 font-sans select-none border-r border-zinc-800/80 relative">
+    <div className="h-full w-full flex flex-col bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 text-on-surface font-sans select-none border-r border-outline/80 relative">
       
       {/* 1. TOP PROFILE HEADER */}
-      <div className="p-4 flex items-center justify-between border-b border-zinc-800/50">
+      <div className="p-4 flex items-center justify-between border-b border-zinc-200/60 dark:border-outline/50 bg-gradient-to-r from-emerald-500/5 via-transparent to-indigo-500/5">
         <div className="flex items-center gap-3">
           <div className="relative group cursor-pointer" onClick={() => setActiveTab('settings')}>
+            {/* Conic-gradient spinning ring */}
+            <span
+              aria-hidden="true"
+              className="absolute -inset-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 conic-spin-slow"
+              style={{
+                background: 'conic-gradient(from 0deg, #10b981, #6366f1, #ec4899, #f59e0b, #10b981)',
+              }}
+            />
             {user?.avatarUrl ? (
-              <img 
-                src={getAvatarUrl(user.avatarUrl)} 
-                alt="Me" 
-                className="h-10 w-10 rounded-full object-cover border border-zinc-800 hover:border-emerald-500 transition duration-300"
+              <img
+                src={getAvatarUrl(user.avatarUrl)}
+                alt="Me"
+                className="relative h-11 w-11 rounded-full object-cover border-2 border-zinc-200 dark:border-outline group-hover:border-transparent transition duration-300"
               />
             ) : (
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-zinc-800 flex items-center justify-center font-bold text-emerald-400 uppercase text-sm hover:border-emerald-500 transition duration-300">
+              <div className="relative h-11 w-11 rounded-full mesh-avatar border-2 border-zinc-200 dark:border-outline group-hover:border-transparent flex items-center justify-center font-extrabold text-white uppercase text-sm shadow-inner transition">
                 {getInitials(user?.displayName)}
               </div>
             )}
-            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition duration-200">
+            {socketConnected && (
+              <span className="absolute bottom-0 right-0 h-3 w-3 bg-emerald-500 border-2 border-white dark:border-outline-variant rounded-full status-online-ring" />
+            )}
+            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition duration-200 z-10">
               <Camera className="h-4 w-4 text-white" />
             </div>
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white leading-tight">{user?.displayName}</h1>
+            <h1 className="text-sm font-bold text-zinc-900 dark:text-white leading-tight">{user?.displayName}</h1>
             <span className="text-[11px] flex items-center gap-1.5">
               <span className={`relative h-2 w-2 rounded-full ${
                 socketConnected
                   ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]'
-                  : 'bg-zinc-500'
+                  : 'bg-surface-container-high backdrop-blur'
               }`}>
                 {socketConnected && (
                   <span className="absolute inset-0 h-2 w-2 rounded-full bg-emerald-400 animate-ping opacity-50"></span>
                 )}
               </span>
-              <span className={socketConnected ? 'text-emerald-400 font-medium' : 'text-zinc-500'}>
-                {socketConnected ? 'Online' : 'Offline'}
+              <span className={socketConnected ? 'text-emerald-500 dark:text-emerald-400 font-bold' : 'text-on-surface-muted font-medium'}>
+                {socketConnected ? '● Online' : 'Offline'}
               </span>
             </span>
           </div>
         </div>
 
         {/* Action icons */}
-        <div className="flex items-center gap-1.5">
-          <button 
+        <div className="flex items-center gap-1">
+          <button
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             onClick={toggleTheme}
-            className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/50 rounded-xl transition duration-200"
+            className="p-2 text-on-surface-muted dark:text-on-surface-muted hover:text-amber-400 hover:bg-amber-400/10 rounded-xl transition-all duration-200 hover-pop"
           >
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
-          <button 
+          <button
             title="Add Friend"
             onClick={() => {
               setShowSearchModal(true);
               setUserSearchQuery('');
               setUserSearchResults([]);
             }}
-            className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/50 rounded-xl transition duration-200"
+            className="p-2 text-on-surface-muted dark:text-on-surface-muted hover:text-pink-400 hover:bg-pink-400/10 rounded-xl transition-all duration-200 hover-pop"
           >
             <UserPlus className="h-5 w-5" />
           </button>
-          <button 
+          <button
             title="Create Group"
             onClick={() => setShowCreateGroupModal(true)}
-            className="p-2 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/50 rounded-xl transition duration-200"
+            className="p-2 text-on-surface-muted dark:text-on-surface-muted hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all duration-200 hover-pop"
           >
             <PlusCircle className="h-5 w-5" />
           </button>
@@ -526,17 +537,17 @@ function Sidebar() {
 
       {/* 2. SEARCH / FILTER BAR */}
       {activeTab !== 'settings' && (
-        <div className="p-3">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-500">
+        <div className="px-3 pt-3">
+          <div className="relative group/search">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-muted group-focus-within/search:text-emerald-400 transition">
               <Search className="h-4 w-4" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search ${activeTab}...`}
-              className="block w-full pl-9 pr-4 py-2 bg-zinc-950 border border-zinc-800/60 rounded-xl text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200"
+              placeholder={`Search ${activeTab}…`}
+              className="block w-full pl-9 pr-4 py-2.5 bg-white/80 dark:bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-zinc-300/60 dark:border-outline/60 rounded-2xl text-zinc-900 dark:text-on-surface placeholder-zinc-400 dark:placeholder-zinc-500 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all duration-200 shadow-inner"
             />
           </div>
         </div>
@@ -559,35 +570,38 @@ function Sidebar() {
               {filteredGroups.map(group => {
                 const isSelected = activeChat && activeChat.groupId && activeChat.id === group.id;
                 return (
-                  <div 
+                  <div
                     key={group.id}
                     onClick={() => selectChat(group)}
-                    className={`p-3.5 flex items-center justify-between cursor-pointer transition duration-200 hover:bg-zinc-800/30 ${isSelected ? 'bg-zinc-800/40 border-l-2 border-emerald-500' : ''}`}
+                    className={`relative p-3.5 flex items-center justify-between cursor-pointer transition-all duration-200 group/row
+                      ${isSelected
+                        ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent border-l-2 border-emerald-400 shadow-[inset_1px_0_0_rgba(255,255,255,0.04)]'
+                        : 'hover:bg-surface-container-high/60 backdrop-blur dark:hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 hover:translate-x-0.5'}
+                    `}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {group.avatarUrl ? (
-                        <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-11 w-11 rounded-full object-cover border border-zinc-850" />
+                        <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-11 w-11 rounded-full object-cover border border-outline hover-pop" />
                       ) : (
-                        <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 border border-zinc-850 flex items-center justify-center text-blue-400 font-bold text-sm">
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-blue-500/30 to-indigo-500/30 border border-blue-400/30 flex items-center justify-center text-blue-300 font-bold text-sm hover-pop">
                           <Users2 className="h-5 w-5" />
                         </div>
                       )}
                       <div className="min-w-0">
                         <h2 className="text-xs font-semibold text-white truncate">{group.name}</h2>
-                        <p className="text-[11px] text-zinc-400 truncate mt-0.5">
-                          {group.lastMessage 
+                        <p className="text-[11px] text-on-surface-muted truncate mt-0.5">
+                          {group.lastMessage
                             ? `${group.lastMessage.senderName}: ${group.lastMessage.type === 'text' ? group.lastMessage.content : `📁 [${group.lastMessage.type}]`}`
-                            : 'No messages yet'
-                          }
+                            : 'No messages yet'}
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end flex-shrink-0 ml-2">
-                      <span className="text-[9px] text-zinc-500 font-medium">
+                      <span className="text-[9px] text-on-surface-muted font-medium">
                         {group.lastMessage ? formatTime(group.lastMessage.createdAt) : formatTime(group.createdAt)}
                       </span>
                       {group.unreadCount > 0 ? (
-                        <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 mt-1.5 animate-pulse">
+                        <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-extrabold text-zinc-950 mt-1.5 status-online-ring shadow-md shadow-emerald-500/30">
                           {group.unreadCount}
                         </span>
                       ) : (
@@ -603,29 +617,33 @@ function Sidebar() {
               {filteredFriends.map(friend => {
                 const isSelected = activeChat && !activeChat.groupId && activeChat.id === friend.id;
                 const isOnline = friend.status === 'online';
-                
+
                 return (
-                  <div 
+                  <div
                     key={friend.id}
                     onClick={() => selectChat(friend)}
-                    className={`group/item relative p-3.5 flex items-center justify-between cursor-pointer transition duration-200 hover:bg-zinc-800/30 ${isSelected ? 'bg-zinc-800/40 border-l-2 border-emerald-500' : ''}`}
+                    className={`group/item relative p-3.5 flex items-center justify-between cursor-pointer transition-all duration-200
+                      ${isSelected
+                        ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent border-l-2 border-emerald-400 shadow-[inset_1px_0_0_rgba(255,255,255,0.04)]'
+                        : 'hover:bg-surface-container-high/60 backdrop-blur dark:hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 hover:translate-x-0.5'}
+                    `}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative">
                         {friend.avatarUrl ? (
-                          <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-11 w-11 rounded-full object-cover border border-zinc-850" />
+                          <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-11 w-11 rounded-full object-cover border border-outline hover-pop" />
                         ) : (
-                          <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 border border-zinc-850 flex items-center justify-center text-zinc-300 font-bold text-xs uppercase">
+                          <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 border border-outline flex items-center justify-center text-on-surface-variant font-extrabold text-xs uppercase hover-pop">
                             {getInitials(friend.displayName)}
                           </div>
                         )}
                         {isOnline && (
-                          <span className="absolute bottom-0 right-0 h-3 w-3 bg-emerald-500 border-2 border-zinc-900 rounded-full"></span>
+                          <span className="absolute bottom-0 right-0 h-3 w-3 bg-emerald-500 border-2 border-outline-variant rounded-full status-online-ring" />
                         )}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <h2 className="text-xs font-semibold text-white truncate">{friend.displayName}</h2>
+                          <h2 className={`text-xs font-semibold truncate ${isSelected ? 'text-emerald-300' : 'text-white'}`}>{friend.displayName}</h2>
                           {friend.isPinned && (
                             <Pin className="h-3 w-3 text-emerald-400 fill-emerald-400/20 rotate-45 flex-shrink-0" />
                           )}
@@ -633,33 +651,32 @@ function Sidebar() {
                             <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1 rounded flex-shrink-0">Blocked</span>
                           )}
                         </div>
-                        <p className="text-[11px] text-zinc-400 truncate mt-0.5">
-                          {friend.lastMessage 
+                        <p className="text-[11px] text-on-surface-muted truncate mt-0.5">
+                          {friend.lastMessage
                             ? (friend.lastMessage.type === 'text' ? friend.lastMessage.content : `📁 [${friend.lastMessage.type}]`)
-                            : friend.bio || 'Available'
-                          }
+                            : friend.bio || '✨ Available'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex flex-col items-end flex-shrink-0 ml-2">
-                        <span className="text-[9px] text-zinc-500 font-medium">
+                        <span className="text-[9px] text-on-surface-muted font-medium">
                           {friend.lastMessage ? formatTime(friend.lastMessage.createdAt) : ''}
                         </span>
                         {friend.unreadCount > 0 ? (
-                          <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 mt-1.5 animate-pulse">
+                          <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-extrabold text-zinc-950 mt-1.5 status-online-ring shadow-md shadow-emerald-500/30">
                             {friend.unreadCount}
                           </span>
                         ) : (
                           friend.lastMessage && friend.lastMessage.senderId === user.id && (
                             <div className="mt-1.5 flex items-center justify-end">
                               {friend.lastMessage.status === 'sent' && (
-                                <Check className="h-3 w-3 text-zinc-500 stroke-[2.5]" />
+                                <Check className="h-3 w-3 text-on-surface-muted stroke-[2.5]" />
                               )}
                               {friend.lastMessage.status === 'delivered' && (
                                 <div className="relative flex items-center w-[14px] h-3">
-                                  <Check className="absolute left-0 h-3 w-3 text-zinc-450 stroke-[2.5]" />
-                                  <Check className="absolute left-[3.5px] h-3 w-3 text-zinc-450 stroke-[2.5]" />
+                                  <Check className="absolute left-0 h-3 w-3 text-on-surface-muted stroke-[2.5]" />
+                                  <Check className="absolute left-[3.5px] h-3 w-3 text-on-surface-muted stroke-[2.5]" />
                                 </div>
                               )}
                               {friend.lastMessage.status === 'read' && (
@@ -677,7 +694,7 @@ function Sidebar() {
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setChatMenuOpen(chatMenuOpen === friend.id ? null : friend.id)}
-                          className="p-1 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800/80 transition duration-200 opacity-0 group-hover/item:opacity-100 focus:opacity-100"
+                          className="p-1 rounded-lg text-on-surface-muted hover:text-white hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/80 transition duration-200 opacity-0 group-hover/item:opacity-100 focus:opacity-100"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </button>
@@ -685,7 +702,7 @@ function Sidebar() {
                         {chatMenuOpen === friend.id && (
                           <div 
                             ref={chatMenuRef}
-                            className="absolute right-0 top-7 w-48 bg-zinc-950/95 backdrop-blur-md border border-zinc-800/80 rounded-xl shadow-2xl py-1.5 z-50 text-left"
+                            className="absolute right-0 top-7 w-48 glass-strong border border-white/30 dark:border-white/10 bg-surface/70 backdrop-blur-md border border-outline/80 rounded-xl shadow-2xl py-1.5 z-50 text-left"
                           >
                             <button
                               onClick={() => {
@@ -696,11 +713,11 @@ function Sidebar() {
                                 }
                                 setChatMenuOpen(null);
                               }}
-                              className="w-full px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800/50 hover:text-white transition flex items-center"
+                              className="w-full px-3 py-2 text-xs text-on-surface-variant hover:bg-surface-container-high/55 backdrop-blur-md border border-white/15 dark:border-white/5 hover:text-white transition flex items-center"
                             >
                               {friend.isPinned ? (
                                 <>
-                                  <PinOff className="h-3.5 w-3.5 mr-2 text-zinc-400" />
+                                  <PinOff className="h-3.5 w-3.5 mr-2 text-on-surface-muted" />
                                   Unpin Chat
                                 </>
                               ) : (
@@ -720,7 +737,7 @@ function Sidebar() {
                                 });
                                 setChatMenuOpen(null);
                               }}
-                              className="w-full px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800/50 hover:text-white transition flex items-center"
+                              className="w-full px-3 py-2 text-xs text-on-surface-variant hover:bg-surface-container-high/55 backdrop-blur-md border border-white/15 dark:border-white/5 hover:text-white transition flex items-center"
                             >
                               <Ban className="h-3.5 w-3.5 mr-2 text-amber-500" />
                               {friend.isBlocked ? 'Unblock User' : 'Block User'}
@@ -735,13 +752,13 @@ function Sidebar() {
                                 });
                                 setChatMenuOpen(null);
                               }}
-                              className="w-full px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800/50 hover:text-white transition flex items-center"
+                              className="w-full px-3 py-2 text-xs text-on-surface-variant hover:bg-surface-container-high/55 backdrop-blur-md border border-white/15 dark:border-white/5 hover:text-white transition flex items-center"
                             >
-                              <EyeOff className="h-3.5 w-3.5 mr-2 text-zinc-400" />
+                              <EyeOff className="h-3.5 w-3.5 mr-2 text-on-surface-muted" />
                               Remove Chat
                             </button>
 
-                            <div className="border-t border-zinc-800/60 my-1"></div>
+                            <div className="border-t border-outline/60 my-1"></div>
 
                             <button
                               onClick={() => {
@@ -766,21 +783,21 @@ function Sidebar() {
               })}
 
               {filteredFriends.length === 0 && filteredGroups.length === 0 && (
-                <div className="p-8 text-center text-zinc-500 text-xs">
+                <div className="p-8 text-center text-on-surface-muted text-xs">
                   No active chats. Use the top icons to add friends or create group chats!
                 </div>
               )}
 
               {/* Dynamic Global Search & Friend Add panel */}
               {searchQuery.trim().length >= 2 && (
-                <div className="mt-4 border-t border-zinc-800/40 pt-4 pb-6">
+                <div className="mt-4 border-t border-outline/40 pt-4 pb-6">
                   <div className="px-4 pb-2 flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 flex items-center gap-1.5">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted flex items-center gap-1.5">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                       Global Search Results
                     </span>
                     {globalSidebarLoading && (
-                      <span className="text-[9px] text-zinc-500 animate-pulse">Searching...</span>
+                      <span className="text-[9px] text-on-surface-muted animate-pulse">Searching...</span>
                     )}
                   </div>
 
@@ -794,19 +811,19 @@ function Sidebar() {
                         return (
                           <div 
                             key={globalUser.id}
-                            className="p-3.5 flex items-center justify-between hover:bg-zinc-800/10 transition duration-150"
+                            className="p-3.5 flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition duration-150"
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               {globalUser.avatarUrl ? (
-                                <img src={getAvatarUrl(globalUser.avatarUrl)} alt={globalUser.displayName} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
+                                <img src={getAvatarUrl(globalUser.avatarUrl)} alt={globalUser.displayName} className="h-9 w-9 rounded-full object-cover border border-outline" />
                               ) : (
-                                <div className="h-9 w-9 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-400 font-bold text-[11px] uppercase">
+                                <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline-variant/80 flex items-center justify-center text-on-surface-muted font-bold text-[11px] uppercase">
                                   {getInitials(globalUser.displayName)}
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <h4 className="text-xs font-semibold text-zinc-200 truncate leading-tight">{globalUser.displayName}</h4>
-                                <p className="text-[10px] text-zinc-500 truncate mt-0.5">@{globalUser.displayName.toLowerCase().replace(/\s+/g, '')}</p>
+                                <h4 className="text-xs font-semibold text-on-surface truncate leading-tight">{globalUser.displayName}</h4>
+                                <p className="text-[10px] text-on-surface-muted truncate mt-0.5">@{globalUser.displayName.toLowerCase().replace(/\s+/g, '')}</p>
                               </div>
                             </div>
 
@@ -814,7 +831,7 @@ function Sidebar() {
                               {isAlreadyFriend ? (
                                 <span className="text-[10px] text-emerald-400 font-semibold px-2 py-1 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">Friend</span>
                               ) : isPendingSent ? (
-                                <span className="text-[10px] text-zinc-500 font-medium px-2 py-1 bg-zinc-850 border border-zinc-800 rounded-lg">Request Sent</span>
+                                <span className="text-[10px] text-on-surface-muted font-medium px-2 py-1 bg-surface-container/40 backdrop-blur-md border border-outline rounded-lg">Request Sent</span>
                               ) : isPendingReceived ? (
                                 <button
                                   type="button"
@@ -840,7 +857,7 @@ function Sidebar() {
                     </div>
                   ) : (
                     !globalSidebarLoading && (
-                      <div className="p-6 text-center text-zinc-500 text-[11px]">
+                      <div className="p-6 text-center text-on-surface-muted text-[11px]">
                         No matching global users found.
                       </div>
                     )
@@ -860,12 +877,12 @@ function Sidebar() {
               className="flex-1 flex flex-col min-h-0"
             >
               {/* Header with clear logs */}
-              <div className="px-4 py-3 flex items-center justify-between border-b border-zinc-800/40">
-                <span className="text-xs font-bold text-zinc-400">Call Logs</span>
+              <div className="px-4 py-3 flex items-center justify-between border-b border-outline/40">
+                <span className="text-xs font-bold text-on-surface-muted">Call Logs</span>
                 {callHistory.length > 0 && (
                   <button
                     onClick={clearCallHistoryHandler}
-                    className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-rose-400 transition"
+                    className="flex items-center gap-1 text-[10px] text-on-surface-muted hover:text-rose-400 transition"
                     title="Clear history"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -877,7 +894,7 @@ function Sidebar() {
               {/* Call logs list */}
               <div className="flex-1 overflow-y-auto divide-y divide-zinc-800/30">
                 {loadingCalls ? (
-                  <div className="p-8 text-center text-zinc-500 text-xs">
+                  <div className="p-8 text-center text-on-surface-muted text-xs">
                     Loading call history...
                   </div>
                 ) : (
@@ -890,7 +907,7 @@ function Sidebar() {
 
                     if (filteredLogs.length === 0) {
                       return (
-                        <div className="p-8 text-center text-zinc-500 text-xs">
+                        <div className="p-8 text-center text-on-surface-muted text-xs">
                           {searchQuery ? 'No calls match your search.' : 'No recent calls.'}
                         </div>
                       );
@@ -933,7 +950,7 @@ function Sidebar() {
                       return (
                         <div 
                           key={log.id} 
-                          className="px-4 py-3 hover:bg-zinc-800/20 transition flex items-center justify-between group/call-item"
+                          className="px-4 py-3 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/20 transition flex items-center justify-between group/call-item"
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative flex-shrink-0">
@@ -944,7 +961,7 @@ function Sidebar() {
                                   className="h-10 w-10 rounded-xl object-cover"
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
+                                <div className="h-10 w-10 rounded-xl bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center text-xs font-bold text-on-surface-variant">
                                   {getInitials(peerName)}
                                 </div>
                               )}
@@ -955,10 +972,10 @@ function Sidebar() {
                             </div>
 
                             <div className="min-w-0">
-                              <h4 className="text-xs font-semibold text-zinc-200 truncate">
+                              <h4 className="text-xs font-semibold text-on-surface truncate">
                                 {peerName}
                               </h4>
-                              <div className="flex items-center gap-1.5 mt-1 text-[10px] text-zinc-500">
+                              <div className="flex items-center gap-1.5 mt-1 text-[10px] text-on-surface-muted">
                                 {statusIcon}
                                 <span className={!isOutgoing && !wasConnected ? 'text-rose-400 font-semibold' : ''}>
                                   {statusText}
@@ -972,7 +989,7 @@ function Sidebar() {
 
                           <button
                             onClick={() => startCall(peerId, peerName, peerAvatar, isVideoLog ? 'video' : 'audio')}
-                            className="p-2 rounded-xl text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/80 transition duration-200 shadow-sm"
+                            className="p-2 rounded-xl text-on-surface-muted hover:text-emerald-400 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/80 transition duration-200 shadow-sm"
                             title={`${isVideoLog ? 'Video' : 'Voice'} call ${peerName}`}
                           >
                             {isVideoLog ? <Video className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
@@ -1006,13 +1023,13 @@ function Sidebar() {
                           {reqUser.avatarUrl ? (
                             <img src={getAvatarUrl(reqUser.avatarUrl)} alt={reqUser.displayName} className="h-8 w-8 rounded-full object-cover" />
                           ) : (
-                            <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-300 uppercase">
+                            <div className="h-8 w-8 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center text-[10px] font-bold text-on-surface-variant uppercase">
                               {getInitials(reqUser.displayName)}
                             </div>
                           )}
                           <div className="min-w-0">
                             <h4 className="text-xs font-semibold text-white truncate leading-tight">{reqUser.displayName}</h4>
-                            <span className="text-[9px] text-zinc-400 truncate block mt-0.5">{reqUser.email}</span>
+                            <span className="text-[9px] text-on-surface-muted truncate block mt-0.5">{reqUser.email}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
@@ -1025,7 +1042,7 @@ function Sidebar() {
                           </button>
                           <button 
                             onClick={() => respondFriendRequest(reqUser.id, false)}
-                            className="p-1.5 bg-zinc-850 hover:bg-zinc-800 text-red-400 rounded-lg border border-zinc-800 transition"
+                            className="p-1.5 bg-surface-container/40 backdrop-blur-md hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 text-red-400 rounded-lg border border-outline transition"
                             title="Decline"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -1039,35 +1056,35 @@ function Sidebar() {
 
               {/* 2. Symmetrical Friends listing */}
               <div className="space-y-2">
-                <h3 className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">All Friends ({filteredFriends.length})</h3>
+                <h3 className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted">All Friends ({filteredFriends.length})</h3>
                 <div className="space-y-1">
                   {filteredFriends.map(friend => (
                     <div 
                       key={friend.id}
                       onClick={() => selectChat(friend)}
-                      className="p-3 rounded-2xl bg-zinc-950/20 border border-zinc-900 flex items-center justify-between hover:bg-zinc-800/10 cursor-pointer transition group"
+                      className="p-3 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 cursor-pointer transition group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 pointer-events-none select-none">
                         <div className="relative">
                           {friend.avatarUrl ? (
                             <img src={getAvatarUrl(friend.avatarUrl)} alt={friend.displayName} className="h-9 w-9 rounded-full object-cover" />
                           ) : (
-                            <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-300 uppercase">
+                            <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center text-[10px] font-bold text-on-surface-variant uppercase">
                               {getInitials(friend.displayName)}
                             </div>
                           )}
                           {friend.status === 'online' && (
-                            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-emerald-500 border-2 border-zinc-900 rounded-full"></span>
+                            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-emerald-500 border-2 border-outline-variant rounded-full"></span>
                           )}
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-xs font-semibold text-white truncate leading-tight">{friend.displayName}</h4>
-                          <p className="text-[10px] text-zinc-400 truncate mt-0.5">{friend.bio || 'No bio status'}</p>
+                          <p className="text-[10px] text-on-surface-muted truncate mt-0.5">{friend.bio || 'No bio status'}</p>
                         </div>
                       </div>
                       
                       <div 
-                        className="p-1.5 text-zinc-500 group-hover:text-emerald-400 bg-zinc-900 border border-zinc-850 rounded-lg opacity-60 group-hover:opacity-100 transition duration-200 flex-shrink-0"
+                        className="p-1.5 text-on-surface-muted group-hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-lg opacity-60 group-hover:opacity-100 transition duration-200 flex-shrink-0"
                         title="Chat now"
                       >
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -1076,7 +1093,7 @@ function Sidebar() {
                   ))}
 
                   {filteredFriends.length === 0 && (
-                    <div className="p-8 text-center text-zinc-600 text-xs">
+                    <div className="p-8 text-center text-on-surface-faint text-xs">
                       No friends matching search.
                     </div>
                   )}
@@ -1096,9 +1113,9 @@ function Sidebar() {
             >
               {/* My status card */}
               <div className="space-y-2">
-                <h3 className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">My Status</h3>
+                <h3 className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted">My Status</h3>
                 
-                <div className="p-3 rounded-2xl bg-zinc-950/20 border border-zinc-900 flex items-center justify-between">
+                <div className="p-3 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between">
                   <div 
                     className="flex items-center gap-3 cursor-pointer" 
                     onClick={() => {
@@ -1112,16 +1129,16 @@ function Sidebar() {
                         <img 
                           src={getAvatarUrl(user.avatarUrl)} 
                           alt="Me" 
-                          className={`h-11 w-11 rounded-full object-cover p-[2px] border-2 ${stories.myStories ? 'border-emerald-500' : 'border-zinc-700'}`} 
+                          className={`h-11 w-11 rounded-full object-cover p-[2px] border-2 ${stories.myStories ? 'border-emerald-500' : 'border-outline-variant'}`} 
                         />
                       ) : (
-                        <div className={`h-11 w-11 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs uppercase border-2 ${stories.myStories ? 'border-emerald-500' : 'border-zinc-700'}`}>
+                        <div className={`h-11 w-11 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center font-bold text-xs uppercase border-2 ${stories.myStories ? 'border-emerald-500' : 'border-outline-variant'}`}>
                           {getInitials(user.displayName)}
                         </div>
                       )}
                       
                       {/* Plus icon to upload */}
-                      <label htmlFor="status-upload-input" className="absolute bottom-0 right-0 h-5 w-5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-full border border-zinc-900 flex items-center justify-center cursor-pointer shadow-md transition duration-200">
+                      <label htmlFor="status-upload-input" className="absolute bottom-0 right-0 h-5 w-5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-full border border-outline-variant flex items-center justify-center cursor-pointer shadow-md transition duration-200">
                         <Plus className="h-3 w-3" />
                         <input 
                           type="file" 
@@ -1135,7 +1152,7 @@ function Sidebar() {
                     </div>
                     <div>
                       <h4 className="text-xs font-semibold text-white">My Status</h4>
-                      <p className="text-[10px] text-zinc-400 mt-0.5">
+                      <p className="text-[10px] text-on-surface-muted mt-0.5">
                         {stories.myStories 
                           ? `${stories.myStories.stories.length} updates posted`
                           : 'Tap "+" to share a 24h status'
@@ -1152,11 +1169,11 @@ function Sidebar() {
 
               {/* Friends statuses */}
               <div className="space-y-2">
-                <h3 className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Recent Updates ({stories.friendsStories.length})</h3>
+                <h3 className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted">Recent Updates ({stories.friendsStories.length})</h3>
                 <div className="space-y-2">
                   {stories.friendsStories.map(feed => {
                     const allViewed = feed.stories.every(s => s.viewed);
-                    const borderClass = allViewed ? 'border-zinc-700' : 'border-emerald-500';
+                    const borderClass = allViewed ? 'border-outline-variant' : 'border-emerald-500';
                     
                     return (
                       <div 
@@ -1167,7 +1184,7 @@ function Sidebar() {
                           // Set up a custom full-screen visual viewer
                           setActiveStatusViewer(feed);
                         }}
-                        className="p-3 rounded-2xl bg-zinc-950/20 border border-zinc-900 hover:bg-zinc-800/10 cursor-pointer flex items-center gap-3 transition"
+                        className="p-3 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 cursor-pointer flex items-center gap-3 transition"
                       >
                         <div className="relative">
                           {feed.avatarUrl ? (
@@ -1177,14 +1194,14 @@ function Sidebar() {
                               className={`h-11 w-11 rounded-full object-cover p-[2px] border-2 ${borderClass}`} 
                             />
                           ) : (
-                            <div className={`h-11 w-11 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-xs uppercase border-2 ${borderClass}`}>
+                            <div className={`h-11 w-11 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center font-bold text-xs uppercase border-2 ${borderClass}`}>
                               {getInitials(feed.displayName)}
                             </div>
                           )}
                         </div>
                         <div>
                           <h4 className="text-xs font-semibold text-white">{feed.displayName}</h4>
-                          <p className="text-[10px] text-zinc-400 mt-0.5">
+                          <p className="text-[10px] text-on-surface-muted mt-0.5">
                             {formatTime(feed.stories[feed.stories.length - 1].createdAt)}
                           </p>
                         </div>
@@ -1193,7 +1210,7 @@ function Sidebar() {
                   })}
 
                   {stories.friendsStories.length === 0 && (
-                    <div className="p-8 text-center text-zinc-600 text-xs">
+                    <div className="p-8 text-center text-on-surface-faint text-xs">
                       No status updates from friends yet.
                     </div>
                   )}
@@ -1215,87 +1232,87 @@ function Sidebar() {
               {settingsSubTab === null && (
                 <div className="space-y-6">
                   {/* User Profile Header Summary */}
-                  <div className="flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/60 rounded-2xl">
+                  <div className="flex items-center gap-4 p-4 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline/60 rounded-2xl">
                     <div className="flex flex-col items-center">
                       {user.avatarUrl ? (
-                        <img src={getAvatarUrl(user.avatarUrl)} alt={user.displayName} className="h-12 w-12 rounded-full object-cover border border-zinc-700/50" />
+                        <img src={getAvatarUrl(user.avatarUrl)} alt={user.displayName} className="h-12 w-12 rounded-full object-cover border border-outline-variant/50" />
                       ) : (
                         <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center font-bold text-emerald-400 text-lg uppercase">
                           {getInitials(user.displayName)}
                         </div>
                       )}
                       {/* Logged in email under the profile image */}
-                      <span className="text-[9px] text-zinc-400 truncate max-w-[64px] mt-1 text-center font-medium" title={user.email}>
+                      <span className="text-[9px] text-on-surface-muted truncate max-w-[64px] mt-1 text-center font-medium" title={user.email}>
                         {user.email}
                       </span>
                     </div>
                     <div className="min-w-0 text-left">
                       <h3 className="text-sm font-bold text-white truncate leading-snug">{user.displayName}</h3>
-                      <p className="text-[10px] text-zinc-500 truncate mt-0.5">{user.bio || "No status set"}</p>
+                      <p className="text-[10px] text-on-surface-muted truncate mt-0.5">{user.bio || "No status set"}</p>
                     </div>
                   </div>
 
                   {/* Settings Menu Options List */}
-                  <div className="flex flex-col bg-zinc-900/30 border border-zinc-800/40 rounded-2xl divide-y divide-zinc-800/30 overflow-hidden">
+                  <div className="flex flex-col bg-surface-container/35 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline/40 rounded-2xl divide-y divide-zinc-800/30 overflow-hidden">
                     {/* Option 1: Profile */}
                     <button
                       type="button"
                       onClick={() => setSettingsSubTab('profile')}
-                      className="flex items-center justify-between p-4 hover:bg-zinc-800/30 transition text-left group"
+                      className="flex items-center justify-between p-4 hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 transition text-left group"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
                           <User className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-xs font-semibold text-zinc-200 block">Profile</span>
-                          <span className="text-[9px] text-zinc-500 block mt-0.5">Name, status, profile photo</span>
+                          <span className="text-xs font-semibold text-on-surface block">Profile</span>
+                          <span className="text-[9px] text-on-surface-muted block mt-0.5">Name, status, profile photo</span>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
+                      <ChevronRight className="h-4 w-4 text-on-surface-muted group-hover:text-on-surface-variant transition" />
                     </button>
 
                     {/* Option 2: Account */}
                     <button
                       type="button"
                       onClick={() => setSettingsSubTab('account')}
-                      className="flex items-center justify-between p-4 hover:bg-zinc-800/30 transition text-left group"
+                      className="flex items-center justify-between p-4 hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 transition text-left group"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="p-2 bg-sky-500/10 text-sky-400 rounded-xl">
                           <Key className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-xs font-semibold text-zinc-200 block">Account</span>
-                          <span className="text-[9px] text-zinc-500 block mt-0.5">Security, 2FA, delete profile</span>
+                          <span className="text-xs font-semibold text-on-surface block">Account</span>
+                          <span className="text-[9px] text-on-surface-muted block mt-0.5">Security, 2FA, delete profile</span>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
+                      <ChevronRight className="h-4 w-4 text-on-surface-muted group-hover:text-on-surface-variant transition" />
                     </button>
 
                     {/* Option 3: Theme */}
                     <button
                       type="button"
                       onClick={() => setSettingsSubTab('theme')}
-                      className="flex items-center justify-between p-4 hover:bg-zinc-800/30 transition text-left group"
+                      className="flex items-center justify-between p-4 hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 transition text-left group"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="p-2 bg-purple-500/10 text-purple-400 rounded-xl">
                           <Palette className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-xs font-semibold text-zinc-200 block">Theme</span>
-                          <span className="text-[9px] text-zinc-500 block mt-0.5">Colors, font size, chat appearance</span>
+                          <span className="text-xs font-semibold text-on-surface block">Theme</span>
+                          <span className="text-[9px] text-on-surface-muted block mt-0.5">Colors, font size, chat appearance</span>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
+                      <ChevronRight className="h-4 w-4 text-on-surface-muted group-hover:text-on-surface-variant transition" />
                     </button>
 
                     {/* Option 4: Logout */}
                     <button
                       type="button"
                       onClick={logout}
-                      className="flex items-center justify-between p-4 hover:bg-zinc-850/20 transition text-left group"
+                      className="flex items-center justify-between p-4 hover:bg-surface-container/40 backdrop-blur-md/20 transition text-left group"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="p-2 bg-red-500/10 text-red-400 rounded-xl">
@@ -1303,10 +1320,10 @@ function Sidebar() {
                         </div>
                         <div className="min-w-0">
                           <span className="text-xs font-semibold text-red-400 block">Logout</span>
-                          <span className="text-[9px] text-zinc-500 block mt-0.5">Sign out of this device</span>
+                          <span className="text-[9px] text-on-surface-muted block mt-0.5">Sign out of this device</span>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
+                      <ChevronRight className="h-4 w-4 text-on-surface-muted group-hover:text-on-surface-variant transition" />
                     </button>
                   </div>
 
@@ -1337,7 +1354,7 @@ function Sidebar() {
                   <button
                     type="button"
                     onClick={() => setSettingsSubTab(null)}
-                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition text-xs font-semibold mb-4 bg-zinc-900/40 px-3 py-1.5 rounded-lg border border-zinc-800/65"
+                    className="flex items-center gap-2 text-on-surface-muted hover:text-white transition text-xs font-semibold mb-4 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 px-3 py-1.5 rounded-lg border border-outline/65"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <span>Back to Settings</span>
@@ -1350,9 +1367,9 @@ function Sidebar() {
                     <div className="flex flex-col items-center justify-center py-2">
                       <div className="relative group cursor-pointer">
                         {editAvatarPreview ? (
-                          <img src={getAvatarUrl(editAvatarPreview)} alt="Preview" className="h-20 w-20 rounded-full object-cover border-2 border-zinc-800" />
+                          <img src={getAvatarUrl(editAvatarPreview)} alt="Preview" className="h-20 w-20 rounded-full object-cover border-2 border-outline" />
                         ) : (
-                          <div className="h-20 w-20 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-white text-xl uppercase">
+                          <div className="h-20 w-20 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center font-bold text-white text-xl uppercase">
                             {getInitials(user.displayName)}
                           </div>
                         )}
@@ -1368,30 +1385,30 @@ function Sidebar() {
                         </label>
                       </div>
                       {/* Logged in email under the profile image */}
-                      <span className="text-xs font-semibold text-zinc-300 mt-2">{user?.email}</span>
-                      <span className="text-[10px] text-zinc-500 mt-1">Click photo to upload new</span>
+                      <span className="text-xs font-semibold text-on-surface-variant mt-2">{user?.email}</span>
+                      <span className="text-[10px] text-on-surface-muted mt-1">Click photo to upload new</span>
                     </div>
 
                     {/* Profile form inputs */}
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-1">Display Name</label>
+                        <label className="block text-[10px] uppercase font-bold tracking-wider text-on-surface-muted mb-1">Display Name</label>
                         <input
                           type="text"
                           required
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="block w-full px-3 py-2 bg-zinc-950 border border-zinc-800/80 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200"
+                          className="block w-full px-3 py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline/80 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-1">Bio / Status</label>
+                        <label className="block text-[10px] uppercase font-bold tracking-wider text-on-surface-muted mb-1">Bio / Status</label>
                         <textarea
                           value={editBio}
                           onChange={(e) => setEditBio(e.target.value)}
                           rows={3}
-                          className="block w-full px-3 py-2 bg-zinc-950 border border-zinc-800/80 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200 resize-none"
+                          className="block w-full px-3 py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline/80 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200 resize-none"
                         />
                       </div>
                     </div>
@@ -1399,7 +1416,7 @@ function Sidebar() {
 
 
                     {profileMessage && (
-                      <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 text-center font-medium">
+                      <div className="p-2.5 rounded-xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline text-[10px] text-on-surface-variant text-center font-medium">
                         {profileMessage}
                       </div>
                     )}
@@ -1407,7 +1424,7 @@ function Sidebar() {
                     <button
                       type="submit"
                       disabled={profileSaving}
-                      className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-bold rounded-xl shadow transition duration-200 text-xs flex items-center justify-center"
+                      className="w-full py-2.5 px-4 bg-white hover:bg-surface-container-high backdrop-blur text-zinc-950 font-bold rounded-xl shadow transition duration-200 text-xs flex items-center justify-center"
                     >
                       {profileSaving ? 'Saving Updates...' : 'Save Changes'}
                     </button>
@@ -1421,7 +1438,7 @@ function Sidebar() {
                   <button
                     type="button"
                     onClick={() => setSettingsSubTab(null)}
-                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition text-xs font-semibold mb-4 bg-zinc-900/40 px-3 py-1.5 rounded-lg border border-zinc-800/65"
+                    className="flex items-center gap-2 text-on-surface-muted hover:text-white transition text-xs font-semibold mb-4 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 px-3 py-1.5 rounded-lg border border-outline/65"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <span>Back to Settings</span>
@@ -1432,10 +1449,10 @@ function Sidebar() {
                     <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Security & Credentials</h4>
                     
                     {/* Two-Factor Authentication (2FA) Toggle */}
-                    <div className="flex items-center justify-between p-3.5 bg-zinc-950/40 border border-zinc-800/45 rounded-2xl">
+                    <div className="flex items-center justify-between p-3.5 bg-surface/50 backdrop-blur-xl border border-white/25 dark:border-white/10 border border-outline/45 rounded-2xl">
                       <div className="flex flex-col pr-2">
                         <span className="text-xs font-semibold text-white">Two-Factor Auth (2FA)</span>
-                        <span className="text-[10px] text-zinc-400 mt-0.5 leading-relaxed">Requires OTP verification sent to email upon login.</span>
+                        <span className="text-[10px] text-on-surface-muted mt-0.5 leading-relaxed">Requires OTP verification sent to email upon login.</span>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                         <input 
@@ -1444,14 +1461,14 @@ function Sidebar() {
                           onChange={(e) => setSecurity2fa(e.target.checked)}
                           className="sr-only peer" 
                         />
-                        <div className="w-9 h-5 bg-zinc-800 rounded-full peer peer-focus:ring-1 peer-focus:ring-emerald-500/40 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-zinc-400 peer-checked:after:bg-zinc-950 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 transition-colors duration-200"></div>
+                        <div className="w-9 h-5 bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 rounded-full peer peer-focus:ring-1 peer-focus:ring-emerald-500/40 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-surface-container-high backdrop-blur peer-checked:after:bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 transition-colors duration-200"></div>
                       </label>
                     </div>
 
                     {/* Password Configuration */}
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-1">
+                        <label className="block text-[10px] uppercase font-bold tracking-wider text-on-surface-muted mb-1">
                           {user?.hasPassword ? 'Change Password' : 'Create login password'}
                         </label>
                         <input
@@ -1459,9 +1476,9 @@ function Sidebar() {
                           value={securityPassword}
                           onChange={(e) => setSecurityPassword(e.target.value)}
                           placeholder={user?.hasPassword ? 'Enter new password...' : 'Choose a password...'}
-                          className="block w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800/80 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200"
+                          className="block w-full px-3 py-2.5 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline/80 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition duration-200"
                         />
-                        <p className="text-[9px] text-zinc-500 mt-1">
+                        <p className="text-[9px] text-on-surface-muted mt-1">
                           {user?.hasPassword 
                             ? 'Update credentials to authenticate via password.' 
                             : 'Configure a password to sign in via password next time.'
@@ -1471,7 +1488,7 @@ function Sidebar() {
                     </div>
 
                     {securityMessage && (
-                      <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 text-center font-medium">
+                      <div className="p-2.5 rounded-xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline text-[10px] text-on-surface-variant text-center font-medium">
                         {securityMessage}
                       </div>
                     )}
@@ -1489,9 +1506,9 @@ function Sidebar() {
 
                   {/* Account Deletion (Danger Zone) - Regular users only */}
                   {user?.role !== 'admin' && (
-                    <div className="pt-6 border-t border-zinc-800/50 space-y-4">
+                    <div className="pt-6 border-t border-outline/50 space-y-4">
                       <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider mb-2">Danger Zone</h4>
-                      <p className="text-[10px] text-zinc-400 leading-relaxed">
+                      <p className="text-[10px] text-on-surface-muted leading-relaxed">
                         Permanently delete your profile, messages, friendships, and all associated chat history. This action is completely irreversible.
                       </p>
                       
@@ -1526,7 +1543,7 @@ function Sidebar() {
                   <button
                     type="button"
                     onClick={() => setSettingsSubTab(null)}
-                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition text-xs font-semibold mb-4 bg-zinc-900/40 px-3 py-1.5 rounded-lg border border-zinc-800/65"
+                    className="flex items-center gap-2 text-on-surface-muted hover:text-white transition text-xs font-semibold mb-4 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 px-3 py-1.5 rounded-lg border border-outline/65"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <span>Back to Settings</span>
@@ -1537,8 +1554,8 @@ function Sidebar() {
                     
                     {/* Theme color customizer */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Theme Accent Color</label>
-                      <div className="flex items-center gap-3 bg-zinc-950 p-3 border border-zinc-800/80 rounded-xl">
+                      <label className="block text-[10px] uppercase font-bold tracking-wider text-on-surface-muted mb-2">Theme Accent Color</label>
+                      <div className="flex items-center gap-3 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 p-3 border border-outline/80 rounded-xl">
                         {[
                           { name: 'green', colorBg: 'bg-emerald-500', nameLabel: 'Emerald (WhatsApp)' },
                           { name: 'blue', colorBg: 'bg-blue-500', nameLabel: 'Ocean Blue' },
@@ -1554,7 +1571,7 @@ function Sidebar() {
                             title={c.nameLabel}
                           >
                             {selectedThemeColor === c.name && (
-                              <span className="h-2.5 w-2.5 rounded-full bg-zinc-950"></span>
+                              <span className="h-2.5 w-2.5 rounded-full bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10"></span>
                             )}
                           </button>
                         ))}
@@ -1563,8 +1580,8 @@ function Sidebar() {
 
                     {/* Font size customizer */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Font Size</label>
-                      <div className="grid grid-cols-5 gap-1 bg-zinc-950 p-1 border border-zinc-800/80 rounded-xl">
+                      <label className="block text-[10px] uppercase font-bold tracking-wider text-on-surface-muted mb-2">Font Size</label>
+                      <div className="grid grid-cols-5 gap-1 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 p-1 border border-outline/80 rounded-xl">
                         {[
                           { size: 'small', label: 'Small' },
                           { size: 'medium', label: 'Medium' },
@@ -1576,7 +1593,7 @@ function Sidebar() {
                             key={s.size}
                             type="button"
                             onClick={() => setSelectedFontSize(s.size)}
-                            className={`py-2 text-[10px] font-bold rounded-lg transition duration-200 text-center ${selectedFontSize === s.size ? 'bg-emerald-500 text-zinc-950 shadow-sm font-extrabold' : 'text-zinc-450 hover:text-white hover:bg-zinc-900'}`}
+                            className={`py-2 text-[10px] font-bold rounded-lg transition duration-200 text-center ${selectedFontSize === s.size ? 'bg-emerald-500 text-zinc-950 shadow-sm font-extrabold' : 'text-on-surface-muted hover:text-white hover:bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10'}`}
                           >
                             {s.label}
                           </button>
@@ -1586,8 +1603,8 @@ function Sidebar() {
 
                     {/* Chat Background Pattern Picker */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold tracking-wider text-zinc-400 mb-2">Chat Background</label>
-                      <div className="grid grid-cols-3 gap-2 bg-zinc-950 p-3 border border-zinc-800/80 rounded-xl">
+                      <label className="block text-[10px] uppercase font-bold tracking-wider text-on-surface-muted mb-2">Chat Background</label>
+                      <div className="grid grid-cols-3 gap-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 p-3 border border-outline/80 rounded-xl">
                         {[
                           { 
                             id: 'dots', 
@@ -1643,18 +1660,18 @@ function Sidebar() {
                             className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition duration-200 ${
                               selectedBgPattern === p.id
                                 ? 'border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/30'
-                                : 'border-zinc-800/60 hover:border-zinc-700 bg-zinc-900/50'
+                                : 'border-outline/60 hover:border-outline-variant bg-surface-container/55 backdrop-blur-xl border border-white/25 dark:border-white/10'
                             }`}
                           >
                             <div
-                              className="w-full h-10 rounded-lg bg-zinc-950 relative overflow-hidden"
+                              className="w-full h-10 rounded-lg bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 relative overflow-hidden"
                               style={{
                                 backgroundImage: p.preview,
                                 backgroundSize: p.size,
                               }}
                             />
                             <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                              selectedBgPattern === p.id ? 'text-emerald-400' : 'text-zinc-500'
+                              selectedBgPattern === p.id ? 'text-emerald-400' : 'text-on-surface-muted'
                             }`}>
                               {p.label}
                             </span>
@@ -1664,7 +1681,7 @@ function Sidebar() {
                     </div>
 
                     {themeMessage && (
-                      <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 text-center font-medium">
+                      <div className="p-2.5 rounded-xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline text-[10px] text-on-surface-variant text-center font-medium">
                         {themeMessage}
                       </div>
                     )}
@@ -1672,7 +1689,7 @@ function Sidebar() {
                     <button
                       type="submit"
                       disabled={themeSaving}
-                      className="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-bold rounded-xl shadow transition duration-200 text-xs flex items-center justify-center"
+                      className="w-full py-2.5 px-4 bg-white hover:bg-surface-container-high backdrop-blur text-zinc-950 font-bold rounded-xl shadow transition duration-200 text-xs flex items-center justify-center"
                     >
                       {themeSaving ? 'Saving Updates...' : 'Save Changes'}
                     </button>
@@ -1684,57 +1701,101 @@ function Sidebar() {
         </AnimatePresence>
       </div>
 
-      {/* 4. FOOTER TAB SELECTOR */}
-      <div className="px-4 h-16 bg-zinc-900/60 border-t border-zinc-800/40 backdrop-blur-md flex items-center justify-around">
-        <button 
-          onClick={() => setActiveTab('chats')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'chats' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+      {/* 4. FOOTER TAB SELECTOR — Static pill nav (no animation) */}
+      <div className="px-3 pt-2 pb-3 relative z-20">
+        <nav
+          className="relative h-[60px] mx-auto flex items-center justify-around
+                     bg-surface/55 backdrop-blur-2xl border border-white/40 dark:border-white/10
+                     rounded-2xl px-1.5 shadow-elev2
+                     ring-1 ring-black/5 dark:ring-white/5"
+          aria-label="Sidebar sections"
         >
-          <div className="relative">
-            <MessageSquare className="h-5 w-5" />
-            {totalUnreadChats > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-zinc-950 animate-pulse">
-                {totalUnreadChats}
-              </span>
-            )}
-          </div>
-          <span>Chats</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('stories')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'stories' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <Sparkles className="h-5 w-5" />
-          <span>Status</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('calls')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'calls' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <Phone className="h-5 w-5" />
-          <span>Calls</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('friends')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'friends' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <div className="relative">
-            <Users className="h-5 w-5" />
-            {pendingReceivedRequests.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-zinc-950 animate-pulse">
-                {pendingReceivedRequests.length}
-              </span>
-            )}
-          </div>
-          <span>Friends</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('settings')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-medium transition ${activeTab === 'settings' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          <Settings className="h-5 w-5" />
-          <span>Settings</span>
-        </button>
+          {[
+            {
+              id: 'chats',
+              label: 'Chats',
+              icon: MessageSquare,
+              badge: totalUnreadChats,
+              accent: 'rgb(var(--theme-color-500))',
+              softAccent: 'rgba(var(--theme-color-500) / 0.18)',
+              badgeBg: 'bg-emerald-500',
+            },
+            {
+              id: 'stories',
+              label: 'Status',
+              icon: Sparkles,
+              accent: '#ec4899',
+              softAccent: 'rgba(236, 72, 153, 0.18)',
+            },
+            {
+              id: 'calls',
+              label: 'Calls',
+              icon: Phone,
+              accent: '#6366f1',
+              softAccent: 'rgba(99, 102, 241, 0.18)',
+            },
+            {
+              id: 'friends',
+              label: 'Friends',
+              icon: Users,
+              badge: pendingReceivedRequests.length,
+              accent: '#f59e0b',
+              softAccent: 'rgba(245, 158, 11, 0.18)',
+              badgeBg: 'bg-amber-500',
+            },
+            {
+              id: 'settings',
+              label: 'Settings',
+              icon: Settings,
+              accent: '#64748b',
+              softAccent: 'rgba(100, 116, 139, 0.18)',
+            },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                aria-pressed={isActive}
+                className="relative flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl transition-colors duration-200 min-w-[54px]"
+              >
+                {isActive && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-xl border shadow-elev1"
+                    style={{
+                      background: tab.softAccent,
+                      borderColor: tab.accent + '55',
+                      boxShadow: `0 6px 18px -6px ${tab.accent}55`,
+                    }}
+                  />
+                )}
+                <div className="relative z-10">
+                  <Icon
+                    className="h-5 w-5 transition-colors duration-200"
+                    strokeWidth={isActive ? 2.6 : 2}
+                    style={{ color: isActive ? tab.accent : 'rgb(var(--on-surface-muted))' }}
+                  />
+                  {tab.badge > 0 && (
+                    <span
+                      className={`absolute -top-1.5 -right-2 flex h-4 min-w-4 px-1 items-center justify-center rounded-full ${tab.badgeBg} text-[9px] font-extrabold shadow-md`}
+                      style={{ color: 'rgb(var(--on-surface))' }}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className="relative z-10 text-[10px] font-semibold transition-colors duration-200"
+                  style={{ color: isActive ? tab.accent : 'rgb(var(--on-surface-muted))' }}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
       {/* ================= MODAL WINDOWS ================= */}
@@ -1742,16 +1803,16 @@ function Sidebar() {
       {/* MODAL A: SEARCH USERS & ADD FRIEND */}
       <AnimatePresence>
         {showSearchModal && (
-          <div className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm z-30 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 backdrop-blur-sm z-30 flex items-center justify-center p-4">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl relative"
+              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-3xl shadow-2xl relative"
             >
               <button 
                 onClick={() => setShowSearchModal(false)}
-                className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition"
+                className="absolute top-4 right-4 p-1 text-on-surface-muted hover:text-white rounded-lg hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 transition"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1767,7 +1828,7 @@ function Sidebar() {
                   value={userSearchQuery}
                   onChange={(e) => setUserSearchQuery(e.target.value)}
                   placeholder="Search by email or name..."
-                  className="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="flex-1 px-3 py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
                 <button
                   type="submit"
@@ -1780,20 +1841,20 @@ function Sidebar() {
 
               <div className="max-h-60 overflow-y-auto space-y-2">
                 {searchLoading ? (
-                  <div className="text-center py-6 text-zinc-500 text-xs loader-pulse">Querying database...</div>
+                  <div className="text-center py-6 text-on-surface-muted text-xs loader-pulse">Querying database...</div>
                 ) : userSearchResults.map(result => (
-                  <div key={result.id} className="p-3 rounded-2xl bg-zinc-950/40 border border-zinc-850 flex items-center justify-between">
+                  <div key={result.id} className="p-3 rounded-2xl bg-surface/50 backdrop-blur-xl border border-white/25 dark:border-white/10 border border-outline flex items-center justify-between">
                     <div className="flex items-center gap-2.5 min-w-0">
                       {result.avatarUrl ? (
                         <img src={getAvatarUrl(result.avatarUrl)} alt={result.displayName} className="h-8 w-8 rounded-full object-cover" />
                       ) : (
-                        <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-300 uppercase">
+                        <div className="h-8 w-8 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center text-[10px] font-bold text-on-surface-variant uppercase">
                           {getInitials(result.displayName)}
                         </div>
                       )}
                       <div className="min-w-0">
                         <h4 className="text-xs font-semibold text-white truncate leading-tight">{result.displayName}</h4>
-                        <span className="text-[9px] text-zinc-500 block truncate">{result.email}</span>
+                        <span className="text-[9px] text-on-surface-muted block truncate">{result.email}</span>
                       </div>
                     </div>
 
@@ -1806,7 +1867,7 @@ function Sidebar() {
                       </button>
                     )}
                     {result.friendshipStatus === 'pending_sent' && (
-                      <span className="text-[10px] text-zinc-500 font-medium italic">Sent</span>
+                      <span className="text-[10px] text-on-surface-muted font-medium italic">Sent</span>
                     )}
                     {result.friendshipStatus === 'pending_received' && (
                       <span className="text-[10px] text-amber-400 font-medium italic">Pending</span>
@@ -1820,7 +1881,7 @@ function Sidebar() {
                 ))}
                 
                 {!searchLoading && userSearchResults.length === 0 && userSearchQuery && (
-                  <div className="text-center py-6 text-zinc-500 text-xs">No users found.</div>
+                  <div className="text-center py-6 text-on-surface-muted text-xs">No users found.</div>
                 )}
               </div>
             </motion.div>
@@ -1831,16 +1892,16 @@ function Sidebar() {
       {/* MODAL B: CREATE GROUP CHAT */}
       <AnimatePresence>
         {showCreateGroupModal && (
-          <div className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm z-30 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 backdrop-blur-sm z-30 flex items-center justify-center p-4">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl relative"
+              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-3xl shadow-2xl relative"
             >
               <button 
                 onClick={() => setShowCreateGroupModal(false)}
-                className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition"
+                className="absolute top-4 right-4 p-1 text-on-surface-muted hover:text-white rounded-lg hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 transition"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1857,8 +1918,8 @@ function Sidebar() {
                     {groupAvatarPreview ? (
                       <img src={groupAvatarPreview} alt="Group" className="h-14 w-14 rounded-full object-cover border border-zinc-855" />
                     ) : (
-                      <div className="h-14 w-14 rounded-full bg-zinc-850 flex items-center justify-center border border-zinc-800">
-                        <Camera className="h-5 w-5 text-zinc-500" />
+                      <div className="h-14 w-14 rounded-full bg-surface-container/40 backdrop-blur-md flex items-center justify-center border border-outline">
+                        <Camera className="h-5 w-5 text-on-surface-muted" />
                       </div>
                     )}
                     <label htmlFor="group-avatar-input" className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition cursor-pointer">
@@ -1872,7 +1933,7 @@ function Sidebar() {
                       />
                     </label>
                   </div>
-                  <span className="text-[9px] text-zinc-500 mt-1">Group Photo</span>
+                  <span className="text-[9px] text-on-surface-muted mt-1">Group Photo</span>
                 </div>
 
                 <div className="space-y-3">
@@ -1882,28 +1943,28 @@ function Sidebar() {
                     value={groupName}
                     onChange={(e) => setGroupName(e.target.value)}
                     placeholder="Group Name *"
-                    className="block w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="block w-full px-3 py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                   <input
                     type="text"
                     value={groupDesc}
                     onChange={(e) => setGroupDesc(e.target.value)}
                     placeholder="Group Description (optional)..."
-                    className="block w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="block w-full px-3 py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline rounded-xl text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 {/* Add Friends checkboxes */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Select Members</span>
-                  <div className="max-h-36 overflow-y-auto border border-zinc-800/50 rounded-xl p-2 space-y-1 bg-zinc-950/40">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted">Select Members</span>
+                  <div className="max-h-36 overflow-y-auto border border-outline/50 rounded-xl p-2 space-y-1 bg-surface/50 backdrop-blur-xl border border-white/25 dark:border-white/10">
                     {friends.filter(f => f.friendshipStatus === 'accepted').map(friend => {
                       const isChecked = selectedGroupMembers.includes(friend.id);
                       return (
                         <div 
                           key={friend.id} 
                           onClick={() => toggleGroupMemberSelection(friend.id)}
-                          className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800/40 cursor-pointer text-left"
+                          className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-container-high/45 backdrop-blur-md border border-white/10 dark:border-white/5 cursor-pointer text-left"
                         >
                           <input 
                             type="checkbox" 
@@ -1911,13 +1972,13 @@ function Sidebar() {
                             readOnly
                             className="accent-emerald-500 h-3.5 w-3.5" 
                           />
-                          <span className="text-xs font-medium text-zinc-300">{friend.displayName}</span>
+                          <span className="text-xs font-medium text-on-surface-variant">{friend.displayName}</span>
                         </div>
                       );
                     })}
 
                     {friends.filter(f => f.friendshipStatus === 'accepted').length === 0 && (
-                      <div className="text-center py-4 text-zinc-600 text-[10px]">No friends available to add.</div>
+                      <div className="text-center py-4 text-on-surface-faint text-[10px]">No friends available to add.</div>
                     )}
                   </div>
                 </div>
@@ -1937,22 +1998,22 @@ function Sidebar() {
       {/* MODAL C: CONFIRM DESTRUCTIVE ACTION (BLOCK, REMOVE FRIEND, REMOVE CHAT) */}
       <AnimatePresence>
         {confirmAction && (
-          <div className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm z-30 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 backdrop-blur-sm z-30 flex items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl relative"
+              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-3xl shadow-2xl relative"
             >
               <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                 {confirmAction.type === 'block' && <Ban className="h-5 w-5 text-amber-500" />}
                 {confirmAction.type === 'unblock' && <Ban className="h-5 w-5 text-emerald-500" />}
-                {confirmAction.type === 'removeChat' && <EyeOff className="h-5 w-5 text-zinc-400" />}
+                {confirmAction.type === 'removeChat' && <EyeOff className="h-5 w-5 text-on-surface-muted" />}
                 {confirmAction.type === 'removeFriendship' && <UserMinus className="h-5 w-5 text-rose-500" />}
                 Confirm Action
               </h3>
 
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+              <p className="text-xs text-on-surface-muted mb-6 leading-relaxed">
                 {confirmAction.type === 'block' && `Are you sure you want to block ${confirmAction.friendName}? You will not receive messages from this user.`}
                 {confirmAction.type === 'unblock' && `Are you sure you want to unblock ${confirmAction.friendName}?`}
                 {confirmAction.type === 'removeChat' && `Are you sure you want to remove the chat history with ${confirmAction.friendName} from your sidebar?`}
@@ -1963,7 +2024,7 @@ function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setConfirmAction(null)}
-                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold rounded-xl transition"
+                  className="px-4 py-2 bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 hover:bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5 text-on-surface-variant text-xs font-semibold rounded-xl transition"
                 >
                   Cancel
                 </button>
@@ -2172,15 +2233,15 @@ function StatusViewer({ feed, onClose, viewStory }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {feed.avatarUrl ? (
-              <img src={getAvatarUrl(feed.avatarUrl)} alt={feed.displayName} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
+              <img src={getAvatarUrl(feed.avatarUrl)} alt={feed.displayName} className="h-9 w-9 rounded-full object-cover border border-outline" />
             ) : (
-              <div className="h-9 w-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 uppercase">
+              <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center text-xs font-bold text-on-surface-variant uppercase">
                 {getInitials(feed.displayName)}
               </div>
             )}
             <div>
               <h4 className="text-xs font-bold text-white leading-tight">{feed.displayName}</h4>
-              <span className="text-[10px] text-zinc-400 mt-0.5 block">
+              <span className="text-[10px] text-on-surface-muted mt-0.5 block">
                 {new Date(currentStory.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
@@ -2189,7 +2250,7 @@ function StatusViewer({ feed, onClose, viewStory }) {
           {/* Prominent glassmorphic close button */}
           <button 
             onClick={onClose} 
-            className="p-2 bg-white/5 hover:bg-white/15 border border-white/10 rounded-full text-zinc-300 hover:text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-black/40"
+            className="p-2 bg-white/5 hover:bg-white/15 border border-white/10 rounded-full text-on-surface-variant hover:text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-black/40"
             aria-label="Close status"
           >
             <X className="h-6 w-6" />
@@ -2267,7 +2328,7 @@ function StatusViewer({ feed, onClose, viewStory }) {
       {/* Toast Feedback Banner */}
       {toast && (
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
-          <div className="px-6 py-4 bg-zinc-900/90 border border-white/10 rounded-3xl flex flex-col items-center gap-2 shadow-2xl scale-in">
+          <div className="px-6 py-4 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/90 border border-white/10 rounded-3xl flex flex-col items-center gap-2 shadow-2xl scale-in">
             <div className="h-12 w-12 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center text-emerald-400">
               <Check className="h-6 w-6" />
             </div>

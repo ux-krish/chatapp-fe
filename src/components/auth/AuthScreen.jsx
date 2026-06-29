@@ -202,7 +202,7 @@ function AuthScreen() {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
+    <div className="relative w-full h-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-y-auto bg-zinc-200/70 backdrop-blur backdrop-blur dark:bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10">
       {/* Animated Aurora Mesh Background */}
       <div className="auth-aurora" aria-hidden="true">
         <div className="blob blob-b" />
@@ -269,7 +269,7 @@ function AuthScreen() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.05 }}
-            className="mt-1.5 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 text-center max-w-[320px] px-2"
+            className="mt-1.5 text-xs sm:text-sm text-on-surface-muted dark:text-on-surface-muted text-center max-w-[320px] px-2"
           >
             {step === 2
               ? `We sent a 6-digit code to ${email || 'your email'}.`
@@ -288,7 +288,7 @@ function AuthScreen() {
                 setOtpValue('');
                 setError('');
               }}
-              className="mt-3 inline-flex items-center gap-1 text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition"
+              className="mt-3 inline-flex items-center gap-1 text-[11px] sm:text-xs text-on-surface-muted dark:text-on-surface-muted hover:text-zinc-900 dark:hover:text-white transition"
             >
               <ArrowLeft className="h-3 w-3" /> Back to {authMode === 'login' ? 'login' : 'register'}
             </button>
@@ -325,7 +325,7 @@ function AuthScreen() {
                 >
                   {/* OTP / Password tab switcher */}
                   {authMode === 'login' && (
-                    <div className="flex p-1 rounded-xl bg-zinc-200/70 dark:bg-zinc-900/60 border border-zinc-300/60 dark:border-zinc-800/60 mb-2">
+                    <div className="flex p-1 rounded-xl bg-surface-container-high backdrop-blur/70 dark:bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/60 border border-zinc-300/60 dark:border-outline/60 mb-2">
                       <button
                         type="button"
                         onClick={() => {
@@ -334,8 +334,8 @@ function AuthScreen() {
                         }}
                         className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-200 ${
                           loginType === 'otp'
-                            ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                            ? 'bg-white dark:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 text-zinc-900 dark:text-white shadow-sm'
+                            : 'text-on-surface-muted dark:text-on-surface-muted hover:text-zinc-800 dark:hover:text-on-surface'
                         }`}
                       >
                         OTP Code
@@ -348,8 +348,8 @@ function AuthScreen() {
                         }}
                         className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-200 ${
                           loginType === 'password'
-                            ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                            ? 'bg-white dark:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 text-zinc-900 dark:text-white shadow-sm'
+                            : 'text-on-surface-muted dark:text-on-surface-muted hover:text-zinc-800 dark:hover:text-on-surface'
                         }`}
                       >
                         Password
@@ -367,7 +367,7 @@ function AuthScreen() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="block w-full pl-10 pr-3 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
+                      className="block w-full pl-10 pr-3 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-on-surface placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
                     />
                   </Field>
 
@@ -382,7 +382,7 @@ function AuthScreen() {
                         <button
                           type="button"
                           onClick={() => setShowPassword((p) => !p)}
-                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition p-1 -mr-1"
+                          className="text-on-surface-muted hover:text-on-surface-faint dark:hover:text-on-surface transition p-1 -mr-1"
                           aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -401,7 +401,7 @@ function AuthScreen() {
                             ? 'Create a strong password'
                             : 'Enter your password'
                         }
-                        className="block w-full pl-10 pr-10 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
+                        className="block w-full pl-10 pr-10 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-on-surface placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
                       />
                     </Field>
                   )}
@@ -426,7 +426,7 @@ function AuthScreen() {
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             placeholder="Your display name"
-                            className="block w-full pl-10 pr-3 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
+                            className="block w-full pl-10 pr-3 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-on-surface placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
                           />
                         </Field>
 
@@ -437,7 +437,7 @@ function AuthScreen() {
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
                             placeholder="Hey there! I am using Talkzen."
-                            className="block w-full pl-10 pr-3 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
+                            className="block w-full pl-10 pr-3 py-3 sm:py-3.5 bg-transparent text-zinc-900 dark:text-on-surface placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-0 border-0 font-sans"
                           />
                         </Field>
                       </motion.div>
@@ -493,11 +493,11 @@ function AuthScreen() {
 
                   {/* Divider */}
                   <div className="relative flex py-2 items-center" role="separator">
-                    <div className="flex-grow border-t border-zinc-300/70 dark:border-zinc-800/70" />
-                    <span className="flex-shrink mx-3 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                    <div className="flex-grow border-t border-zinc-300/70 dark:border-outline/70" />
+                    <span className="flex-shrink mx-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-muted dark:text-on-surface-muted">
                       or continue with
                     </span>
-                    <div className="flex-grow border-t border-zinc-300/70 dark:border-zinc-800/70" />
+                    <div className="flex-grow border-t border-zinc-300/70 dark:border-outline/70" />
                   </div>
 
                   {/* Google */}
@@ -506,9 +506,9 @@ function AuthScreen() {
                     onClick={handleGoogleLogin}
                     disabled={loading}
                     className="w-full py-3 sm:py-3.5 px-4 rounded-2xl font-semibold text-sm
-                               bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200
-                               border border-zinc-300/70 dark:border-zinc-800/80
-                               hover:bg-zinc-100 dark:hover:bg-zinc-800
+                               bg-white dark:bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 text-zinc-800 dark:text-on-surface
+                               border border-zinc-300/70 dark:border-outline/80
+                               hover:bg-surface-container-high backdrop-blur/70 backdrop-blur dark:hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5
                                transition-all duration-200 flex items-center justify-center gap-2.5
                                focus:outline-none focus:ring-2 focus:ring-zinc-400
                                min-h-[44px] disabled:opacity-70"
@@ -549,11 +549,11 @@ function AuthScreen() {
                         aria-label={`Digit ${i + 1}`}
                         className={`otp-cell w-full aspect-square min-w-0 max-w-[52px] text-center text-lg sm:text-xl font-bold
                                     rounded-xl border-2 outline-none transition-all duration-200
-                                    bg-white/90 dark:bg-zinc-900/80
+                                    bg-white/90 dark:bg-surface-container/75 backdrop-blur-xl border border-white/30 dark:border-white/10
                                     ${
                                       d
                                         ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/20'
-                                        : 'border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100'
+                                        : 'border-zinc-300 dark:border-outline-variant text-zinc-900 dark:text-on-surface'
                                     }
                                     focus:border-emerald-500 focus:shadow-md focus:shadow-emerald-500/20`}
                       />
@@ -603,7 +603,7 @@ function AuthScreen() {
                         }
                       }}
                       disabled={loading}
-                      className="text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition"
+                      className="text-xs font-medium text-on-surface-muted dark:text-on-surface-muted hover:text-emerald-600 dark:hover:text-emerald-400 transition"
                     >
                       Didn’t get a code? Resend
                     </button>
@@ -614,13 +614,13 @@ function AuthScreen() {
           </div>
 
           {/* Tiny footer terms */}
-          <p className="mt-6 sm:mt-7 text-[10px] sm:text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500 text-center max-w-[300px]">
+          <p className="mt-6 sm:mt-7 text-[10px] sm:text-[11px] leading-relaxed text-on-surface-muted dark:text-on-surface-muted text-center max-w-[300px]">
             By continuing, you agree to Talkzen’s{' '}
-            <span className="text-zinc-600 dark:text-zinc-300 underline-offset-2 hover:underline cursor-pointer">
+            <span className="text-on-surface-faint dark:text-on-surface-variant underline-offset-2 hover:underline cursor-pointer">
               Terms
             </span>{' '}
             &{' '}
-            <span className="text-zinc-600 dark:text-zinc-300 underline-offset-2 hover:underline cursor-pointer">
+            <span className="text-on-surface-faint dark:text-on-surface-variant underline-offset-2 hover:underline cursor-pointer">
               Privacy Policy
             </span>
             .
@@ -637,18 +637,18 @@ function Field({ id, label, icon, right, children }) {
     <div className="group">
       <label
         htmlFor={id}
-        className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1"
+        className="block text-[11px] font-semibold uppercase tracking-wider text-on-surface-muted dark:text-on-surface-muted mb-1.5 ml-1"
       >
         {label}
       </label>
       <div
-        className="relative flex items-center rounded-2xl border border-zinc-300/70 dark:border-zinc-800/80
-                   bg-white/90 dark:bg-zinc-900/80 backdrop-blur
+        className="relative flex items-center rounded-2xl border border-zinc-300/70 dark:border-outline/80
+                   bg-white/90 dark:bg-surface-container/75 backdrop-blur-xl border border-white/30 dark:border-white/10 backdrop-blur
                    transition-all duration-200
                    focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20
-                   hover:border-zinc-400 dark:hover:border-zinc-700"
+                   hover:border-zinc-400 dark:hover:border-outline-variant"
       >
-        <span className="pl-3.5 pr-2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-emerald-500 transition">
+        <span className="pl-3.5 pr-2 text-on-surface-muted dark:text-on-surface-muted group-focus-within:text-emerald-500 transition">
           {icon}
         </span>
         <div className="flex-1 min-w-0">{children}</div>

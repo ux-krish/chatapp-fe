@@ -4,7 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class', // supports class-based dark mode switching
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -18,18 +18,17 @@ export default {
           600: 'rgb(var(--theme-color-600) / <alpha-value>)',
           700: 'rgb(var(--theme-color-700) / <alpha-value>)',
         },
-        // Custom premium chat colors
         brand: {
           50: '#f0fdf4',
           100: '#dcfce7',
-          500: '#22c55e', // Emerald/WhatsApp Green
+          500: '#22c55e',
           600: '#16a34a',
           700: '#15803d',
         },
         dark: {
-          50: '#27272a',  // Zinc 800
-          100: '#18181b', // Zinc 900
-          200: '#09090b', // Zinc 950
+          50: '#27272a',
+          100: '#18181b',
+          200: '#09090b',
         },
         zinc: {
           50: 'rgb(var(--zinc-50) / <alpha-value>)',
@@ -44,7 +43,34 @@ export default {
           850: 'rgb(var(--zinc-850) / <alpha-value>)',
           900: 'rgb(var(--zinc-900) / <alpha-value>)',
           950: 'rgb(var(--zinc-950) / <alpha-value>)',
-        }
+        },
+        background:           'rgb(var(--background) / <alpha-value>)',
+        surface:              'rgb(var(--surface) / <alpha-value>)',
+        'surface-container':          'rgb(var(--surface-container) / <alpha-value>)',
+        'surface-container-low':     'rgb(var(--surface-container-low) / <alpha-value>)',
+        'surface-container-high':    'rgb(var(--surface-container-high) / <alpha-value>)',
+        'surface-container-highest': 'rgb(var(--surface-container-highest) / <alpha-value>)',
+        outline:              'rgb(var(--outline) / <alpha-value>)',
+        'outline-variant':   'rgb(var(--outline-variant) / <alpha-value>)',
+        'on-surface':        'rgb(var(--on-surface) / <alpha-value>)',
+        'on-surface-variant':'rgb(var(--on-surface-variant) / <alpha-value>)',
+        'on-surface-muted':  'rgb(var(--on-surface-muted) / <alpha-value>)',
+        'on-surface-faint':  'rgb(var(--on-surface-faint) / <alpha-value>)',
+      },
+      borderRadius: {
+        sm:  'var(--radius-sm)',
+        md:  'var(--radius-md)',
+        lg:  'var(--radius-lg)',
+        xl:  'var(--radius-xl)',
+        '2xl':'var(--radius-2xl)',
+        '3xl':'var(--radius-3xl)',
+        full:'var(--radius-full)',
+      },
+      boxShadow: {
+        elev1: '0 1px 2px rgba(var(--shadow-rgb) / 0.06), 0 1px 1px rgba(var(--shadow-rgb) / 0.04)',
+        elev2: '0 2px 4px rgba(var(--shadow-rgb) / 0.06), 0 4px 8px rgba(var(--shadow-rgb) / 0.04)',
+        elev3: '0 4px 8px rgba(var(--shadow-rgb) / 0.08), 0 12px 24px rgba(var(--shadow-rgb) / 0.06)',
+        elev4: '0 8px 16px rgba(var(--shadow-rgb) / 0.08), 0 24px 40px rgba(var(--shadow-rgb) / 0.08)',
       },
       fontFamily: {
         sans: ['Inter', 'Outfit', 'sans-serif'],

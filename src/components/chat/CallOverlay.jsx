@@ -158,7 +158,7 @@ export default function CallOverlay() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="w-full max-w-sm rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl overflow-hidden p-6 flex flex-col items-center justify-between min-h-[460px] relative text-center"
+            className="w-full max-w-sm rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline shadow-2xl overflow-hidden p-6 flex flex-col items-center justify-between min-h-[460px] relative text-center"
           >
             {/* Top Security Banner */}
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-4">
@@ -166,29 +166,46 @@ export default function CallOverlay() {
             </div>
 
             {/* Peer Avatar & Ripples */}
-            <div className="relative my-6 flex items-center justify-center h-32 w-32">
+            <div className="relative my-6 flex items-center justify-center h-40 w-40">
+              {/* Animated conic-gradient ring */}
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full opacity-80 conic-spin-slow"
+                style={{
+                  background: 'conic-gradient(from 0deg, #10b981, #6366f1, #ec4899, #f59e0b, #10b981)',
+                  WebkitMask: 'radial-gradient(circle, transparent 60%, black 62%)',
+                  mask: 'radial-gradient(circle, transparent 60%, black 62%)',
+                }}
+              />
               {/* Pulsing Ripple Rings */}
               {(callState === 'dialing' || callState === 'ringing') && (
                 <>
-                  <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping" style={{ animationDuration: '3s' }} />
-                  <div className="absolute -inset-4 rounded-full border border-emerald-500/10 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
+                  <div className="absolute inset-2 rounded-full border border-emerald-500/25 animate-ping" style={{ animationDuration: '3s' }} />
+                  <div className="absolute inset-0 rounded-full border border-emerald-500/15 animate-ping" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
+                  <div className="absolute -inset-4 rounded-full border border-indigo-500/15 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
                 </>
               )}
               {callState === 'connected' && (
-                <div className="absolute -inset-2 rounded-full border border-emerald-500/20 animate-pulse" />
+                <div className="absolute -inset-2 rounded-full border border-emerald-500/30 status-online-ring" />
               )}
 
-              {peer.avatarUrl ? (
-                <img
-                  src={getAvatarUrl(peer.avatarUrl)}
-                  alt={peer.name}
-                  className="h-28 w-28 rounded-full object-cover border-4 border-zinc-800 shadow-2xl relative z-10"
-                />
-              ) : (
-                <div className="h-28 w-28 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/5 border-4 border-zinc-800 flex items-center justify-center text-emerald-400 font-bold text-3xl uppercase shadow-2xl relative z-10">
-                  {getInitials(peer.name)}
-                </div>
-              )}
+              <motion.div
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative z-10"
+              >
+                {peer.avatarUrl ? (
+                  <img
+                    src={getAvatarUrl(peer.avatarUrl)}
+                    alt={peer.name}
+                    className="h-28 w-28 rounded-full object-cover border-4 border-outline shadow-2xl relative z-10"
+                  />
+                ) : (
+                  <div className="h-28 w-28 rounded-full mesh-avatar border-4 border-outline flex items-center justify-center text-white font-bold text-3xl uppercase shadow-2xl relative z-10">
+                    {getInitials(peer.name)}
+                  </div>
+                )}
+              </motion.div>
             </div>
 
             {/* Name & Call State Metadata */}
@@ -208,7 +225,7 @@ export default function CallOverlay() {
                 )}
                 {callState === 'connected' && (
                   <div className="flex flex-col items-center gap-3">
-                    <span className="text-sm font-mono font-bold text-zinc-300 tracking-wider">
+                    <span className="text-sm font-mono font-bold text-on-surface-variant tracking-wider">
                       {formatDuration(callDuration)}
                     </span>
                     
@@ -269,7 +286,7 @@ export default function CallOverlay() {
                       className={`p-3.5 rounded-full border transition-all duration-150 flex items-center justify-center ${
                         isMuted
                           ? 'bg-amber-500/20 border-amber-500/30 text-amber-400 hover:bg-amber-500/35'
-                          : 'bg-zinc-800 border-zinc-700/80 text-zinc-300 hover:bg-zinc-750 hover:text-white'
+                          : 'bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border-outline-variant/80 text-on-surface-variant hover:bg-surface-container-high/40 backdrop-blur-md hover:text-white'
                       }`}
                       title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
                     >
@@ -332,24 +349,40 @@ export default function CallOverlay() {
               : 'bg-gradient-to-b from-zinc-900 via-zinc-950 to-black'
           }`}>
             {/* Peer Avatar */}
-            <div className="relative flex items-center justify-center h-36 w-36 mb-6">
+            <div className="relative flex items-center justify-center h-44 w-44 mb-6">
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full opacity-80 conic-spin-slow"
+                style={{
+                  background: 'conic-gradient(from 0deg, #10b981, #6366f1, #ec4899, #f59e0b, #10b981)',
+                  WebkitMask: 'radial-gradient(circle, transparent 58%, black 60%)',
+                  mask: 'radial-gradient(circle, transparent 58%, black 60%)',
+                }}
+              />
               {(callState === 'dialing' || callState === 'ringing') && (
                 <>
-                  <div className="absolute inset-0 rounded-full border-2 border-emerald-500/20 animate-ping" style={{ animationDuration: '3s' }} />
-                  <div className="absolute -inset-6 rounded-full border border-emerald-500/10 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
+                  <div className="absolute inset-0 rounded-full border-2 border-emerald-500/25 animate-ping" style={{ animationDuration: '3s' }} />
+                  <div className="absolute -inset-3 rounded-full border border-emerald-500/15 animate-ping" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
+                  <div className="absolute -inset-6 rounded-full border border-indigo-500/15 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
                 </>
               )}
-              {peer.avatarUrl ? (
-                <img
-                  src={getAvatarUrl(peer.avatarUrl)}
-                  alt={peer.name}
-                  className="h-32 w-32 rounded-full object-cover border-4 border-zinc-800 shadow-2xl relative z-10"
-                />
-              ) : (
-                <div className="h-32 w-32 rounded-full bg-gradient-to-tr from-emerald-500/20 to-emerald-500/5 border-4 border-zinc-800 flex items-center justify-center text-emerald-400 font-bold text-4xl uppercase shadow-2xl relative z-10">
-                  {getInitials(peer.name)}
-                </div>
-              )}
+              <motion.div
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative z-10"
+              >
+                {peer.avatarUrl ? (
+                  <img
+                    src={getAvatarUrl(peer.avatarUrl)}
+                    alt={peer.name}
+                    className="h-32 w-32 rounded-full object-cover border-4 border-outline shadow-2xl"
+                  />
+                ) : (
+                  <div className="h-32 w-32 rounded-full mesh-avatar border-4 border-outline flex items-center justify-center text-white font-bold text-4xl uppercase shadow-2xl">
+                    {getInitials(peer.name)}
+                  </div>
+                )}
+              </motion.div>
             </div>
 
             <h3 className="text-2xl font-bold text-white mb-2">{peer.name}</h3>
@@ -393,7 +426,7 @@ export default function CallOverlay() {
                 <div className="flex flex-col items-center">
                   <span className="text-sm font-semibold text-white">{peer.name}</span>
                   {callState === 'connected' && (
-                    <span className="text-xs font-mono text-zinc-300 tracking-wider">
+                    <span className="text-xs font-mono text-on-surface-variant tracking-wider">
                       {formatDuration(callDuration)}
                     </span>
                   )}
@@ -414,7 +447,7 @@ export default function CallOverlay() {
         {/* Local Video PiP (draggable corner preview) */}
         {callState === 'connected' && (
           <div
-            className="absolute z-40 rounded-2xl overflow-hidden shadow-2xl border-2 border-zinc-800/80 cursor-grab active:cursor-grabbing"
+            className="absolute z-40 rounded-2xl overflow-hidden shadow-2xl border-2 border-outline/80 cursor-grab active:cursor-grabbing"
             style={{
               width: 160,
               height: 220,
@@ -426,9 +459,9 @@ export default function CallOverlay() {
             onTouchStart={handlePipTouchStart}
           >
             {isCameraOff || !hasLocalVideo ? (
-              <div className="w-full h-full bg-zinc-900 flex flex-col items-center justify-center gap-2">
-                <CameraOff className="h-8 w-8 text-zinc-600" />
-                <span className="text-[10px] text-zinc-500 font-medium">Camera Off</span>
+              <div className="w-full h-full bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 flex flex-col items-center justify-center gap-2">
+                <CameraOff className="h-8 w-8 text-on-surface-faint" />
+                <span className="text-[10px] text-on-surface-muted font-medium">Camera Off</span>
               </div>
             ) : (
               <video
@@ -482,7 +515,7 @@ export default function CallOverlay() {
                       className={`p-3.5 rounded-full backdrop-blur-md transition-all duration-150 active:scale-90 ${
                         isMuted
                           ? 'bg-white/20 text-white'
-                          : 'bg-zinc-800/60 text-zinc-300 hover:text-white'
+                          : 'bg-surface-container-high/65 backdrop-blur-md border border-white/15 dark:border-white/5 text-on-surface-variant hover:text-white'
                       }`}
                       title={isMuted ? 'Unmute' : 'Mute'}
                     >
@@ -496,7 +529,7 @@ export default function CallOverlay() {
                         className={`p-3.5 rounded-full backdrop-blur-md transition-all duration-150 active:scale-90 ${
                           isCameraOff
                             ? 'bg-white/20 text-white'
-                            : 'bg-zinc-800/60 text-zinc-300 hover:text-white'
+                            : 'bg-surface-container-high/65 backdrop-blur-md border border-white/15 dark:border-white/5 text-on-surface-variant hover:text-white'
                         }`}
                         title={isCameraOff ? 'Turn camera on' : 'Turn camera off'}
                       >

@@ -364,18 +364,18 @@ export default function AdminDashboard({ onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 bg-zinc-950/95 backdrop-blur-2xl z-50 flex overflow-hidden text-zinc-100 font-sans">
+    <div className="fixed inset-0 glass-strong border border-white/30 dark:border-white/10 bg-surface/70 backdrop-blur-2xl z-50 flex overflow-hidden text-on-surface font-sans">
       
       {/* LEFT NAVIGATION PANEL */}
-      <div className="w-64 border-r border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md flex flex-col justify-between flex-shrink-0">
+      <div className="w-64 border-r border-outline/80 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 backdrop-blur-md flex flex-col justify-between flex-shrink-0">
         <div>
           {/* Dashboard Title Header */}
-          <div className="p-6 flex items-center gap-3 border-b border-zinc-800/60">
+          <div className="p-6 flex items-center gap-3 border-b border-outline/60">
             <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <Shield className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xs font-bold tracking-widest text-zinc-400 uppercase leading-none">Console</h1>
+              <h1 className="text-xs font-bold tracking-widest text-on-surface-muted uppercase leading-none">Console</h1>
               <span className="text-[13px] font-bold text-white mt-1 block">Admin Portal</span>
             </div>
           </div>
@@ -387,7 +387,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'overview'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/30 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
               }`}
             >
               <Activity className="h-4 w-4" />
@@ -398,7 +398,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'users'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/30 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
               }`}
             >
               <Users className="h-4 w-4" />
@@ -409,7 +409,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'chats'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/30 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
               }`}
             >
               <MessageSquare className="h-4 w-4" />
@@ -420,7 +420,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'logs'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/30 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
               }`}
             >
               <FileText className="h-4 w-4" />
@@ -430,10 +430,10 @@ export default function AdminDashboard({ onClose }) {
         </div>
 
         {/* Footer actions */}
-        <div className="p-4 border-t border-zinc-800/60">
+        <div className="p-4 border-t border-outline/60">
           <button
             onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800/40 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white rounded-xl text-xs font-semibold transition duration-200"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface-container-high/45 backdrop-blur-md border border-white/10 dark:border-white/5 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline hover:border-outline-variant text-on-surface-variant hover:text-white rounded-xl text-xs font-semibold transition duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Exit Command Portal
@@ -442,13 +442,13 @@ export default function AdminDashboard({ onClose }) {
       </div>
 
       {/* MAIN VIEWPORT */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
+      <div className="flex-1 flex flex-col overflow-hidden bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10">
         
         {/* Top Header Panel */}
-        <header className="h-16 border-b border-zinc-800/60 flex items-center justify-between px-8 bg-zinc-900/20">
+        <header className="h-16 border-b border-outline/60 flex items-center justify-between px-8 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/20">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
-            <h2 className="text-xs uppercase tracking-widest font-semibold text-zinc-400">
+            <h2 className="text-xs uppercase tracking-widest font-semibold text-on-surface-muted">
               System Gateway Online
             </h2>
           </div>
@@ -457,12 +457,12 @@ export default function AdminDashboard({ onClose }) {
             <button
               onClick={loadAllData}
               title="Refresh Data"
-              className="p-2 text-zinc-400 hover:text-emerald-400 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl transition duration-200"
+              className="p-2 text-on-surface-muted hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline hover:border-outline-variant rounded-xl transition duration-200"
             >
               <RefreshCw className="h-4 w-4" />
             </button>
-            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs">
-              <span className="font-semibold text-zinc-400">Operator:</span>
+            <div className="flex items-center gap-2 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline px-3 py-1.5 rounded-xl text-xs">
+              <span className="font-semibold text-on-surface-muted">Operator:</span>
               <span className="text-emerald-400 font-bold">{currentUser?.displayName}</span>
             </div>
           </div>
@@ -472,18 +472,18 @@ export default function AdminDashboard({ onClose }) {
         <main className="flex-1 overflow-y-auto p-8 relative">
           
           {loading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/80">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10">
               <div className="h-12 w-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-              <span className="mt-4 text-xs font-semibold text-zinc-400 tracking-wider">Syncing control panel...</span>
+              <span className="mt-4 text-xs font-semibold text-on-surface-muted tracking-wider">Syncing control panel...</span>
             </div>
           ) : error ? (
             <div className="p-6 rounded-2xl bg-red-500/5 border border-red-500/15 text-center space-y-4 max-w-md mx-auto mt-16">
               <AlertTriangle className="h-10 w-10 text-red-400 mx-auto" />
               <h3 className="font-semibold text-white">Administrative Decoupling</h3>
-              <p className="text-xs text-zinc-400">{error}</p>
+              <p className="text-xs text-on-surface-muted">{error}</p>
               <button
                 onClick={loadAllData}
-                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-850 rounded-xl text-xs border border-zinc-800 font-bold"
+                className="px-4 py-2 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md rounded-xl text-xs border border-outline font-bold"
               >
                 Retry Security Verification
               </button>
@@ -503,41 +503,41 @@ export default function AdminDashboard({ onClose }) {
                   {/* Glowing metrics grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Card 1: Users */}
-                    <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md relative overflow-hidden group hover:border-blue-500/30 transition duration-300">
+                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-blue-500/30 transition duration-300">
                       <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-4">
                         <Users className="h-5 w-5" />
                       </div>
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest block">Total Registered</span>
+                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Total Registered</span>
                       <h3 className="text-3xl font-bold text-white mt-1">{stats.totalUsers}</h3>
                       <div className="absolute top-0 right-0 h-24 w-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition duration-300"></div>
                     </div>
 
                     {/* Card 2: Online */}
-                    <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md relative overflow-hidden group hover:border-emerald-500/30 transition duration-300">
+                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-emerald-500/30 transition duration-300">
                       <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 mb-4">
                         <Activity className="h-5 w-5 animate-pulse" />
                       </div>
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest block">Active Sockets</span>
+                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Active Sockets</span>
                       <h3 className="text-3xl font-bold text-white mt-1">{stats.onlineUsers}</h3>
                       <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition duration-300"></div>
                     </div>
 
                     {/* Card 3: Messages */}
-                    <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md relative overflow-hidden group hover:border-purple-500/30 transition duration-300">
+                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-purple-500/30 transition duration-300">
                       <div className="h-12 w-12 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 mb-4">
                         <MessageSquare className="h-5 w-5" />
                       </div>
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest block">Database Packets</span>
+                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Database Packets</span>
                       <h3 className="text-3xl font-bold text-white mt-1">{stats.totalMessages}</h3>
                       <div className="absolute top-0 right-0 h-24 w-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition duration-300"></div>
                     </div>
 
                     {/* Card 4: Groups */}
-                    <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md relative overflow-hidden group hover:border-pink-500/30 transition duration-300">
+                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-pink-500/30 transition duration-300">
                       <div className="h-12 w-12 rounded-2xl bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 mb-4">
                         <TrendingUp className="h-5 w-5" />
                       </div>
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest block">Active Groups</span>
+                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Active Groups</span>
                       <h3 className="text-3xl font-bold text-white mt-1">{stats.totalGroups}</h3>
                       <div className="absolute top-0 right-0 h-24 w-24 bg-pink-500/5 rounded-full blur-2xl group-hover:bg-pink-500/10 transition duration-300"></div>
                     </div>
@@ -549,39 +549,39 @@ export default function AdminDashboard({ onClose }) {
                     {/* Left: Server Infrastructure & Maintenance */}
                     <div className="space-y-6 lg:col-span-1">
                       {/* Infrastructure Health */}
-                      <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                           <Server className="h-4 w-4 text-emerald-400" /> Infrastructure Health
                         </h3>
                         
                         <div className="space-y-3 mt-2">
-                          <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                            <span className="text-[11px] text-zinc-400">Database Size</span>
-                            <span className="text-[11px] font-bold text-zinc-200">
+                          <div className="flex items-center justify-between border-b border-outline pb-2">
+                            <span className="text-[11px] text-on-surface-muted">Database Size</span>
+                            <span className="text-[11px] font-bold text-on-surface">
                               {stats.analytics?.dbSize ? formatBytes(stats.analytics.dbSize) : 'Unknown'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                            <span className="text-[11px] text-zinc-400">Node Engine</span>
-                            <span className="text-[11px] font-mono font-bold text-zinc-200">
+                          <div className="flex items-center justify-between border-b border-outline pb-2">
+                            <span className="text-[11px] text-on-surface-muted">Node Engine</span>
+                            <span className="text-[11px] font-mono font-bold text-on-surface">
                               {stats.analytics?.system?.nodeVersion || 'Unknown'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                            <span className="text-[11px] text-zinc-400">Server Platform</span>
-                            <span className="text-[11px] font-mono text-zinc-200 uppercase">
+                          <div className="flex items-center justify-between border-b border-outline pb-2">
+                            <span className="text-[11px] text-on-surface-muted">Server Platform</span>
+                            <span className="text-[11px] font-mono text-on-surface uppercase">
                               {stats.analytics?.system?.platform || 'Unknown'} ({stats.analytics?.system?.arch || ''})
                             </span>
                           </div>
-                          <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                            <span className="text-[11px] text-zinc-400">Server RAM</span>
-                            <span className="text-[11px] font-mono text-zinc-200">
+                          <div className="flex items-center justify-between border-b border-outline pb-2">
+                            <span className="text-[11px] text-on-surface-muted">Server RAM</span>
+                            <span className="text-[11px] font-mono text-on-surface">
                               {stats.analytics?.system?.heapUsed ? formatBytes(stats.analytics.system.heapUsed) : 'Unknown'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                            <span className="text-[11px] text-zinc-400">Uptime</span>
-                            <span className="text-[11px] font-mono text-zinc-200">
+                          <div className="flex items-center justify-between border-b border-outline pb-2">
+                            <span className="text-[11px] text-on-surface-muted">Uptime</span>
+                            <span className="text-[11px] font-mono text-on-surface">
                               {Math.floor(stats.serverUptime / 3600)}h {Math.floor((stats.serverUptime % 3600) / 60)}m
                             </span>
                           </div>
@@ -589,12 +589,12 @@ export default function AdminDashboard({ onClose }) {
                       </div>
 
                       {/* SQLite Database Maintenance */}
-                      <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                           <ShieldCheck className="h-4 w-4 text-emerald-400" /> DB Optimization
                         </h3>
                         
-                        <p className="text-[10px] text-zinc-500 leading-relaxed">
+                        <p className="text-[10px] text-on-surface-muted leading-relaxed">
                           Execute database procedures directly on the SQLite engine to guarantee database integrity and clean indices.
                         </p>
 
@@ -602,7 +602,7 @@ export default function AdminDashboard({ onClose }) {
                           <button
                             onClick={() => handleMaintenance('integrity_check')}
                             disabled={maintenanceRunning}
-                            className="w-full py-2 bg-zinc-950 hover:bg-zinc-850 border border-zinc-800/60 rounded-xl text-[10px] font-bold text-zinc-300 hover:text-white transition flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline/60 rounded-xl text-[10px] font-bold text-on-surface-variant hover:text-white transition flex items-center justify-center gap-2"
                           >
                             <ShieldAlert className="h-3.5 w-3.5 text-blue-400" />
                             Verify DB Integrity
@@ -610,7 +610,7 @@ export default function AdminDashboard({ onClose }) {
                           <button
                             onClick={() => handleMaintenance('vacuum')}
                             disabled={maintenanceRunning}
-                            className="w-full py-2 bg-zinc-950 hover:bg-zinc-850 border border-zinc-800/60 rounded-xl text-[10px] font-bold text-zinc-300 hover:text-white transition flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline/60 rounded-xl text-[10px] font-bold text-on-surface-variant hover:text-white transition flex items-center justify-center gap-2"
                           >
                             <RefreshCw className={`h-3.5 w-3.5 text-emerald-400 ${maintenanceRunning ? 'animate-spin' : ''}`} />
                             Vacuum & Compact DB
@@ -632,12 +632,12 @@ export default function AdminDashboard({ onClose }) {
                     {/* Middle/Right: Broadcast alerts & graphical breakdowns */}
                     <div className="space-y-6 lg:col-span-2">
                       {/* Real-time System Broadcast Panel */}
-                      <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                           <MessageCircle className="h-4 w-4 text-emerald-400 animate-pulse" /> System Broadcast Transmission
                         </h3>
                         
-                        <p className="text-[10px] text-zinc-500 leading-relaxed">
+                        <p className="text-[10px] text-on-surface-muted leading-relaxed">
                           Broadcast a warning banner or service announcement to all active connections in real-time.
                         </p>
 
@@ -646,26 +646,26 @@ export default function AdminDashboard({ onClose }) {
                             value={broadcastMessage}
                             onChange={(e) => setBroadcastMessage(e.target.value)}
                             placeholder="Type broadcast message (e.g. Server under scheduled maintenance in 10 minutes...)"
-                            className="w-full h-16 p-3 bg-zinc-950/60 border border-zinc-850 rounded-2xl text-[11px] text-zinc-200 placeholder-zinc-650 focus:outline-none focus:border-emerald-500/50 resize-none leading-relaxed"
+                            className="w-full h-16 p-3 bg-surface/65 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-2xl text-[11px] text-on-surface placeholder-zinc-650 focus:outline-none focus:border-emerald-500/50 resize-none leading-relaxed"
                             required
                           />
                           <div className="flex flex-col gap-1.5">
-                            <span className="text-[9px] uppercase font-bold text-zinc-500">Attach Broadcast Media (Optional - Posts to Status Feed):</span>
+                            <span className="text-[9px] uppercase font-bold text-on-surface-muted">Attach Broadcast Media (Optional - Posts to Status Feed):</span>
                             <input 
                               type="file"
                               ref={fileInputRef}
                               accept="image/*"
                               onChange={(e) => setBroadcastFile(e.target.files?.[0] || null)}
-                              className="text-[10px] text-zinc-400 bg-zinc-950/40 border border-zinc-850 p-2 rounded-xl focus:outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-zinc-800 file:text-zinc-200 file:hover:bg-zinc-700 hover:border-zinc-800 transition cursor-pointer"
+                              className="text-[10px] text-on-surface-muted bg-surface/50 backdrop-blur-xl border border-white/25 dark:border-white/10 border border-outline p-2 rounded-xl focus:outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 file:text-on-surface file:hover:bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5 hover:border-outline transition cursor-pointer"
                             />
                           </div>
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-2">
-                              <span className="text-[9px] uppercase font-bold text-zinc-500">Severity:</span>
+                              <span className="text-[9px] uppercase font-bold text-on-surface-muted">Severity:</span>
                               <select
                                 value={broadcastSeverity}
                                 onChange={(e) => setBroadcastSeverity(e.target.value)}
-                                className="bg-zinc-950 border border-zinc-850 text-zinc-300 text-[10px] px-2 py-1 rounded-lg focus:outline-none focus:border-emerald-500"
+                                className="bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline text-on-surface-variant text-[10px] px-2 py-1 rounded-lg focus:outline-none focus:border-emerald-500"
                               >
                                 <option value="info">💡 Info</option>
                                 <option value="warning">⚠️ Warning</option>
@@ -684,45 +684,45 @@ export default function AdminDashboard({ onClose }) {
                       </div>
 
                       {/* Visual Analytics breakdowns */}
-                      <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                           <TrendingUp className="h-4 w-4 text-blue-400" /> Analytical Distributions
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                           {/* Role Distribution Bar */}
                           <div className="space-y-1.5">
-                            <div className="flex justify-between text-[9px] uppercase font-bold text-zinc-400">
+                            <div className="flex justify-between text-[9px] uppercase font-bold text-on-surface-muted">
                               <span>Security Roles</span>
-                              <span className="text-zinc-300">
+                              <span className="text-on-surface-variant">
                                 {stats.analytics?.roles?.admin || 0} Admins / {stats.analytics?.roles?.user || 0} Users
                               </span>
                             </div>
-                            <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden flex">
+                            <div className="h-2 w-full bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-full overflow-hidden flex">
                               <div 
                                 style={{ width: `${(stats.analytics?.roles?.admin || 0) / (stats.totalUsers || 1) * 100}%` }} 
                                 className="h-full bg-emerald-500"
                               />
                               <div 
                                 style={{ width: `${(stats.analytics?.roles?.user || 0) / (stats.totalUsers || 1) * 100}%` }} 
-                                className="h-full bg-zinc-700"
+                                className="h-full bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5"
                               />
                             </div>
-                            <div className="flex justify-between text-[8px] text-zinc-500">
+                            <div className="flex justify-between text-[8px] text-on-surface-muted">
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span> Admin</span>
-                              <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-zinc-700 rounded-full"></span> Standard User</span>
+                              <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-full"></span> Standard User</span>
                             </div>
                           </div>
 
                           {/* Security Status Ban rate */}
                           <div className="space-y-1.5">
-                            <div className="flex justify-between text-[9px] uppercase font-bold text-zinc-400">
+                            <div className="flex justify-between text-[9px] uppercase font-bold text-on-surface-muted">
                               <span>Account Status</span>
-                              <span className="text-zinc-300">
+                              <span className="text-on-surface-variant">
                                 {stats.analytics?.banned || 0} Suspended / {(stats.totalUsers || 0) - (stats.analytics?.banned || 0)} Active
                               </span>
                             </div>
-                            <div className="h-2 w-full bg-zinc-950 rounded-full overflow-hidden flex">
+                            <div className="h-2 w-full bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-full overflow-hidden flex">
                               <div 
                                 style={{ width: `${(stats.analytics?.banned || 0) / (stats.totalUsers || 1) * 100}%` }} 
                                 className="h-full bg-red-500"
@@ -732,7 +732,7 @@ export default function AdminDashboard({ onClose }) {
                                 className="h-full bg-emerald-500"
                               />
                             </div>
-                            <div className="flex justify-between text-[8px] text-zinc-500">
+                            <div className="flex justify-between text-[8px] text-on-surface-muted">
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-red-500 rounded-full"></span> Banned</span>
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span> Active</span>
                             </div>
@@ -740,22 +740,22 @@ export default function AdminDashboard({ onClose }) {
                         </div>
 
                         {/* Message Type Stacked Breakdown */}
-                        <div className="space-y-2 mt-4 pt-4 border-t border-zinc-800/40">
-                          <span className="text-[9px] uppercase font-bold text-zinc-400 block">Message Formats Distribution</span>
+                        <div className="space-y-2 mt-4 pt-4 border-t border-outline/40">
+                          <span className="text-[9px] uppercase font-bold text-on-surface-muted block">Message Formats Distribution</span>
                           
                           {(() => {
                             const mt = stats.analytics?.messageTypes || { text: 0, image: 0, video: 0, audio: 0, file: 0 };
                             const sum = Object.values(mt).reduce((a, b) => a + b, 0) || 1;
                             return (
                               <div className="space-y-2">
-                                <div className="h-3 w-full bg-zinc-950 rounded-lg overflow-hidden flex">
+                                <div className="h-3 w-full bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-lg overflow-hidden flex">
                                   <div style={{ width: `${mt.text / sum * 100}%` }} className="h-full bg-emerald-500" title={`Text: ${mt.text}`} />
                                   <div style={{ width: `${mt.image / sum * 100}%` }} className="h-full bg-blue-500" title={`Images: ${mt.image}`} />
                                   <div style={{ width: `${mt.video / sum * 100}%` }} className="h-full bg-red-500" title={`Videos: ${mt.video}`} />
                                   <div style={{ width: `${mt.audio / sum * 100}%` }} className="h-full bg-purple-500" title={`Audio: ${mt.audio}`} />
                                   <div style={{ width: `${mt.file / sum * 100}%` }} className="h-full bg-pink-500" title={`Files: ${mt.file}`} />
                                 </div>
-                                <div className="grid grid-cols-5 gap-1.5 text-[8px] text-zinc-500 leading-none">
+                                <div className="grid grid-cols-5 gap-1.5 text-[8px] text-on-surface-muted leading-none">
                                   <span className="truncate flex items-center gap-1"><span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span> Text ({mt.text})</span>
                                   <span className="truncate flex items-center gap-1"><span className="h-1.5 w-1.5 bg-blue-500 rounded-full"></span> Image ({mt.image})</span>
                                   <span className="truncate flex items-center gap-1"><span className="h-1.5 w-1.5 bg-red-500 rounded-full"></span> Video ({mt.video})</span>
@@ -786,7 +786,7 @@ export default function AdminDashboard({ onClose }) {
                   {/* Filter and Search controls */}
                   <div className="flex items-center justify-between gap-4">
                     <div className="relative flex-1 max-w-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-muted">
                         <Search className="h-4 w-4" />
                       </div>
                       <input
@@ -794,20 +794,20 @@ export default function AdminDashboard({ onClose }) {
                         value={userSearch}
                         onChange={(e) => setUserSearch(e.target.value)}
                         placeholder="Search operators and users..."
-                        className="block w-full pl-10 pr-4 py-2.5 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="block w-full pl-10 pr-4 py-2.5 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline/80 rounded-2xl text-on-surface placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
-                    <span className="text-xs font-semibold text-zinc-400">
+                    <span className="text-xs font-semibold text-on-surface-muted">
                       Total: <span className="text-white">{filteredUsers.length}</span> / {users.length}
                     </span>
                   </div>
 
                   {/* Users Table */}
-                  <div className="rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md overflow-hidden">
+                  <div className="rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-zinc-800/60 bg-zinc-900/10 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                          <tr className="border-b border-outline/60 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/10 text-[10px] font-bold uppercase tracking-widest text-on-surface-muted">
                             <th className="px-6 py-4">Participant</th>
                             <th className="px-6 py-4">Role / Privileges</th>
                             <th className="px-6 py-4">Status</th>
@@ -825,7 +825,7 @@ export default function AdminDashboard({ onClose }) {
                             return (
                               <tr 
                                 key={user.id}
-                                className={`hover:bg-zinc-800/10 transition duration-150 ${
+                                className={`hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition duration-150 ${
                                   isBanned ? 'bg-red-500/[0.02]' : ''
                                 }`}
                               >
@@ -836,10 +836,10 @@ export default function AdminDashboard({ onClose }) {
                                       <img 
                                         src={getAvatarUrl(user.avatarUrl)} 
                                         alt={user.displayName} 
-                                        className="h-9 w-9 rounded-full object-cover border border-zinc-800" 
+                                        className="h-9 w-9 rounded-full object-cover border border-outline" 
                                       />
                                     ) : (
-                                      <div className="h-9 w-9 rounded-full bg-zinc-800 border border-zinc-800 flex items-center justify-center font-bold text-zinc-300 text-[10px] uppercase">
+                                      <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline flex items-center justify-center font-bold text-on-surface-variant text-[10px] uppercase">
                                         {getInitials(user.displayName)}
                                       </div>
                                     )}
@@ -847,12 +847,12 @@ export default function AdminDashboard({ onClose }) {
                                       <div className="font-bold text-white flex items-center gap-1.5">
                                         {user.displayName}
                                         {isMe && (
-                                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-zinc-800 border border-zinc-750 text-zinc-400">
+                                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-zinc-750 text-on-surface-muted">
                                             Operator
                                           </span>
                                         )}
                                       </div>
-                                      <div className="text-[10px] text-zinc-500 mt-0.5">{user.email}</div>
+                                      <div className="text-[10px] text-on-surface-muted mt-0.5">{user.email}</div>
                                     </div>
                                   </div>
                                 </td>
@@ -862,7 +862,7 @@ export default function AdminDashboard({ onClose }) {
                                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border ${
                                     user.role === 'admin' 
                                       ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' 
-                                      : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+                                      : 'bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border-outline text-on-surface-muted'
                                   }`}>
                                     {user.role}
                                   </span>
@@ -879,17 +879,17 @@ export default function AdminDashboard({ onClose }) {
                                       <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span> ONLINE
                                     </span>
                                   ) : (
-                                    <span className="text-zinc-500 font-medium">OFFLINE</span>
+                                    <span className="text-on-surface-muted font-medium">OFFLINE</span>
                                   )}
                                 </td>
 
                                 {/* Database ID */}
-                                <td className="px-6 py-4 whitespace-nowrap font-mono text-[10px] text-zinc-500">
+                                <td className="px-6 py-4 whitespace-nowrap font-mono text-[10px] text-on-surface-muted">
                                   {user.id}
                                 </td>
 
                                 {/* Creation date */}
-                                <td className="px-6 py-4 whitespace-nowrap text-zinc-400 font-medium">
+                                <td className="px-6 py-4 whitespace-nowrap text-on-surface-muted font-medium">
                                   {new Date(user.createdAt).toLocaleDateString()}
                                 </td>
 
@@ -905,7 +905,7 @@ export default function AdminDashboard({ onClose }) {
                                       className={`p-1.5 rounded-lg border transition ${
                                         user.role === 'admin'
                                           ? 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/20'
-                                          : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-400 border-zinc-850'
+                                          : 'bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md text-on-surface-muted border-outline'
                                       } ${isMe ? 'opacity-30 cursor-not-allowed' : ''}`}
                                     >
                                       <Shield className="h-3.5 w-3.5" />
@@ -919,7 +919,7 @@ export default function AdminDashboard({ onClose }) {
                                       className={`p-1.5 rounded-lg border transition ${
                                         isBanned
                                           ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20'
-                                          : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-400 border-zinc-850'
+                                          : 'bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md text-on-surface-muted border-outline'
                                       } ${isMe ? 'opacity-30 cursor-not-allowed' : ''}`}
                                     >
                                       {isBanned ? <UserCheck className="h-3.5 w-3.5" /> : <UserX className="h-3.5 w-3.5" />}
@@ -930,7 +930,7 @@ export default function AdminDashboard({ onClose }) {
                                       onClick={() => handleDeleteUser(user.id, user.displayName)}
                                       disabled={isMe || actionLoading === user.id}
                                       title="Delete Account"
-                                      className={`p-1.5 bg-zinc-900 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-zinc-850 hover:border-red-500/20 rounded-lg transition ${
+                                      className={`p-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-red-500/10 text-on-surface-muted hover:text-red-400 border border-outline hover:border-red-500/20 rounded-lg transition ${
                                         isMe ? 'opacity-30 cursor-not-allowed' : ''
                                       }`}
                                     >
@@ -960,7 +960,7 @@ export default function AdminDashboard({ onClose }) {
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="relative flex-1 max-w-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-muted">
                         <Search className="h-4 w-4" />
                       </div>
                       <input
@@ -968,7 +968,7 @@ export default function AdminDashboard({ onClose }) {
                         value={chatSearch}
                         onChange={(e) => setChatSearch(e.target.value)}
                         placeholder="Search channels and groups..."
-                        className="block w-full pl-10 pr-4 py-2.5 bg-zinc-900/40 border border-zinc-800/80 rounded-2xl text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="block w-full pl-10 pr-4 py-2.5 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline/80 rounded-2xl text-on-surface placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
@@ -976,25 +976,25 @@ export default function AdminDashboard({ onClose }) {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     
                     {/* Left: Group Chats */}
-                    <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                         <Users className="h-4 w-4 text-emerald-400" /> Group Channels ({filteredGroups.length})
                       </h3>
 
                       <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
                         {filteredGroups.map(group => (
-                          <div key={group.id} className="p-3.5 rounded-2xl bg-zinc-950/20 border border-zinc-900 flex items-center justify-between hover:bg-zinc-800/10 transition">
+                          <div key={group.id} className="p-3.5 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition">
                             <div className="flex items-center gap-3 min-w-0">
                               {group.avatarUrl ? (
-                                <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-9 w-9 rounded-full object-cover border border-zinc-800" />
+                                <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-9 w-9 rounded-full object-cover border border-outline" />
                               ) : (
-                                <div className="h-9 w-9 rounded-full bg-zinc-800 border border-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300">
+                                <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline flex items-center justify-center text-xs font-bold text-on-surface-variant">
                                   G
                                 </div>
                               )}
                               <div className="min-w-0">
                                 <h4 className="text-xs font-bold text-white truncate">{group.name}</h4>
-                                <p className="text-[10px] text-zinc-500 mt-0.5 truncate">
+                                <p className="text-[10px] text-on-surface-muted mt-0.5 truncate">
                                   Creator: {group.creatorName} • {group.memberCount} members
                                 </p>
                               </div>
@@ -1003,13 +1003,13 @@ export default function AdminDashboard({ onClose }) {
                             <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
                               <button
                                 onClick={() => handleOpenAudit(group.id, group.name, true)}
-                                className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-800 text-zinc-300 rounded-lg text-[10px] font-semibold transition"
+                                className="px-2.5 py-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline hover:border-outline text-on-surface-variant rounded-lg text-[10px] font-semibold transition"
                               >
                                 Audit Logs
                               </button>
                               <button
                                 onClick={() => handleDeleteGroup(group.id, group.name)}
-                                className="p-1.5 bg-zinc-900 hover:bg-red-500/10 border border-zinc-850 hover:border-red-500/20 text-zinc-500 hover:text-red-400 rounded-lg transition"
+                                className="p-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-red-500/10 border border-outline hover:border-red-500/20 text-on-surface-muted hover:text-red-400 rounded-lg transition"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -1018,34 +1018,34 @@ export default function AdminDashboard({ onClose }) {
                         ))}
 
                         {filteredGroups.length === 0 && (
-                          <div className="text-center py-8 text-zinc-600 text-xs">No groups matching query.</div>
+                          <div className="text-center py-8 text-on-surface-faint text-xs">No groups matching query.</div>
                         )}
                       </div>
                     </div>
 
                     {/* Right: Direct Active DM Rooms */}
-                    <div className="p-6 rounded-3xl bg-zinc-900/35 border border-zinc-800/80 backdrop-blur-md space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-blue-400" /> Active Direct Rooms ({filteredDirects.length})
                       </h3>
 
                       <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
                         {filteredDirects.map(direct => (
-                          <div key={direct.chatId} className="p-3.5 rounded-2xl bg-zinc-950/20 border border-zinc-900 flex items-center justify-between hover:bg-zinc-800/10 transition">
+                          <div key={direct.chatId} className="p-3.5 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition">
                             <div className="min-w-0">
                               <h4 className="text-xs font-bold text-white truncate flex items-center gap-1.5">
                                 <span className="truncate">{direct.userAName}</span>
-                                <span className="text-zinc-600 font-semibold">↔</span>
+                                <span className="text-on-surface-faint font-semibold">↔</span>
                                 <span className="truncate">{direct.userBName}</span>
                               </h4>
-                              <p className="text-[10px] text-zinc-500 mt-0.5">
+                              <p className="text-[10px] text-on-surface-muted mt-0.5">
                                 Volume: {direct.messageCount} packets • Active: {new Date(direct.lastActive).toLocaleTimeString()}
                               </p>
                             </div>
 
                             <button
                               onClick={() => handleOpenAudit(direct.chatId, `${direct.userAName} & ${direct.userBName}`, false)}
-                              className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-800 text-zinc-300 rounded-lg text-[10px] font-semibold transition"
+                              className="px-2.5 py-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline hover:border-outline text-on-surface-variant rounded-lg text-[10px] font-semibold transition"
                             >
                               Audit Logs
                             </button>
@@ -1053,7 +1053,7 @@ export default function AdminDashboard({ onClose }) {
                         ))}
 
                         {filteredDirects.length === 0 && (
-                          <div className="text-center py-8 text-zinc-600 text-xs">No active direct rooms found.</div>
+                          <div className="text-center py-8 text-on-surface-faint text-xs">No active direct rooms found.</div>
                         )}
                       </div>
                     </div>
@@ -1074,25 +1074,25 @@ export default function AdminDashboard({ onClose }) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted">
                         Live System Command Log (Socket.IO Connection)
                       </h3>
                     </div>
                     <button
                       onClick={() => setLogs([])}
-                      className="px-2.5 py-1 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-[10px] text-zinc-400 hover:text-white font-bold transition"
+                      className="px-2.5 py-1 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline rounded-lg text-[10px] text-on-surface-muted hover:text-white font-bold transition"
                     >
                       Clear Terminal
                     </button>
                   </div>
 
                   {/* Terminal Log Container */}
-                  <div className="h-[480px] bg-zinc-950/80 border border-zinc-900 rounded-3xl p-6 font-mono text-[11px] overflow-y-auto flex flex-col gap-2 relative shadow-2xl">
-                    <div className="absolute top-4 right-6 text-[9px] font-bold text-zinc-600 select-none">
+                  <div className="h-[480px] bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 border border-outline-variant rounded-3xl p-6 font-mono text-[11px] overflow-y-auto flex flex-col gap-2 relative shadow-2xl">
+                    <div className="absolute top-4 right-6 text-[9px] font-bold text-on-surface-faint select-none">
                       ANTIGRAVITY SYSTEMS DEPLOYED
                     </div>
                     
-                    <div className="text-zinc-600 border-b border-zinc-900 pb-2">
+                    <div className="text-on-surface-faint border-b border-outline-variant pb-2">
                       --- HANDSHAKE ESTABLISHED CORE LOGGING CLIENT ---
                       <br />
                       --- LISTENING ON PORT 5000 SYNCED TO SQLITE ARCHIVES ---
@@ -1105,16 +1105,16 @@ export default function AdminDashboard({ onClose }) {
                       if (log.category === 'Security') catColor = 'text-purple-400';
                       
                       return (
-                        <div key={log.id} className="flex gap-2.5 leading-relaxed items-start hover:bg-zinc-900/30 py-0.5 rounded px-1 transition duration-100">
-                          <span className="text-zinc-600 font-semibold">{log.timestamp}</span>
+                        <div key={log.id} className="flex gap-2.5 leading-relaxed items-start hover:bg-surface-container/35 backdrop-blur-md border border-white/20 dark:border-white/5 py-0.5 rounded px-1 transition duration-100">
+                          <span className="text-on-surface-faint font-semibold">{log.timestamp}</span>
                           <span className={`${catColor} font-bold`}>[{log.category.toUpperCase()}]</span>
-                          <span className="text-zinc-300">{log.message}</span>
+                          <span className="text-on-surface-variant">{log.message}</span>
                         </div>
                       );
                     })}
 
                     {logs.length === 0 && (
-                      <div className="text-zinc-600 text-center py-20 italic">
+                      <div className="text-on-surface-faint text-center py-20 italic">
                         Logs empty. Awaiting client connections or operator actions...
                       </div>
                     )}
@@ -1131,16 +1131,16 @@ export default function AdminDashboard({ onClose }) {
       {/* FULLSCREEN AUDIT HISTORY PORTAL (Drawer / Modal overlay) */}
       <AnimatePresence>
         {selectedAuditChat && (
-          <div className="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-50 flex items-center justify-end">
+          <div className="fixed inset-0 glass-strong border border-white/30 dark:border-white/10 bg-surface/70 backdrop-blur-md z-50 flex items-center justify-end">
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="w-full max-w-lg h-full bg-zinc-900 border-l border-zinc-800 flex flex-col"
+              className="w-full max-w-lg h-full bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border-l border-outline flex flex-col"
             >
               {/* Drawer Header */}
-              <div className="p-6 border-b border-zinc-800/60 flex items-center justify-between bg-zinc-900/40">
+              <div className="p-6 border-b border-outline/60 flex items-center justify-between bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5">
                 <div>
                   <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/15 px-2 py-0.5 rounded-full">
                     Audit Inspection
@@ -1151,60 +1151,60 @@ export default function AdminDashboard({ onClose }) {
                 </div>
                 <button
                   onClick={() => setSelectedAuditChat(null)}
-                  className="p-2 text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 border border-zinc-800 rounded-xl transition duration-200"
+                  className="p-2 text-on-surface-muted hover:text-white bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 hover:bg-surface-container-high/40 backdrop-blur-md border border-outline rounded-xl transition duration-200"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               {/* History Stream */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-zinc-950/30">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-surface/40 backdrop-blur-lg border border-white/25 dark:border-white/5">
                 {auditLoading ? (
                   <div className="text-center py-20">
                     <div className="h-8 w-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto"></div>
-                    <span className="text-[11px] text-zinc-500 mt-3 block">Extracting messaging database rows...</span>
+                    <span className="text-[11px] text-on-surface-muted mt-3 block">Extracting messaging database rows...</span>
                   </div>
                 ) : auditHistory.length === 0 ? (
-                  <div className="text-center py-20 text-zinc-600 text-xs italic">
+                  <div className="text-center py-20 text-on-surface-faint text-xs italic">
                     No logs found. Conversation empty.
                   </div>
                 ) : (
                   auditHistory.map(msg => (
                     <div 
                       key={msg.id}
-                      className="p-3 rounded-2xl bg-zinc-900/40 border border-zinc-850 flex items-start justify-between group hover:border-zinc-700 transition"
+                      className="p-3 rounded-2xl bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline flex items-start justify-between group hover:border-outline-variant transition"
                     >
                       <div className="flex gap-2.5 min-w-0">
                         {msg.senderAvatar ? (
                           <img src={msg.senderAvatar} alt={msg.senderName} className="h-7 w-7 rounded-full object-cover mt-0.5" />
                         ) : (
-                          <div className="h-7 w-7 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-zinc-300 text-[10px] mt-0.5 uppercase">
+                          <div className="h-7 w-7 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center font-bold text-on-surface-variant text-[10px] mt-0.5 uppercase">
                             {getInitials(msg.senderName)}
                           </div>
                         )}
                         <div className="min-w-0">
                           <div className="flex items-baseline gap-2">
                             <span className="text-[11px] font-bold text-white">{msg.senderName}</span>
-                            <span className="text-[9px] text-zinc-600 font-mono">
+                            <span className="text-[9px] text-on-surface-faint font-mono">
                               {new Date(msg.createdAt).toLocaleTimeString()}
                             </span>
                           </div>
                           
                           {/* Content format */}
                           {msg.type === 'text' ? (
-                            <p className="text-xs text-zinc-300 mt-1 break-words leading-relaxed whitespace-pre-wrap">
+                            <p className="text-xs text-on-surface-variant mt-1 break-words leading-relaxed whitespace-pre-wrap">
                               {msg.content}
                             </p>
                           ) : (
                             <div className="mt-1">
-                              <span className="text-[10px] text-zinc-500 bg-zinc-850 px-2 py-0.5 rounded font-mono border border-zinc-800">
+                              <span className="text-[10px] text-on-surface-muted bg-surface-container/40 backdrop-blur-md px-2 py-0.5 rounded font-mono border border-outline">
                                 Attachment: {msg.type}
                               </span>
                               {msg.type.startsWith('image/') && (
                                 <img 
                                   src={msg.content} 
                                   alt="Attachment" 
-                                  className="h-20 max-w-[120px] rounded-lg object-cover border border-zinc-850 mt-1.5" 
+                                  className="h-20 max-w-[120px] rounded-lg object-cover border border-outline mt-1.5" 
                                 />
                               )}
                             </div>
@@ -1216,7 +1216,7 @@ export default function AdminDashboard({ onClose }) {
                       <button
                         onClick={() => handleDeleteMessage(msg.id)}
                         title="Delete Message"
-                        className="p-1.5 text-zinc-500 hover:text-red-400 bg-zinc-950 border border-zinc-850 hover:border-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition duration-200"
+                        className="p-1.5 text-on-surface-muted hover:text-red-400 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline hover:border-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition duration-200"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
