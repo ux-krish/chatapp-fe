@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Users, MessageSquare, Activity, Server, UserX, UserCheck,
   Trash2, TrendingUp, Clock, ArrowLeft, Search, MessageCircle, X,
-  FileText, RefreshCw, AlertTriangle, ShieldCheck, ShieldAlert
+  FileText, RefreshCw, AlertTriangle, ShieldCheck, ShieldAlert,
+  Menu, X as XIcon, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 const getInitials = (name) => {
@@ -20,6 +21,7 @@ export default function AdminDashboard({ onClose }) {
   const { socket } = useChat();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'users', 'chats', 'logs'
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     onlineUsers: 0,
@@ -366,77 +368,88 @@ export default function AdminDashboard({ onClose }) {
   return (
     <div className="fixed inset-0 glass-strong border border-outline bg-surface/70 backdrop-blur-2xl z-50 flex overflow-hidden text-on-surface font-sans">
       
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* LEFT NAVIGATION PANEL */}
-      <div className="w-64 border-r border-outline/80 bg-surface-container/50 backdrop-blur-lg border border-outline-variant flex flex-col justify-between flex-shrink-0">
+      <div className={`w-64 border-r border-outline/80 bg-surface-container/50 backdrop-blur-lg border border-outline-variant flex flex-col justify-between flex-shrink-0 z-50 lg:static fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:visible ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
         <div>
           {/* Dashboard Title Header */}
-          <div className="px-6 pb-6 pt-[calc(24px+env(safe-area-inset-top))] flex items-center gap-3 border-b border-outline/60">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Shield className="h-5 w-5" />
+          <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-[calc(16px+env(safe-area-inset-top))] flex items-center gap-3 border-b border-outline/60">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <h1 className="text-xs font-bold tracking-widest text-on-surface-muted uppercase leading-none">Console</h1>
-              <span className="text-[13px] font-bold text-white mt-1 block">Admin Portal</span>
+            <div className="min-w-0">
+              <h1 className="text-xs font-bold tracking-widest text-on-surface-muted uppercase leading-none truncate">Console</h1>
+              <span className="text-[12px] sm:text-[13px] font-bold text-white mt-1 block truncate">Admin Portal</span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-4 space-y-1">
+          <nav className="p-3 sm:p-4 space-y-1">
             <button
-              onClick={() => setActiveTab('overview')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
+              onClick={() => { setActiveTab('overview'); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'overview'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
                   : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
-              <Activity className="h-4 w-4" />
-              Overview
+              <Activity className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Overview</span>
             </button>
             <button
-              onClick={() => setActiveTab('users')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
+              onClick={() => { setActiveTab('users'); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'users'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
                   : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
-              <Users className="h-4 w-4" />
-              User Directory
+              <Users className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">User Directory</span>
             </button>
             <button
-              onClick={() => setActiveTab('chats')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
+              onClick={() => { setActiveTab('chats'); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'chats'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
                   : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
-              <MessageSquare className="h-4 w-4" />
-              Chat Moderation
+              <MessageSquare className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Chat Moderation</span>
             </button>
             <button
-              onClick={() => setActiveTab('logs')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
+              onClick={() => { setActiveTab('logs'); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'logs'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
                   : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
-              <FileText className="h-4 w-4" />
-              Real-Time Logs
+              <FileText className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Real-Time Logs</span>
             </button>
           </nav>
         </div>
 
         {/* Footer actions */}
-        <div className="px-4 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))] border-t border-outline/60">
+        <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-[calc(16px+env(safe-area-inset-bottom))] border-t border-outline/60">
           <button
-            onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface-container-high/45 backdrop-blur-md border border-outline hover:border-outline-variant text-on-surface-variant hover:text-white rounded-xl text-xs font-semibold transition duration-200"
+            onClick={() => { onClose(); setSidebarOpen(false); }}
+            className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-surface-container-high/45 backdrop-blur-md border border-outline hover:border-outline-variant text-on-surface-variant hover:text-white rounded-xl text-xs font-semibold transition duration-200"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Exit Command Portal
+            <ArrowLeft className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Exit Command Portal</span>
           </button>
         </div>
       </div>
@@ -445,31 +458,46 @@ export default function AdminDashboard({ onClose }) {
       <div className="flex-1 flex flex-col overflow-hidden bg-surface/85 backdrop-blur-xl border-l border-outline">
         
         {/* Top Header Panel */}
-        <header className="px-8 pb-4 pt-[calc(16px+env(safe-area-inset-top))] border-b border-outline/60 flex items-center justify-between bg-surface-container/85 backdrop-blur-xl">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
-            <h2 className="text-xs uppercase tracking-widest font-semibold text-on-surface-muted">
-              System Gateway Online
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-4">
+          <header className="px-4 pb-4 pt-[calc(16px+env(safe-area-inset-top))] border-b border-outline/60 flex items-center justify-between bg-surface-container/85 backdrop-blur-xl flex-wrap gap-4">
+            {/* Mobile Menu Button */}
             <button
-              onClick={loadAllData}
-              title="Refresh Data"
-              className="p-2 text-on-surface-muted hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-outline hover:border-outline-variant rounded-xl transition duration-200"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden p-2 text-on-surface-muted hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-outline hover:border-outline-variant rounded-xl transition duration-200"
+              aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+              aria-expanded={sidebarOpen}
             >
-              <RefreshCw className="h-4 w-4" />
+              {sidebarOpen ? <XIcon className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <div className="flex items-center gap-2 bg-surface-container/85 backdrop-blur-xl border border-outline px-3 py-1.5 rounded-xl text-xs">
-              <span className="font-semibold text-on-surface-muted">Operator:</span>
-              <span className="text-emerald-400 font-bold">{currentUser?.displayName}</span>
+
+            <div className="flex items-center gap-2 flex-1 lg:mr-4">
+              <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
+              <h2 className="text-xs uppercase tracking-widest font-semibold text-on-surface-muted hidden sm:block">
+                System Gateway Online
+              </h2>
+              <h2 className="text-xs uppercase tracking-widest font-semibold text-on-surface-muted sm:hidden">
+                Admin Portal
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={loadAllData}
+                title="Refresh Data"
+                className="p-2 text-on-surface-muted hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-outline hover:border-outline-variant rounded-xl transition duration-200"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-2 bg-surface-container/85 backdrop-blur-xl border border-outline px-3 py-1.5 rounded-xl text-xs hidden sm:flex">
+                <span className="font-semibold text-on-surface-muted">Operator:</span>
+                <span className="text-emerald-400 font-bold">{currentUser?.displayName}</span>
+              </div>
+              <div className="flex items-center gap-2 bg-surface-container/85 backdrop-blur-xl border border-outline px-2 py-1.5 rounded-xl text-xs sm:hidden">
             </div>
           </div>
         </header>
 
         {/* Dynamic Content Container */}
-        <main className="flex-1 overflow-y-auto p-8 relative">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 relative">
           
           {loading ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-2xl">
@@ -501,50 +529,50 @@ export default function AdminDashboard({ onClose }) {
                   className="space-y-6"
                 >
                   {/* Glowing metrics grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Card 1: Users */}
-                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-blue-500/30 transition duration-300">
-                      <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-4">
-                        <Users className="h-5 w-5" />
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-blue-500/30 transition duration-300">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-3 sm:mb-4">
+                        <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Total Registered</span>
-                      <h3 className="text-3xl font-bold text-white mt-1">{stats.totalUsers}</h3>
-                      <div className="absolute top-0 right-0 h-24 w-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition duration-300"></div>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Total Registered</span>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1">{stats.totalUsers}</h3>
+                      <div className="absolute top-0 right-0 h-20 w-20 sm:h-24 sm:w-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition duration-300"></div>
                     </div>
 
                     {/* Card 2: Online */}
-                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-emerald-500/30 transition duration-300">
-                      <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 mb-4">
-                        <Activity className="h-5 w-5 animate-pulse" />
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-emerald-500/30 transition duration-300">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 mb-3 sm:mb-4">
+                        <Activity className="h-4 w-4 sm:h-5 sm:w-5 animate-pulse" />
                       </div>
-                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Active Sockets</span>
-                      <h3 className="text-3xl font-bold text-white mt-1">{stats.onlineUsers}</h3>
-                      <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition duration-300"></div>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Active Sockets</span>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1">{stats.onlineUsers}</h3>
+                      <div className="absolute top-0 right-0 h-20 w-20 sm:h-24 sm:w-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition duration-300"></div>
                     </div>
 
                     {/* Card 3: Messages */}
-                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-purple-500/30 transition duration-300">
-                      <div className="h-12 w-12 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 mb-4">
-                        <MessageSquare className="h-5 w-5" />
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-purple-500/30 transition duration-300">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 mb-3 sm:mb-4">
+                        <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Database Packets</span>
-                      <h3 className="text-3xl font-bold text-white mt-1">{stats.totalMessages}</h3>
-                      <div className="absolute top-0 right-0 h-24 w-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition duration-300"></div>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Database Packets</span>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1">{stats.totalMessages}</h3>
+                      <div className="absolute top-0 right-0 h-20 w-20 sm:h-24 sm:w-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition duration-300"></div>
                     </div>
 
                     {/* Card 4: Groups */}
-                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-pink-500/30 transition duration-300">
-                      <div className="h-12 w-12 rounded-2xl bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 mb-4">
-                        <TrendingUp className="h-5 w-5" />
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md relative overflow-hidden group hover:border-pink-500/30 transition duration-300">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-pink-500/10 border border-pink-500/25 flex items-center justify-center text-pink-400 mb-3 sm:mb-4">
+                        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <span className="text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Active Groups</span>
-                      <h3 className="text-3xl font-bold text-white mt-1">{stats.totalGroups}</h3>
-                      <div className="absolute top-0 right-0 h-24 w-24 bg-pink-500/5 rounded-full blur-2xl group-hover:bg-pink-500/10 transition duration-300"></div>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-on-surface-muted uppercase tracking-widest block">Active Groups</span>
+                      <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1">{stats.totalGroups}</h3>
+                      <div className="absolute top-0 right-0 h-20 w-20 sm:h-24 sm:w-24 bg-pink-500/5 rounded-full blur-2xl group-hover:bg-pink-500/10 transition duration-300"></div>
                     </div>
                   </div>
 
                   {/* System overview & charts */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     
                     {/* Left: Server Infrastructure & Maintenance */}
                     <div className="space-y-6 lg:col-span-1">
@@ -630,42 +658,42 @@ export default function AdminDashboard({ onClose }) {
                     </div>
 
                     {/* Middle/Right: Broadcast alerts & graphical breakdowns */}
-                    <div className="space-y-6 lg:col-span-2">
+                    <div className="space-y-4 sm:space-y-6 lg:col-span-2">
                       {/* Real-time System Broadcast Panel */}
-                      <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                      <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-3 sm:space-y-4">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                           <MessageCircle className="h-4 w-4 text-emerald-400 animate-pulse" /> System Broadcast Transmission
                         </h3>
                         
-                        <p className="text-[10px] text-on-surface-muted leading-relaxed">
+                        <p className="text-[9px] sm:text-[10px] text-on-surface-muted leading-relaxed">
                           Broadcast a warning banner or service announcement to all active connections in real-time.
                         </p>
 
-                        <form onSubmit={handleBroadcast} className="space-y-3.5 mt-2">
+                        <form onSubmit={handleBroadcast} className="space-y-3 mt-2">
                           <textarea
                             value={broadcastMessage}
                             onChange={(e) => setBroadcastMessage(e.target.value)}
                             placeholder="Type broadcast message (e.g. Server under scheduled maintenance in 10 minutes...)"
-                            className="w-full h-16 p-3 bg-surface/65 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-2xl text-[11px] text-on-surface placeholder-zinc-650 focus:outline-none focus:border-emerald-500/50 resize-none leading-relaxed"
+                            className="w-full h-12 sm:h-16 p-3 bg-surface/65 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] text-on-surface placeholder-zinc-650 focus:outline-none focus:border-emerald-500/50 resize-none leading-relaxed"
                             required
                           />
                           <div className="flex flex-col gap-1.5">
-                            <span className="text-[9px] uppercase font-bold text-on-surface-muted">Attach Broadcast Media (Optional - Posts to Status Feed):</span>
+                            <span className="text-[8px] sm:text-[9px] uppercase font-bold text-on-surface-muted">Attach Broadcast Media (Optional - Posts to Status Feed):</span>
                             <input 
                               type="file"
                               ref={fileInputRef}
                               accept="image/*"
                               onChange={(e) => setBroadcastFile(e.target.files?.[0] || null)}
-                              className="text-[10px] text-on-surface-muted bg-surface/50 backdrop-blur-xl border border-white/25 dark:border-white/10 border border-outline p-2 rounded-xl focus:outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 file:text-on-surface file:hover:bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5 hover:border-outline transition cursor-pointer"
+                              className="text-[9px] sm:text-[10px] text-on-surface-muted bg-surface/50 backdrop-blur-xl border border-white/25 dark:border-white/10 border border-outline p-2 rounded-xl focus:outline-none file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[8px] sm:file:text-[9px] file:font-bold file:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 file:text-on-surface file:hover:bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5 hover:border-outline transition cursor-pointer"
                             />
                           </div>
-                          <div className="flex items-center justify-between gap-4">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                             <div className="flex items-center gap-2">
-                              <span className="text-[9px] uppercase font-bold text-on-surface-muted">Severity:</span>
+                              <span className="text-[8px] sm:text-[9px] uppercase font-bold text-on-surface-muted">Severity:</span>
                               <select
                                 value={broadcastSeverity}
                                 onChange={(e) => setBroadcastSeverity(e.target.value)}
-                                className="bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline text-on-surface-variant text-[10px] px-2 py-1 rounded-lg focus:outline-none focus:border-emerald-500"
+                                className="bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline text-on-surface-variant text-[9px] sm:text-[10px] px-2 py-1 rounded-lg focus:outline-none focus:border-emerald-500"
                               >
                                 <option value="info">💡 Info</option>
                                 <option value="warning">⚠️ Warning</option>
@@ -675,7 +703,7 @@ export default function AdminDashboard({ onClose }) {
                             <button
                               type="submit"
                               disabled={broadcastLoading || !broadcastMessage.trim()}
-                              className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-black text-[10px] font-bold rounded-xl transition shadow-lg shadow-emerald-500/10"
+                              className="w-full sm:w-auto px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-black text-[9px] sm:text-[10px] font-bold rounded-xl transition shadow-lg shadow-emerald-500/10"
                             >
                               {broadcastLoading ? 'Broadcasting...' : 'Broadcast Transmission'}
                             </button>
@@ -684,15 +712,15 @@ export default function AdminDashboard({ onClose }) {
                       </div>
 
                       {/* Visual Analytics breakdowns */}
-                      <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                      <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-3 sm:space-y-4">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                           <TrendingUp className="h-4 w-4 text-blue-400" /> Analytical Distributions
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-2">
                           {/* Role Distribution Bar */}
                           <div className="space-y-1.5">
-                            <div className="flex justify-between text-[9px] uppercase font-bold text-on-surface-muted">
+                            <div className="flex justify-between text-[8px] sm:text-[9px] uppercase font-bold text-on-surface-muted">
                               <span>Security Roles</span>
                               <span className="text-on-surface-variant">
                                 {stats.analytics?.roles?.admin || 0} Admins / {stats.analytics?.roles?.user || 0} Users
@@ -708,7 +736,7 @@ export default function AdminDashboard({ onClose }) {
                                 className="h-full bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5"
                               />
                             </div>
-                            <div className="flex justify-between text-[8px] text-on-surface-muted">
+                            <div className="flex justify-between text-[7px] sm:text-[8px] text-on-surface-muted">
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span> Admin</span>
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-surface-container-low/80 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-full"></span> Standard User</span>
                             </div>
@@ -716,7 +744,7 @@ export default function AdminDashboard({ onClose }) {
 
                           {/* Security Status Ban rate */}
                           <div className="space-y-1.5">
-                            <div className="flex justify-between text-[9px] uppercase font-bold text-on-surface-muted">
+                            <div className="flex justify-between text-[8px] sm:text-[9px] uppercase font-bold text-on-surface-muted">
                               <span>Account Status</span>
                               <span className="text-on-surface-variant">
                                 {stats.analytics?.banned || 0} Suspended / {(stats.totalUsers || 0) - (stats.analytics?.banned || 0)} Active
@@ -732,7 +760,7 @@ export default function AdminDashboard({ onClose }) {
                                 className="h-full bg-emerald-500"
                               />
                             </div>
-                            <div className="flex justify-between text-[8px] text-on-surface-muted">
+                            <div className="flex justify-between text-[7px] sm:text-[8px] text-on-surface-muted">
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-red-500 rounded-full"></span> Banned</span>
                               <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span> Active</span>
                             </div>
@@ -740,8 +768,8 @@ export default function AdminDashboard({ onClose }) {
                         </div>
 
                         {/* Message Type Stacked Breakdown */}
-                        <div className="space-y-2 mt-4 pt-4 border-t border-outline/40">
-                          <span className="text-[9px] uppercase font-bold text-on-surface-muted block">Message Formats Distribution</span>
+                        <div className="space-y-2 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-outline/40">
+                          <span className="text-[8px] sm:text-[9px] uppercase font-bold text-on-surface-muted block">Message Formats Distribution</span>
                           
                           {(() => {
                             const mt = stats.analytics?.messageTypes || { text: 0, image: 0, video: 0, audio: 0, file: 0 };
@@ -755,7 +783,7 @@ export default function AdminDashboard({ onClose }) {
                                   <div style={{ width: `${mt.audio / sum * 100}%` }} className="h-full bg-purple-500" title={`Audio: ${mt.audio}`} />
                                   <div style={{ width: `${mt.file / sum * 100}%` }} className="h-full bg-pink-500" title={`Files: ${mt.file}`} />
                                 </div>
-                                <div className="grid grid-cols-5 gap-1.5 text-[8px] text-on-surface-muted leading-none">
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-[7px] sm:text-[8px] text-on-surface-muted leading-none">
                                   <span className="truncate flex items-center gap-1"><span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span> Text ({mt.text})</span>
                                   <span className="truncate flex items-center gap-1"><span className="h-1.5 w-1.5 bg-blue-500 rounded-full"></span> Image ({mt.image})</span>
                                   <span className="truncate flex items-center gap-1"><span className="h-1.5 w-1.5 bg-red-500 rounded-full"></span> Video ({mt.video})</span>
@@ -781,11 +809,11 @@ export default function AdminDashboard({ onClose }) {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="space-y-4"
+                  className="space-y-3 sm:space-y-4"
                 >
                   {/* Filter and Search controls */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="relative flex-1 max-w-sm">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="relative flex-1 max-w-sm w-full">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-muted">
                         <Search className="h-4 w-4" />
                       </div>
@@ -797,26 +825,26 @@ export default function AdminDashboard({ onClose }) {
                         className="block w-full pl-10 pr-4 py-2.5 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline/80 rounded-2xl text-on-surface placeholder-zinc-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
-                    <span className="text-xs font-semibold text-on-surface-muted">
+                    <span className="text-xs font-semibold text-on-surface-muted whitespace-nowrap">
                       Total: <span className="text-white">{filteredUsers.length}</span> / {users.length}
                     </span>
                   </div>
 
                   {/* Users Table */}
-                  <div className="rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md overflow-hidden">
+                  <div className="rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
+                      <table className="w-full min-w-[700px] text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-outline/60 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/10 text-[10px] font-bold uppercase tracking-widest text-on-surface-muted">
-                            <th className="px-6 py-4">Participant</th>
-                            <th className="px-6 py-4">Role / Privileges</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4">System ID</th>
-                            <th className="px-6 py-4">Enrolled</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                          <tr className="border-b border-outline/60 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/10 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-on-surface-muted">
+                            <th className="px-4 sm:px-6 py-3 sm:py-4">Participant</th>
+                            <th className="px-4 sm:px-6 py-3 sm:py-4">Role / Privileges</th>
+                            <th className="px-4 sm:px-6 py-3 sm:py-4">Status</th>
+                            <th className="px-4 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">System ID</th>
+                            <th className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">Enrolled</th>
+                            <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-800/40 text-xs">
+                        <tbody className="divide-y divide-zinc-800/40 text-[9px] sm:text-xs">
                           {filteredUsers.map(user => {
                             const isMe = user.id === currentUser.id;
                             const isBanned = user.isBanned === 1;
@@ -830,36 +858,36 @@ export default function AdminDashboard({ onClose }) {
                                 }`}
                               >
                                 {/* User Info */}
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="flex items-center gap-3">
+                                <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                  <div className="flex items-center gap-2 sm:gap-3">
                                     {user.avatarUrl ? (
                                       <img 
                                         src={getAvatarUrl(user.avatarUrl)} 
                                         alt={user.displayName} 
-                                        className="h-9 w-9 rounded-full object-cover border border-outline" 
+                                        className="h-8 w-8 sm:h-9 sm:w-9 rounded-full object-cover border border-outline" 
                                       />
                                     ) : (
-                                      <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline flex items-center justify-center font-bold text-on-surface-variant text-[10px] uppercase">
+                                      <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline flex items-center justify-center font-bold text-on-surface-variant text-[9px] sm:text-[10px] uppercase">
                                         {getInitials(user.displayName)}
                                       </div>
                                     )}
-                                    <div>
-                                      <div className="font-bold text-white flex items-center gap-1.5">
+                                    <div className="min-w-0">
+                                      <div className="font-bold text-white flex items-center gap-1.5 truncate">
                                         {user.displayName}
                                         {isMe && (
-                                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-zinc-750 text-on-surface-muted">
+                                          <span className="text-[8px] sm:text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-zinc-750 text-on-surface-muted whitespace-nowrap flex-shrink-0">
                                             Operator
                                           </span>
                                         )}
                                       </div>
-                                      <div className="text-[10px] text-on-surface-muted mt-0.5">{user.email}</div>
+                                      <div className="text-[9px] sm:text-[10px] text-on-surface-muted mt-0.5 truncate">{user.email}</div>
                                     </div>
                                   </div>
                                 </td>
 
                                 {/* Privilege Role */}
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border ${
+                                <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                  <span className={`px-2 py-1 rounded-full text-[9px] sm:text-[10px] font-bold tracking-wider uppercase border ${
                                     user.role === 'admin' 
                                       ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' 
                                       : 'bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border-outline text-on-surface-muted'
@@ -869,10 +897,10 @@ export default function AdminDashboard({ onClose }) {
                                 </td>
 
                                 {/* Connection Status */}
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                   {isBanned ? (
                                     <span className="text-red-400 font-bold flex items-center gap-1">
-                                      <UserX className="h-3.5 w-3.5" /> BANNED
+                                      <UserX className="h-3 w-3.5" /> BANNED
                                     </span>
                                   ) : isUserOnline ? (
                                     <span className="text-emerald-400 font-bold flex items-center gap-1.5">
@@ -884,17 +912,17 @@ export default function AdminDashboard({ onClose }) {
                                 </td>
 
                                 {/* Database ID */}
-                                <td className="px-6 py-4 whitespace-nowrap font-mono text-[10px] text-on-surface-muted">
+                                <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap font-mono text-[9px] sm:text-[10px] text-on-surface-muted hidden sm:table-cell">
                                   {user.id}
                                 </td>
 
                                 {/* Creation date */}
-                                <td className="px-6 py-4 whitespace-nowrap text-on-surface-muted font-medium">
+                                <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-on-surface-muted font-medium hidden md:table-cell">
                                   {new Date(user.createdAt).toLocaleDateString()}
                                 </td>
 
                                 {/* Admin Actions */}
-                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right">
                                   <div className="flex items-center justify-end gap-1.5">
                                     
                                     {/* Role toggle (Admin/User) */}
@@ -956,10 +984,10 @@ export default function AdminDashboard({ onClose }) {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="space-y-6"
+                  className="space-y-4 sm:space-y-6"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="relative flex-1 max-w-sm">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="relative flex-1 max-w-sm w-full">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-muted">
                         <Search className="h-4 w-4" />
                       </div>
@@ -973,28 +1001,28 @@ export default function AdminDashboard({ onClose }) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     
                     {/* Left: Group Chats */}
-                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-3 sm:space-y-4">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                         <Users className="h-4 w-4 text-emerald-400" /> Group Channels ({filteredGroups.length})
                       </h3>
 
-                      <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                      <div className="space-y-2 max-h-[380px] sm:max-h-[420px] overflow-y-auto pr-1">
                         {filteredGroups.map(group => (
-                          <div key={group.id} className="p-3.5 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition">
-                            <div className="flex items-center gap-3 min-w-0">
+                          <div key={group.id} className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                               {group.avatarUrl ? (
-                                <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-9 w-9 rounded-full object-cover border border-outline" />
+                                <img src={getAvatarUrl(group.avatarUrl)} alt={group.name} className="h-8 w-8 sm:h-9 sm:w-9 rounded-full object-cover border border-outline" />
                               ) : (
-                                <div className="h-9 w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline flex items-center justify-center text-xs font-bold text-on-surface-variant">
+                                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline flex items-center justify-center text-xs font-bold text-on-surface-variant">
                                   G
                                 </div>
                               )}
                               <div className="min-w-0">
                                 <h4 className="text-xs font-bold text-white truncate">{group.name}</h4>
-                                <p className="text-[10px] text-on-surface-muted mt-0.5 truncate">
+                                <p className="text-[9px] sm:text-[10px] text-on-surface-muted mt-0.5 truncate">
                                   Creator: {group.creatorName} • {group.memberCount} members
                                 </p>
                               </div>
@@ -1003,7 +1031,7 @@ export default function AdminDashboard({ onClose }) {
                             <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
                               <button
                                 onClick={() => handleOpenAudit(group.id, group.name, true)}
-                                className="px-2.5 py-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline hover:border-outline text-on-surface-variant rounded-lg text-[10px] font-semibold transition"
+                                className="px-2 py-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline hover:border-outline text-on-surface-variant rounded-lg text-[9px] sm:text-[10px] font-semibold transition whitespace-nowrap"
                               >
                                 Audit Logs
                               </button>
@@ -1024,28 +1052,28 @@ export default function AdminDashboard({ onClose }) {
                     </div>
 
                     {/* Right: Direct Active DM Rooms */}
-                    <div className="p-6 rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-4">
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/35 border border-outline/80 backdrop-blur-md space-y-3 sm:space-y-4">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-blue-400" /> Active Direct Rooms ({filteredDirects.length})
                       </h3>
 
-                      <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                      <div className="space-y-2 max-h-[380px] sm:max-h-[420px] overflow-y-auto pr-1">
                         {filteredDirects.map(direct => (
-                          <div key={direct.chatId} className="p-3.5 rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition">
+                          <div key={direct.chatId} className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10/20 border border-outline-variant flex items-center justify-between hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5/10 transition">
                             <div className="min-w-0">
                               <h4 className="text-xs font-bold text-white truncate flex items-center gap-1.5">
                                 <span className="truncate">{direct.userAName}</span>
                                 <span className="text-on-surface-faint font-semibold">↔</span>
                                 <span className="truncate">{direct.userBName}</span>
                               </h4>
-                              <p className="text-[10px] text-on-surface-muted mt-0.5">
+                              <p className="text-[9px] sm:text-[10px] text-on-surface-muted mt-0.5">
                                 Volume: {direct.messageCount} packets • Active: {new Date(direct.lastActive).toLocaleTimeString()}
                               </p>
                             </div>
 
                             <button
                               onClick={() => handleOpenAudit(direct.chatId, `${direct.userAName} & ${direct.userBName}`, false)}
-                              className="px-2.5 py-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline hover:border-outline text-on-surface-variant rounded-lg text-[10px] font-semibold transition"
+                              className="px-2 py-1.5 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md border border-outline hover:border-outline text-on-surface-variant rounded-lg text-[9px] sm:text-[10px] font-semibold transition whitespace-nowrap"
                             >
                               Audit Logs
                             </button>
@@ -1069,26 +1097,29 @@ export default function AdminDashboard({ onClose }) {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="space-y-4"
+                  className="space-y-3 sm:space-y-4"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted hidden sm:block">
                         Live System Command Log (Socket.IO Connection)
+                      </h3>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-muted sm:hidden">
+                        Live System Logs
                       </h3>
                     </div>
                     <button
                       onClick={() => setLogs([])}
-                      className="px-2.5 py-1 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline rounded-lg text-[10px] text-on-surface-muted hover:text-white font-bold transition"
+                      className="px-2.5 py-1 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline rounded-lg text-[9px] sm:text-[10px] text-on-surface-muted hover:text-white font-bold transition whitespace-nowrap"
                     >
                       Clear Terminal
                     </button>
                   </div>
 
                   {/* Terminal Log Container */}
-                  <div className="h-[480px] bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 border border-outline-variant rounded-3xl p-6 font-mono text-[11px] overflow-y-auto flex flex-col gap-2 relative shadow-2xl">
-                    <div className="absolute top-4 right-6 text-[9px] font-bold text-on-surface-faint select-none">
+                  <div className="h-[380px] sm:h-[420px] lg:h-[480px] bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10 border border-outline-variant rounded-2xl sm:rounded-3xl p-4 sm:p-6 font-mono text-[10px] sm:text-[11px] overflow-y-auto flex flex-col gap-1.5 sm:gap-2 relative shadow-2xl">
+                    <div className="absolute top-3 right-4 text-[8px] sm:text-[9px] font-bold text-on-surface-faint select-none">
                       ANTIGRAVITY SYSTEMS DEPLOYED
                     </div>
                     
@@ -1105,16 +1136,16 @@ export default function AdminDashboard({ onClose }) {
                       if (log.category === 'Security') catColor = 'text-purple-400';
                       
                       return (
-                        <div key={log.id} className="flex gap-2.5 leading-relaxed items-start hover:bg-surface-container/35 backdrop-blur-md border border-white/20 dark:border-white/5 py-0.5 rounded px-1 transition duration-100">
-                          <span className="text-on-surface-faint font-semibold">{log.timestamp}</span>
-                          <span className={`${catColor} font-bold`}>[{log.category.toUpperCase()}]</span>
-                          <span className="text-on-surface-variant">{log.message}</span>
+                        <div key={log.id} className="flex gap-2 leading-relaxed items-start hover:bg-surface-container/35 backdrop-blur-md border border-white/20 dark:border-white/5 py-0.5 rounded px-1 transition duration-100">
+                          <span className="text-on-surface-faint font-semibold whitespace-nowrap">{log.timestamp}</span>
+                          <span className={`${catColor} font-bold whitespace-nowrap`}>[{log.category.toUpperCase()}]</span>
+                          <span className="text-on-surface-variant break-words">{log.message}</span>
                         </div>
                       );
                     })}
 
                     {logs.length === 0 && (
-                      <div className="text-on-surface-faint text-center py-20 italic">
+                      <div className="text-on-surface-faint text-center py-12 sm:py-20 italic text-xs sm:text-sm">
                         Logs empty. Awaiting client connections or operator actions...
                       </div>
                     )}
@@ -1137,74 +1168,75 @@ export default function AdminDashboard({ onClose }) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="w-full max-w-lg h-full bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border-l border-outline flex flex-col"
+              className="w-full max-w-lg lg:max-w-xl h-full lg:h-auto lg:max-h-[90vh] bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border-l border-outline flex flex-col rounded-t-lg lg:rounded-xl lg:mt-4 lg:mb-4 lg:mr-4 shadow-2xl"
             >
               {/* Drawer Header */}
-              <div className="p-6 border-b border-outline/60 flex items-center justify-between bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5">
-                <div>
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/15 px-2 py-0.5 rounded-full">
+              <div className="p-4 sm:p-6 border-b border-outline/60 flex items-center justify-between bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 flex-wrap gap-2">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[8px] sm:text-[9px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/15 px-2 py-0.5 rounded-full">
                     Audit Inspection
                   </span>
-                  <h3 className="text-xs font-bold text-white truncate mt-2 max-w-[320px]">
+                  <h3 className="text-xs sm:text-sm font-bold text-white truncate mt-1.5 max-w-full">
                     {selectedAuditChat.name}
                   </h3>
                 </div>
                 <button
                   onClick={() => setSelectedAuditChat(null)}
-                  className="p-2 text-on-surface-muted hover:text-white bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 hover:bg-surface-container-high/40 backdrop-blur-md border border-outline rounded-xl transition duration-200"
+                  className="p-2 text-on-surface-muted hover:text-white bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 hover:bg-surface-container-high/40 backdrop-blur-md border border-outline rounded-xl transition duration-200 flex-shrink-0"
+                  aria-label="Close audit panel"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               {/* History Stream */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-surface/40 backdrop-blur-lg border border-white/25 dark:border-white/5">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 bg-surface/40 backdrop-blur-lg border border-white/25 dark:border-white/5">
                 {auditLoading ? (
-                  <div className="text-center py-20">
-                    <div className="h-8 w-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto"></div>
-                    <span className="text-[11px] text-on-surface-muted mt-3 block">Extracting messaging database rows...</span>
+                  <div className="text-center py-12 sm:py-20">
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto"></div>
+                    <span className="text-[10px] sm:text-[11px] text-on-surface-muted mt-3 block">Extracting messaging database rows...</span>
                   </div>
                 ) : auditHistory.length === 0 ? (
-                  <div className="text-center py-20 text-on-surface-faint text-xs italic">
+                  <div className="text-center py-12 sm:py-20 text-on-surface-faint text-xs sm:text-sm italic">
                     No logs found. Conversation empty.
                   </div>
                 ) : (
                   auditHistory.map(msg => (
                     <div 
                       key={msg.id}
-                      className="p-3 rounded-2xl bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline flex items-start justify-between group hover:border-outline-variant transition"
+                      className="p-3 rounded-xl sm:rounded-2xl bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 border border-outline flex items-start justify-between group hover:border-outline-variant transition"
                     >
-                      <div className="flex gap-2.5 min-w-0">
+                      <div className="flex gap-2 min-w-0">
                         {msg.senderAvatar ? (
-                          <img src={msg.senderAvatar} alt={msg.senderName} className="h-7 w-7 rounded-full object-cover mt-0.5" />
+                          <img src={msg.senderAvatar} alt={msg.senderName} className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-cover mt-0.5 flex-shrink-0" />
                         ) : (
-                          <div className="h-7 w-7 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center font-bold text-on-surface-variant text-[10px] mt-0.5 uppercase">
+                          <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 flex items-center justify-center font-bold text-on-surface-variant text-[9px] sm:text-[10px] mt-0.5 uppercase flex-shrink-0">
                             {getInitials(msg.senderName)}
                           </div>
                         )}
                         <div className="min-w-0">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-[11px] font-bold text-white">{msg.senderName}</span>
-                            <span className="text-[9px] text-on-surface-faint font-mono">
+                          <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-white truncate">{msg.senderName}</span>
+                            <span className="text-[8px] sm:text-[9px] text-on-surface-faint font-mono whitespace-nowrap">
                               {new Date(msg.createdAt).toLocaleTimeString()}
                             </span>
                           </div>
                           
                           {/* Content format */}
                           {msg.type === 'text' ? (
-                            <p className="text-xs text-on-surface-variant mt-1 break-words leading-relaxed whitespace-pre-wrap">
+                            <p className="text-[10px] sm:text-xs text-on-surface-variant mt-1 break-words leading-relaxed whitespace-pre-wrap">
                               {msg.content}
                             </p>
                           ) : (
                             <div className="mt-1">
-                              <span className="text-[10px] text-on-surface-muted bg-surface-container/40 backdrop-blur-md px-2 py-0.5 rounded font-mono border border-outline">
+                              <span className="text-[9px] sm:text-[10px] text-on-surface-muted bg-surface-container/40 backdrop-blur-md px-2 py-0.5 rounded font-mono border border-outline">
                                 Attachment: {msg.type}
                               </span>
                               {msg.type.startsWith('image/') && (
                                 <img 
                                   src={msg.content} 
                                   alt="Attachment" 
-                                  className="h-20 max-w-[120px] rounded-lg object-cover border border-outline mt-1.5" 
+                                  className="h-16 sm:h-20 max-w-[100px] sm:max-w-[120px] rounded-lg object-cover border border-outline mt-1.5" 
                                 />
                               )}
                             </div>
@@ -1216,7 +1248,7 @@ export default function AdminDashboard({ onClose }) {
                       <button
                         onClick={() => handleDeleteMessage(msg.id)}
                         title="Delete Message"
-                        className="p-1.5 text-on-surface-muted hover:text-red-400 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline hover:border-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition duration-200"
+                        className="p-1.5 text-on-surface-muted hover:text-red-400 bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-outline hover:border-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition duration-200 flex-shrink-0"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
