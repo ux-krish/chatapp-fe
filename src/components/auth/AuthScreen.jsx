@@ -202,7 +202,7 @@ function AuthScreen() {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-y-auto bg-zinc-200/70 backdrop-blur backdrop-blur dark:bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10">
+    <div className="relative w-full h-full flex flex-col items-center justify-start p-4 sm:p-8 overflow-y-auto bg-zinc-200/70 backdrop-blur backdrop-blur dark:bg-surface/85 backdrop-blur-xl border border-outline-variant/60 dark:border-white/10">
       {/* Animated Aurora Mesh Background */}
       <div className="auth-aurora" aria-hidden="true">
         <div className="blob blob-b" />
@@ -325,7 +325,7 @@ function AuthScreen() {
                 >
                   {/* OTP / Password tab switcher */}
                   {authMode === 'login' && (
-                    <div className="flex p-1 rounded-xl bg-surface-container-high backdrop-blur/70 dark:bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/60 border border-zinc-300/60 dark:border-outline/60 mb-2">
+                    <div className="flex p-1 rounded-xl bg-surface-container-high backdrop-blur/70 dark:bg-surface-container/85 backdrop-blur-xl border border-outline-variant dark:border-white/5 mb-2">
                       <button
                         type="button"
                         onClick={() => {
@@ -334,7 +334,7 @@ function AuthScreen() {
                         }}
                         className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-200 ${
                           loginType === 'otp'
-                            ? 'bg-white dark:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 text-zinc-900 dark:text-white shadow-sm'
+                            ? 'bg-white dark:bg-surface-container-high/80 backdrop-blur-md border border-outline-variant dark:border-white/5 text-zinc-900 dark:text-white shadow-sm'
                             : 'text-on-surface-muted dark:text-on-surface-muted hover:text-zinc-800 dark:hover:text-on-surface'
                         }`}
                       >
@@ -348,7 +348,7 @@ function AuthScreen() {
                         }}
                         className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all duration-200 ${
                           loginType === 'password'
-                            ? 'bg-white dark:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 text-zinc-900 dark:text-white shadow-sm'
+                            ? 'bg-white dark:bg-surface-container-high/80 backdrop-blur-md border border-outline-variant dark:border-white/5 text-zinc-900 dark:text-white shadow-sm'
                             : 'text-on-surface-muted dark:text-on-surface-muted hover:text-zinc-800 dark:hover:text-on-surface'
                         }`}
                       >
@@ -493,11 +493,11 @@ function AuthScreen() {
 
                   {/* Divider */}
                   <div className="relative flex py-2 items-center" role="separator">
-                    <div className="flex-grow border-t border-zinc-300/70 dark:border-outline/70" />
+                    <div className="flex-grow border-t border-outline-variant" />
                     <span className="flex-shrink mx-3 text-[10px] font-bold uppercase tracking-wider text-on-surface-muted dark:text-on-surface-muted">
                       or continue with
                     </span>
-                    <div className="flex-grow border-t border-zinc-300/70 dark:border-outline/70" />
+                    <div className="flex-grow border-t border-outline-variant" />
                   </div>
 
                   {/* Google */}
@@ -506,9 +506,8 @@ function AuthScreen() {
                     onClick={handleGoogleLogin}
                     disabled={loading}
                     className="w-full py-3 sm:py-3.5 px-4 rounded-2xl font-semibold text-sm
-                               bg-white dark:bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 text-zinc-800 dark:text-on-surface
-                               border border-zinc-300/70 dark:border-outline/80
-                               hover:bg-surface-container-high backdrop-blur/70 backdrop-blur dark:hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5
+                               bg-white dark:bg-surface-container/85 backdrop-blur-xl border border-outline text-zinc-800 dark:text-on-surface
+                               hover:bg-surface-container-high dark:hover:bg-surface-container-high/80
                                transition-all duration-200 flex items-center justify-center gap-2.5
                                focus:outline-none focus:ring-2 focus:ring-zinc-400
                                min-h-[44px] disabled:opacity-70"
@@ -549,11 +548,11 @@ function AuthScreen() {
                         aria-label={`Digit ${i + 1}`}
                         className={`otp-cell w-full aspect-square min-w-0 max-w-[52px] text-center text-lg sm:text-xl font-bold
                                     rounded-xl border-2 outline-none transition-all duration-200
-                                    bg-white/90 dark:bg-surface-container/75 backdrop-blur-xl border border-white/30 dark:border-white/10
+                                    bg-white/80 dark:bg-surface-container/75 backdrop-blur-xl
                                     ${
                                       d
                                         ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/20'
-                                        : 'border-zinc-300 dark:border-outline-variant text-zinc-900 dark:text-on-surface'
+                                        : 'border-outline-variant text-zinc-900 dark:text-on-surface hover:border-outline dark:hover:border-white/20'
                                     }
                                     focus:border-emerald-500 focus:shadow-md focus:shadow-emerald-500/20`}
                       />
@@ -642,11 +641,11 @@ function Field({ id, label, icon, right, children }) {
         {label}
       </label>
       <div
-        className="relative flex items-center rounded-2xl border border-zinc-300/70 dark:border-outline/80
-                   bg-white/90 dark:bg-surface-container/75 backdrop-blur-xl border border-white/30 dark:border-white/10 backdrop-blur
+        className="relative flex items-center rounded-2xl border border-outline-variant
+                   bg-white/80 dark:bg-surface-container/75 backdrop-blur-xl
                    transition-all duration-200
-                   focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20
-                   hover:border-zinc-400 dark:hover:border-outline-variant"
+                   focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:bg-white dark:focus-within:bg-surface
+                   hover:border-outline dark:hover:border-white/20"
       >
         <span className="pl-3.5 pr-2 text-on-surface-muted dark:text-on-surface-muted group-focus-within:text-emerald-500 transition">
           {icon}

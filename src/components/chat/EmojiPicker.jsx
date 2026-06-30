@@ -131,7 +131,7 @@ function EmojiPicker({ onSelect }) {
   })();
 
   return (
-    <div className="w-72 h-80 bg-white/95 dark:glass-strong border border-white/30 dark:border-white/10 bg-surface/70 backdrop-blur-xl border border-zinc-200/70 dark:border-outline/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden select-none font-sans">
+    <div className="w-72 h-80 bg-surface/98 dark:bg-surface-container/98 border border-outline rounded-3xl shadow-2xl flex flex-col overflow-hidden select-none font-sans">
       {/* Search bar with gradient border on focus */}
       <div className="p-2.5 border-b border-zinc-200/70 dark:border-outline/60">
         <div className="relative group">
@@ -148,7 +148,7 @@ function EmojiPicker({ onSelect }) {
 
       {/* Recents strip */}
       {!searchQuery.trim() && recents.length > 0 && (
-        <div className="px-2 pt-2 pb-1.5 border-b border-zinc-200/70 dark:border-outline/60 bg-surface-container-high backdrop-blur/40 backdrop-blur dark:bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5">
+        <div className="px-2 pt-2 pb-1.5 border-b border-outline-variant bg-surface-container-high/80 dark:bg-surface-container/50 backdrop-blur-lg">
           <div className="flex items-center justify-between px-1 mb-1">
             <span className="text-[9px] font-bold uppercase tracking-wider text-on-surface-muted flex items-center gap-1">
               <Clock className="h-2.5 w-2.5" /> Recents
@@ -171,7 +171,7 @@ function EmojiPicker({ onSelect }) {
 
       {/* Category Tabs */}
       {!searchQuery.trim() && (
-        <div className="flex justify-between px-2 py-2 bg-surface-container-high/60 backdrop-blur backdrop-blur dark:bg-surface-container/35 backdrop-blur-md border border-white/20 dark:border-white/5 border-b border-zinc-200/50 dark:border-outline/40">
+        <div className="flex justify-between px-2 py-2 bg-surface-container-high/60 dark:bg-surface-container/35 backdrop-blur-md border-b border-outline-variant">
           {EMOJI_CATEGORIES.map((category) => (
             <button
               key={category.name}
@@ -191,7 +191,7 @@ function EmojiPicker({ onSelect }) {
       )}
 
       {/* Emojis Grid */}
-      <div className="flex-1 overflow-y-auto p-2.5 custom-scrollbar bg-zinc-200/70 backdrop-blur backdrop-blur/40 dark:bg-surface/40 backdrop-blur-lg border border-white/25 dark:border-white/5">
+      <div className="flex-1 overflow-y-auto p-2.5 custom-scrollbar bg-zinc-200/50 dark:bg-surface/40 backdrop-blur-lg border-t border-outline-variant">
         {searchQuery.trim() && (
           <div className="text-[9px] font-bold text-on-surface-muted uppercase tracking-wider mb-2 px-1">
             {filteredEmojis.length} result{filteredEmojis.length === 1 ? '' : 's'}

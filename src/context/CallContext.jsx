@@ -13,7 +13,9 @@ export function CallProvider({ children }) {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isRemoteCameraOff, setIsRemoteCameraOff] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
+  const [facingMode, setFacingMode] = useState('user');
 
   // Call participant details
   const [callerDetails, setCallerDetails] = useState(null); // { id, name, avatarUrl }
@@ -238,6 +240,8 @@ export function CallProvider({ children }) {
     setRemoteStream(null);
     setIsMuted(false);
     setIsCameraOff(false);
+    setIsRemoteCameraOff(false);
+    setFacingMode('user');
   }, []);
 
   const processIceQueue = useCallback(async () => {
@@ -532,10 +536,67 @@ export function CallProvider({ children }) {
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
         setIsCameraOff(!videoTrack.enabled);
-        console.log(`📷 Camera toggled: ${videoTrack.enabled ? 'ON' : 'OFF'}`);
+        
+        // Notify remote peer
+        const peerId = calleeDetails?.id || callerDetails?.id;
+        if (socket && peerId) {
+          socket.emit('toggle_camera', { to: peerId, isCameraOff: !videoTrack.enabled });
+        }
       }
     }
-  }, []);
+  }, [socket, calleeDetails, callerDetails]);
+
+  // Switch between front and rear camera for mobile WebRTC calls
+  const switchCamera = useCallback(async () => {
+    if (!localStreamRef.current) {
+      console.warn('⚠️ No active local stream to switch camera.');
+      return;
+    }
+
+    const videoTrack = localStreamRef.current.getVideoTracks()[0];
+    if (!videoTrack) {
+      console.warn('⚠️ No active video track to switch.');
+      return;
+    }
+
+    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    console.log(`📡 Switching camera facingMode from ${facingMode} to ${newFacingMode}...`);
+
+    try {
+      const newConstraints = {
+        audio: false,
+        video: {
+          facingMode: newFacingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+
+      const newStream = await navigator.mediaDevices.getUserMedia(newConstraints);
+      const newVideoTrack = newStream.getVideoTracks()[0];
+
+      if (newVideoTrack) {
+        videoTrack.stop();
+        localStreamRef.current.removeTrack(videoTrack);
+        localStreamRef.current.addTrack(newVideoTrack);
+
+        if (peerConnectionRef.current) {
+          const senders = peerConnectionRef.current.getSenders();
+          const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+          if (videoSender) {
+            console.log('📡 Replacing RTCRtpSender video track with the new camera track...');
+            await videoSender.replaceTrack(newVideoTrack);
+          }
+        }
+
+        setFacingMode(newFacingMode);
+        setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+      }
+    } catch (err) {
+      console.error('❌ Failed to switch camera:', err);
+      alert('Unable to switch camera. Make sure device has multiple cameras available.');
+    }
+  }, [facingMode]);
 
   // Listen to socket signals
   useEffect(() => {
@@ -629,11 +690,17 @@ export function CallProvider({ children }) {
       cleanUpMedia();
     };
 
+    const handlePeerCameraToggled = ({ isCameraOff }) => {
+      console.log('📡 Peer camera toggled status:', isCameraOff);
+      setIsRemoteCameraOff(isCameraOff);
+    };
+
     socket.on('incoming_call', handleIncomingCall);
     socket.on('call_accepted', handleCallAccepted);
     socket.on('call_rejected', handleCallRejected);
     socket.on('ice_candidate', handleIceCandidateEvent);
     socket.on('peer_hungup', handlePeerHungUp);
+    socket.on('peer_camera_toggled', handlePeerCameraToggled);
 
     return () => {
       console.log('🔌 Removing WebRTC calling socket listeners.');
@@ -642,6 +709,7 @@ export function CallProvider({ children }) {
       socket.off('call_rejected', handleCallRejected);
       socket.off('ice_candidate', handleIceCandidateEvent);
       socket.off('peer_hungup', handlePeerHungUp);
+      socket.off('peer_camera_toggled', handlePeerCameraToggled);
     };
   }, [socket, callState, user, cleanUpMedia, logCallEnded]);
 
@@ -661,6 +729,7 @@ export function CallProvider({ children }) {
     isMuted,
     isVideoCall,
     isCameraOff,
+    isRemoteCameraOff,
     callDuration,
     callerDetails,
     calleeDetails,
@@ -671,7 +740,9 @@ export function CallProvider({ children }) {
     rejectCall,
     endCall,
     toggleMute,
-    toggleCamera
+    toggleCamera,
+    switchCamera,
+    facingMode
   };
 
   return (

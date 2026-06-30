@@ -637,6 +637,46 @@ export function ChatProvider({ children }) {
     }
   }, [apiFetch, activeChat, selectChat]);
 
+  // Clear chat history (delete all messages in a direct message or group chat)
+  const clearChatHistoryAction = useCallback(async (chatId) => {
+    try {
+      const response = await apiFetch(`/api/chat/history/${chatId}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        // Clear local messages state if active and close chat window
+        if (activeChat) {
+          const isOneToOne = chatId.startsWith('usr_');
+          const matchesActive = isOneToOne
+            ? chatId.includes(activeChat.id)
+            : activeChat.id === chatId;
+          
+          if (matchesActive) {
+            setMessages([]);
+            selectChat(null);
+          }
+        }
+        // Update lastMessage inside friends/groups lists locally
+        setFriends(prev => prev.map(f => {
+          const fid = f.id;
+          const userChatId = get1to1ChatId(user.id, fid);
+          if (userChatId === chatId) {
+            return { ...f, lastMessage: null };
+          }
+          return f;
+        }));
+        setGroups(prev => prev.map(g => {
+          if (g.groupId === chatId) {
+            return { ...g, lastMessage: null };
+          }
+          return g;
+        }));
+      }
+    } catch (err) {
+      console.error('Error clearing chat history:', err);
+    }
+  }, [apiFetch, activeChat, get1to1ChatId, user, selectChat]);
+
   // Setup Real-time socket event bindings
   useEffect(() => {
     if (!socket) return;
@@ -788,6 +828,35 @@ export function ChatProvider({ children }) {
       setMessages(prev => prev.map(m => m.id === messageId ? { ...m, reaction } : m));
     };
 
+    const handleChatHistoryCleared = ({ chatId }) => {
+      // Check if this cleared chat matches activeChat
+      if (activeChat) {
+        const isOneToOne = chatId.startsWith('usr_');
+        const matchesActive = isOneToOne
+          ? chatId.includes(activeChat.id)
+          : activeChat.id === chatId;
+        
+        if (matchesActive) {
+          setMessages([]);
+        }
+      }
+      // Update local lastMessage inside friends/groups lists
+      setFriends(prev => prev.map(f => {
+        const fid = f.id;
+        const userChatId = get1to1ChatId(user.id, fid);
+        if (userChatId === chatId) {
+          return { ...f, lastMessage: null };
+        }
+        return f;
+      }));
+      setGroups(prev => prev.map(g => {
+        if (g.groupId === chatId) {
+          return { ...g, lastMessage: null };
+        }
+        return g;
+      }));
+    };
+
     socket.on('new_message', handleNewMessage);
     socket.on('user_typing', handleUserTyping);
     socket.on('message_status_update', handleMessageStatusUpdate);
@@ -801,6 +870,7 @@ export function ChatProvider({ children }) {
     socket.on('message_deleted', handleMessageDeleted);
     socket.on('message_pinned', handleMessagePinned);
     socket.on('message_reacted', handleMessageReacted);
+    socket.on('chat_history_cleared', handleChatHistoryCleared);
 
     // Pull currently active users list on connection
     socket.emit('get_active_users', (userIds) => {
@@ -821,6 +891,7 @@ export function ChatProvider({ children }) {
       socket.off('message_deleted', handleMessageDeleted);
       socket.off('message_pinned', handleMessagePinned);
       socket.off('message_reacted', handleMessageReacted);
+      socket.off('chat_history_cleared', handleChatHistoryCleared);
     };
   }, [socket, activeChat, user, get1to1ChatId]);
 
@@ -858,6 +929,7 @@ export function ChatProvider({ children }) {
     unblockUserAction,
     hideChatAction,
     removeFriendshipAction,
+    clearChatHistoryAction,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

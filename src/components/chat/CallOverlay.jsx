@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useCall } from '../../context/CallContext';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Mic, MicOff, Shield, Video, VideoOff, CameraOff } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Shield, Video, VideoOff, CameraOff, SwitchCamera } from 'lucide-react';
 
 const getInitials = (name) => {
   if (!name) return '?';
@@ -33,7 +33,10 @@ export default function CallOverlay() {
     rejectCall,
     endCall,
     toggleMute,
-    toggleCamera
+    toggleCamera,
+    switchCamera,
+    facingMode,
+    isRemoteCameraOff
   } = useCall();
 
   // Local video element ref (for PiP preview)
@@ -145,8 +148,8 @@ export default function CallOverlay() {
 
   if (!peer) return null;
 
-  const hasRemoteVideo = remoteStream && remoteStream.getVideoTracks().length > 0 && remoteStream.getVideoTracks()[0].enabled;
-  const hasLocalVideo = localStream && localStream.getVideoTracks().length > 0 && localStream.getVideoTracks()[0].enabled;
+  const hasRemoteVideo = remoteStream && remoteStream.getVideoTracks().length > 0 && remoteStream.getVideoTracks()[0].enabled && !isRemoteCameraOff;
+  const hasLocalVideo = localStream && localStream.getVideoTracks().length > 0 && localStream.getVideoTracks()[0].enabled && !isCameraOff;
 
   // ─── AUDIO-ONLY CALL OVERLAY (original card-style) ───
   if (!isVideoCall) {
@@ -324,13 +327,15 @@ export default function CallOverlay() {
       >
         {/* Fullscreen Video Background */}
         {isVideoCall && callState !== 'connected' ? (
-          <video
-            ref={localVidRef}
-            autoPlay
-            playsInline
-            muted
-            className="absolute inset-0 w-full h-full object-cover mirror-video"
-          />
+          !isCameraOff && (
+            <video
+              ref={localVidRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 w-full h-full object-cover mirror-video"
+            />
+          )
         ) : (
           <video
             ref={remoteVidRef}
@@ -523,7 +528,7 @@ export default function CallOverlay() {
                     </button>
 
                     {/* Camera Toggle */}
-                    {callState === 'connected' && (
+                    {isVideoCall && (callState === 'connected' || callState === 'dialing') && (
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleCamera(); }}
                         className={`p-3.5 rounded-full backdrop-blur-md transition-all duration-150 active:scale-90 ${
@@ -534,6 +539,17 @@ export default function CallOverlay() {
                         title={isCameraOff ? 'Turn camera on' : 'Turn camera off'}
                       >
                         {isCameraOff ? <VideoOff className="h-6 w-6" /> : <Video className="h-6 w-6" />}
+                      </button>
+                    )}
+
+                    {/* Switch/Flip Camera (Only for active video calls and when camera is ON) */}
+                    {isVideoCall && (callState === 'connected' || callState === 'dialing') && !isCameraOff && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); switchCamera(); }}
+                        className="p-3.5 rounded-full bg-surface-container-high/65 backdrop-blur-md border border-outline text-on-surface-variant hover:text-white transition-all duration-150 active:scale-90"
+                        title="Switch Camera"
+                      >
+                        <SwitchCamera className="h-6 w-6" />
                       </button>
                     )}
 

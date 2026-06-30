@@ -364,13 +364,13 @@ export default function AdminDashboard({ onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 glass-strong border border-white/30 dark:border-white/10 bg-surface/70 backdrop-blur-2xl z-50 flex overflow-hidden text-on-surface font-sans">
+    <div className="fixed inset-0 glass-strong border border-outline bg-surface/70 backdrop-blur-2xl z-50 flex overflow-hidden text-on-surface font-sans">
       
       {/* LEFT NAVIGATION PANEL */}
-      <div className="w-64 border-r border-outline/80 bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 backdrop-blur-md flex flex-col justify-between flex-shrink-0">
+      <div className="w-64 border-r border-outline/80 bg-surface-container/50 backdrop-blur-lg border border-outline-variant flex flex-col justify-between flex-shrink-0">
         <div>
           {/* Dashboard Title Header */}
-          <div className="p-6 flex items-center gap-3 border-b border-outline/60">
+          <div className="px-6 pb-6 pt-[calc(24px+env(safe-area-inset-top))] flex items-center gap-3 border-b border-outline/60">
             <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
               <Shield className="h-5 w-5" />
             </div>
@@ -387,7 +387,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'overview'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
               <Activity className="h-4 w-4" />
@@ -398,7 +398,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'users'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
               <Users className="h-4 w-4" />
@@ -409,7 +409,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'chats'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
               <MessageSquare className="h-4 w-4" />
@@ -420,7 +420,7 @@ export default function AdminDashboard({ onClose }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition duration-200 ${
                 activeTab === 'logs'
                   ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 border border-transparent'
+                  : 'text-on-surface-muted hover:text-white hover:bg-surface-container-high/35 backdrop-blur border border-transparent'
               }`}
             >
               <FileText className="h-4 w-4" />
@@ -430,10 +430,10 @@ export default function AdminDashboard({ onClose }) {
         </div>
 
         {/* Footer actions */}
-        <div className="p-4 border-t border-outline/60">
+        <div className="px-4 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))] border-t border-outline/60">
           <button
             onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface-container-high/45 backdrop-blur-md border border-white/10 dark:border-white/5 hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline hover:border-outline-variant text-on-surface-variant hover:text-white rounded-xl text-xs font-semibold transition duration-200"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface-container-high/45 backdrop-blur-md border border-outline hover:border-outline-variant text-on-surface-variant hover:text-white rounded-xl text-xs font-semibold transition duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Exit Command Portal
@@ -442,10 +442,10 @@ export default function AdminDashboard({ onClose }) {
       </div>
 
       {/* MAIN VIEWPORT */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10">
+      <div className="flex-1 flex flex-col overflow-hidden bg-surface/85 backdrop-blur-xl border-l border-outline">
         
         {/* Top Header Panel */}
-        <header className="h-16 border-b border-outline/60 flex items-center justify-between px-8 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/20">
+        <header className="px-8 pb-4 pt-[calc(16px+env(safe-area-inset-top))] border-b border-outline/60 flex items-center justify-between bg-surface-container/85 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
             <h2 className="text-xs uppercase tracking-widest font-semibold text-on-surface-muted">
@@ -457,11 +457,11 @@ export default function AdminDashboard({ onClose }) {
             <button
               onClick={loadAllData}
               title="Refresh Data"
-              className="p-2 text-on-surface-muted hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline hover:border-outline-variant rounded-xl transition duration-200"
+              className="p-2 text-on-surface-muted hover:text-emerald-400 bg-surface-container/85 backdrop-blur-xl border border-outline hover:border-outline-variant rounded-xl transition duration-200"
             >
               <RefreshCw className="h-4 w-4" />
             </button>
-            <div className="flex items-center gap-2 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline px-3 py-1.5 rounded-xl text-xs">
+            <div className="flex items-center gap-2 bg-surface-container/85 backdrop-blur-xl border border-outline px-3 py-1.5 rounded-xl text-xs">
               <span className="font-semibold text-on-surface-muted">Operator:</span>
               <span className="text-emerald-400 font-bold">{currentUser?.displayName}</span>
             </div>
@@ -472,7 +472,7 @@ export default function AdminDashboard({ onClose }) {
         <main className="flex-1 overflow-y-auto p-8 relative">
           
           {loading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-2xl border border-white/30 dark:border-white/10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-2xl">
               <div className="h-12 w-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
               <span className="mt-4 text-xs font-semibold text-on-surface-muted tracking-wider">Syncing control panel...</span>
             </div>
@@ -483,7 +483,7 @@ export default function AdminDashboard({ onClose }) {
               <p className="text-xs text-on-surface-muted">{error}</p>
               <button
                 onClick={loadAllData}
-                className="px-4 py-2 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 hover:bg-surface-container/40 backdrop-blur-md rounded-xl text-xs border border-outline font-bold"
+                className="px-4 py-2 bg-surface-container/85 backdrop-blur-xl border border-outline hover:bg-surface-container-high rounded-xl text-xs font-bold transition"
               >
                 Retry Security Verification
               </button>

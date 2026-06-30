@@ -7,7 +7,7 @@ import {
   MessageSquare, Users, Sparkles, Settings, LogOut, Search, 
   UserPlus, Check, X, Camera, Plus, PlusCircle, Trash2, Users2, ChevronRight, User,
   Shield, ShieldAlert, Sun, Moon, ArrowLeft, Key, Send, Palette,
-  MoreVertical, Pin, PinOff, Ban, EyeOff, UserMinus,
+  MoreVertical, Pin, PinOff, Ban, UserMinus,
   Phone, PhoneCall, PhoneIncoming, PhoneOutgoing, PhoneMissed, Video
 } from 'lucide-react';
 import { useCall } from '../../context/CallContext';
@@ -31,7 +31,7 @@ function Sidebar() {
     friends, groups, activeChat, selectChat, stories, postStory, viewStory,
     respondFriendRequest, createGroup, leaveGroup,
     pinChatAction, unpinChatAction, blockUserAction, unblockUserAction,
-    hideChatAction, removeFriendshipAction, loadFriends
+    hideChatAction, removeFriendshipAction, loadFriends, clearChatHistoryAction
   } = useChat();
 
   const { startCall, callState } = useCall();
@@ -255,7 +255,10 @@ function Sidebar() {
     const { type, friendId } = confirmAction;
     if (type === 'block') await blockUserAction(friendId);
     if (type === 'removeFriendship') await removeFriendshipAction(friendId);
-    if (type === 'removeChat') await hideChatAction(friendId);
+    if (type === 'removeChat') {
+      const chatId = [user.id, friendId].sort().join('_');
+      await clearChatHistoryAction(chatId);
+    }
     setConfirmAction(null);
   };
 
@@ -431,17 +434,27 @@ function Sidebar() {
   };
 
   // Filters for Chat/Friends
-  const filteredFriends = friends.filter(f => 
+  const filteredFriendsForChats = friends.filter(f => 
     f.friendshipStatus === 'accepted' && 
     !f.isHidden &&
+    (f.lastMessage !== null && f.lastMessage !== undefined) &&
     (f.displayName.toLowerCase().includes(searchQuery.toLowerCase()) || 
      f.email.toLowerCase().includes(searchQuery.toLowerCase()))
   ).sort((a, b) => {
     // Pinned chats always come first
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
-    return 0;
+    // Sort by last message timestamp if available
+    const timeA = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+    const timeB = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+    return timeB - timeA;
   });
+
+  const filteredFriendsForFriends = friends.filter(f => 
+    f.friendshipStatus === 'accepted' && 
+    (f.displayName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     f.email.toLowerCase().includes(searchQuery.toLowerCase()))
+  ).sort((a, b) => a.displayName.localeCompare(b.displayName));
 
   const filteredGroups = groups.filter(g => 
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -454,10 +467,13 @@ function Sidebar() {
     groups.filter(g => g.unreadCount > 0).length;
 
   return (
-    <div className="h-full w-full flex flex-col bg-surface-container/50 backdrop-blur-lg border border-white/20 dark:border-white/5 text-on-surface font-sans select-none border-r border-outline/80 relative">
+    <div className="h-full w-full flex flex-col bg-surface/85 backdrop-blur-xl border border-outline-variant/60 font-sans select-none relative overflow-hidden chat-bg border-r border-outline/80" data-bg-pattern={chatBgPattern}>
       
       {/* 1. TOP PROFILE HEADER */}
-      <div className="p-4 flex items-center justify-between border-b border-zinc-200/60 dark:border-outline/50 bg-gradient-to-r from-emerald-500/5 via-transparent to-indigo-500/5">
+      <div
+        className="px-4 pt-[env(safe-area-inset-top)] flex items-center justify-between glass-light border-none backdrop-blur-2xl z-10"
+        style={{ height: 'calc(68px + env(safe-area-inset-top))' }}
+      >
         <div className="flex items-center gap-3">
           <div className="relative group cursor-pointer" onClick={() => setActiveTab('settings')}>
             {/* Conic-gradient spinning ring */}
@@ -472,10 +488,10 @@ function Sidebar() {
               <img
                 src={getAvatarUrl(user.avatarUrl)}
                 alt="Me"
-                className="relative h-11 w-11 rounded-full object-cover border-2 border-zinc-200 dark:border-outline group-hover:border-transparent transition duration-300"
+                className="relative h-11 w-11 rounded-full object-cover border-2 border-outline group-hover:border-transparent transition duration-300"
               />
             ) : (
-              <div className="relative h-11 w-11 rounded-full mesh-avatar border-2 border-zinc-200 dark:border-outline group-hover:border-transparent flex items-center justify-center font-extrabold text-white uppercase text-sm shadow-inner transition">
+              <div className="relative h-11 w-11 rounded-full mesh-avatar border-2 border-outline group-hover:border-transparent flex items-center justify-center font-extrabold text-white uppercase text-sm shadow-inner transition">
                 {getInitials(user?.displayName)}
               </div>
             )}
@@ -487,19 +503,10 @@ function Sidebar() {
             </div>
           </div>
           <div>
-            <h1 className="text-sm font-bold text-zinc-900 dark:text-white leading-tight">{user?.displayName}</h1>
+            <h1 className="text-sm font-bold text-on-surface leading-tight">{user?.displayName}</h1>
             <span className="text-[11px] flex items-center gap-1.5">
-              <span className={`relative h-2 w-2 rounded-full ${
-                socketConnected
-                  ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]'
-                  : 'bg-surface-container-high backdrop-blur'
-              }`}>
-                {socketConnected && (
-                  <span className="absolute inset-0 h-2 w-2 rounded-full bg-emerald-400 animate-ping opacity-50"></span>
-                )}
-              </span>
               <span className={socketConnected ? 'text-emerald-500 dark:text-emerald-400 font-bold' : 'text-on-surface-muted font-medium'}>
-                {socketConnected ? '● Online' : 'Offline'}
+                {socketConnected ? 'Online' : 'Offline'}
               </span>
             </span>
           </div>
@@ -538,8 +545,8 @@ function Sidebar() {
       {/* 2. SEARCH / FILTER BAR */}
       {activeTab !== 'settings' && (
         <div className="px-3 pt-3">
-          <div className="relative group/search">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-muted group-focus-within/search:text-emerald-400 transition">
+          <div className="relative group/search input-glow-ring rounded-2xl">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-muted group-focus-within/search:text-emerald-400 transition z-10">
               <Search className="h-4 w-4" />
             </div>
             <input
@@ -547,14 +554,14 @@ function Sidebar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={`Search ${activeTab}…`}
-              className="block w-full pl-9 pr-4 py-2.5 bg-white/80 dark:bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 border border-zinc-300/60 dark:border-outline/60 rounded-2xl text-zinc-900 dark:text-on-surface placeholder-zinc-400 dark:placeholder-zinc-500 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all duration-200 shadow-inner"
+              className="block w-full pl-9 pr-4 py-2 bg-transparent border border-outline rounded-2xl text-on-surface placeholder-on-surface-muted/50 text-xs focus:outline-none focus:ring-0 transition-all duration-200"
             />
           </div>
         </div>
       )}
 
       {/* 3. CORE SUB-VIEW CONTENTS */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <AnimatePresence mode="wait">
           
           {/* CHATS TAB */}
@@ -576,7 +583,7 @@ function Sidebar() {
                     className={`relative p-3.5 flex items-center justify-between cursor-pointer transition-all duration-200 group/row
                       ${isSelected
                         ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent border-l-2 border-emerald-400 shadow-[inset_1px_0_0_rgba(255,255,255,0.04)]'
-                        : 'hover:bg-surface-container-high/60 backdrop-blur dark:hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 hover:translate-x-0.5'}
+                        : 'hover:bg-surface-container-high/60 backdrop-blur dark:hover:bg-surface-container-high/35 backdrop-blur border border-outline-variant/30 hover:translate-x-0.5'}
                     `}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -614,7 +621,7 @@ function Sidebar() {
                 );
               })}
 
-              {filteredFriends.map(friend => {
+              {filteredFriendsForChats.map(friend => {
                 const isSelected = activeChat && !activeChat.groupId && activeChat.id === friend.id;
                 const isOnline = friend.status === 'online';
 
@@ -625,7 +632,7 @@ function Sidebar() {
                     className={`group/item relative p-3.5 flex items-center justify-between cursor-pointer transition-all duration-200
                       ${isSelected
                         ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent border-l-2 border-emerald-400 shadow-[inset_1px_0_0_rgba(255,255,255,0.04)]'
-                        : 'hover:bg-surface-container-high/60 backdrop-blur dark:hover:bg-surface-container-high/35 backdrop-blur border border-white/10 dark:border-white/5 hover:translate-x-0.5'}
+                        : 'hover:bg-surface-container-high/60 backdrop-blur dark:hover:bg-surface-container-high/35 backdrop-blur border border-outline-variant/30 hover:translate-x-0.5'}
                     `}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -702,7 +709,7 @@ function Sidebar() {
                         {chatMenuOpen === friend.id && (
                           <div 
                             ref={chatMenuRef}
-                            className="absolute right-0 top-7 w-48 glass-strong border border-white/30 dark:border-white/10 bg-surface/70 backdrop-blur-md border border-outline/80 rounded-xl shadow-2xl py-1.5 z-50 text-left"
+                            className="absolute right-0 top-7 w-48 glass-strong border border-outline rounded-xl shadow-2xl py-1.5 z-50 text-left"
                           >
                             <button
                               onClick={() => {
@@ -752,10 +759,10 @@ function Sidebar() {
                                 });
                                 setChatMenuOpen(null);
                               }}
-                              className="w-full px-3 py-2 text-xs text-on-surface-variant hover:bg-surface-container-high/55 backdrop-blur-md border border-white/15 dark:border-white/5 hover:text-white transition flex items-center"
+                              className="w-full px-3 py-2 text-xs text-rose-500 hover:bg-rose-500/10 hover:text-rose-400 transition flex items-center"
                             >
-                              <EyeOff className="h-3.5 w-3.5 mr-2 text-on-surface-muted" />
-                              Remove Chat
+                              <Trash2 className="h-3.5 w-3.5 mr-2 text-rose-500" />
+                              Delete Chat
                             </button>
 
                             <div className="border-t border-outline/60 my-1"></div>
@@ -782,7 +789,7 @@ function Sidebar() {
                 );
               })}
 
-              {filteredFriends.length === 0 && filteredGroups.length === 0 && (
+              {filteredFriendsForChats.length === 0 && filteredGroups.length === 0 && (
                 <div className="p-8 text-center text-on-surface-muted text-xs">
                   No active chats. Use the top icons to add friends or create group chats!
                 </div>
@@ -1056,9 +1063,9 @@ function Sidebar() {
 
               {/* 2. Symmetrical Friends listing */}
               <div className="space-y-2">
-                <h3 className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted">All Friends ({filteredFriends.length})</h3>
+                <h3 className="text-[10px] uppercase font-bold tracking-wider text-on-surface-muted">All Friends ({filteredFriendsForFriends.length})</h3>
                 <div className="space-y-1">
-                  {filteredFriends.map(friend => (
+                  {filteredFriendsForFriends.map(friend => (
                     <div 
                       key={friend.id}
                       onClick={() => selectChat(friend)}
@@ -1092,7 +1099,7 @@ function Sidebar() {
                     </div>
                   ))}
 
-                  {filteredFriends.length === 0 && (
+                  {filteredFriendsForFriends.length === 0 && (
                     <div className="p-8 text-center text-on-surface-faint text-xs">
                       No friends matching search.
                     </div>
@@ -1227,7 +1234,7 @@ function Sidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="p-4 overflow-y-auto max-h-[calc(100vh-120px)] custom-scrollbar"
+              className="p-4"
             >
               {settingsSubTab === null && (
                 <div className="space-y-6">
@@ -1700,103 +1707,90 @@ function Sidebar() {
           )}
         </AnimatePresence>
       </div>
-
-      {/* 4. FOOTER TAB SELECTOR — Static pill nav (no animation) */}
-      <div className="px-3 pt-2 pb-3 relative z-20">
-        <nav
-          className="relative h-[60px] mx-auto flex items-center justify-around
-                     bg-surface/55 backdrop-blur-2xl border border-white/40 dark:border-white/10
-                     rounded-2xl px-1.5 shadow-elev2
-                     ring-1 ring-black/5 dark:ring-white/5"
-          aria-label="Sidebar sections"
-        >
-          {[
-            {
-              id: 'chats',
-              label: 'Chats',
-              icon: MessageSquare,
-              badge: totalUnreadChats,
-              accent: 'rgb(var(--theme-color-500))',
-              softAccent: 'rgba(var(--theme-color-500) / 0.18)',
-              badgeBg: 'bg-emerald-500',
-            },
-            {
-              id: 'stories',
-              label: 'Status',
-              icon: Sparkles,
-              accent: '#ec4899',
-              softAccent: 'rgba(236, 72, 153, 0.18)',
-            },
-            {
-              id: 'calls',
-              label: 'Calls',
-              icon: Phone,
-              accent: '#6366f1',
-              softAccent: 'rgba(99, 102, 241, 0.18)',
-            },
-            {
-              id: 'friends',
-              label: 'Friends',
-              icon: Users,
-              badge: pendingReceivedRequests.length,
-              accent: '#f59e0b',
-              softAccent: 'rgba(245, 158, 11, 0.18)',
-              badgeBg: 'bg-amber-500',
-            },
-            {
-              id: 'settings',
-              label: 'Settings',
-              icon: Settings,
-              accent: '#64748b',
-              softAccent: 'rgba(100, 116, 139, 0.18)',
-            },
-          ].map((tab) => {
-            const isActive = activeTab === tab.id;
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                aria-pressed={isActive}
-                className="relative flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl transition-colors duration-200 min-w-[54px]"
-              >
-                {isActive && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 rounded-xl border shadow-elev1"
-                    style={{
-                      background: tab.softAccent,
-                      borderColor: tab.accent + '55',
-                      boxShadow: `0 6px 18px -6px ${tab.accent}55`,
-                    }}
-                  />
-                )}
-                <div className="relative z-10">
-                  <Icon
-                    className="h-5 w-5 transition-colors duration-200"
-                    strokeWidth={isActive ? 2.6 : 2}
-                    style={{ color: isActive ? tab.accent : 'rgb(var(--on-surface-muted))' }}
-                  />
-                  {tab.badge > 0 && (
-                    <span
-                      className={`absolute -top-1.5 -right-2 flex h-4 min-w-4 px-1 items-center justify-center rounded-full ${tab.badgeBg} text-[9px] font-extrabold shadow-md`}
-                      style={{ color: 'rgb(var(--on-surface))' }}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </div>
+      <nav
+        className="w-full flex items-center justify-around glass-light border-none pb-[env(safe-area-inset-bottom)] select-none h-14 relative z-20"
+        aria-label="Sidebar sections"
+      >
+        {[
+          {
+            id: 'chats',
+            label: 'Chats',
+            icon: MessageSquare,
+            badge: totalUnreadChats,
+            accent: 'rgb(var(--theme-color-500))',
+            badgeBg: 'bg-emerald-500',
+          },
+          {
+            id: 'stories',
+            label: 'Status',
+            icon: Sparkles,
+            accent: '#ec4899',
+          },
+          {
+            id: 'calls',
+            label: 'Calls',
+            icon: Phone,
+            accent: '#6366f1',
+          },
+          {
+            id: 'friends',
+            label: 'Friends',
+            icon: Users,
+            badge: pendingReceivedRequests.length,
+            accent: '#f59e0b',
+            badgeBg: 'bg-amber-500',
+          },
+          {
+            id: 'settings',
+            label: 'Settings',
+            icon: Settings,
+            accent: 'rgb(var(--on-surface))',
+          },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              aria-pressed={isActive}
+              className="relative flex-grow flex flex-col items-center justify-center gap-1 h-full py-1.5 transition-all duration-200 hover:bg-surface-container-high/20"
+            >
+              {isActive && (
                 <span
-                  className="relative z-10 text-[10px] font-semibold transition-colors duration-200"
+                  aria-hidden="true"
+                  className="absolute top-0 left-1/4 right-1/4 h-0.5 rounded-full"
+                  style={{
+                    background: tab.accent,
+                    boxShadow: `0 2px 8px ${tab.accent}`,
+                  }}
+                />
+              )}
+              <div className="relative">
+                <Icon
+                  className="h-[18px] w-[18px] transition-colors duration-200"
+                  strokeWidth={isActive ? 2.5 : 2}
                   style={{ color: isActive ? tab.accent : 'rgb(var(--on-surface-muted))' }}
-                >
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+                />
+                {tab.badge > 0 && (
+                  <span
+                    className={`absolute -top-1.5 -right-2 flex h-3.5 min-w-[14px] px-0.5 items-center justify-center rounded-full ${tab.badgeBg} text-[8px] font-extrabold shadow-sm`}
+                    style={{ color: 'rgb(var(--on-surface))' }}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
+              <span
+                className="text-[9px] font-semibold tracking-wide transition-colors duration-200 uppercase"
+                style={{ color: isActive ? tab.accent : 'rgb(var(--on-surface-muted))' }}
+              >
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* ================= MODAL WINDOWS ================= */}
 
@@ -2008,15 +2002,15 @@ function Sidebar() {
               <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                 {confirmAction.type === 'block' && <Ban className="h-5 w-5 text-amber-500" />}
                 {confirmAction.type === 'unblock' && <Ban className="h-5 w-5 text-emerald-500" />}
-                {confirmAction.type === 'removeChat' && <EyeOff className="h-5 w-5 text-on-surface-muted" />}
+                {confirmAction.type === 'removeChat' && <Trash2 className="h-5 w-5 text-rose-500" />}
                 {confirmAction.type === 'removeFriendship' && <UserMinus className="h-5 w-5 text-rose-500" />}
-                Confirm Action
+                {confirmAction.type === 'removeChat' ? 'Delete Chat' : 'Confirm Action'}
               </h3>
 
               <p className="text-xs text-on-surface-muted mb-6 leading-relaxed">
                 {confirmAction.type === 'block' && `Are you sure you want to block ${confirmAction.friendName}? You will not receive messages from this user.`}
                 {confirmAction.type === 'unblock' && `Are you sure you want to unblock ${confirmAction.friendName}?`}
-                {confirmAction.type === 'removeChat' && `Are you sure you want to remove the chat history with ${confirmAction.friendName} from your sidebar?`}
+                {confirmAction.type === 'removeChat' && `Are you sure you want to delete all chat history with ${confirmAction.friendName} from your end? This action is permanent.`}
                 {confirmAction.type === 'removeFriendship' && `Are you sure you want to remove ${confirmAction.friendName} from your friends list? This will delete the chat history as well.`}
               </p>
 
@@ -2037,14 +2031,15 @@ function Sidebar() {
                     } else if (type === 'unblock') {
                       await unblockUserAction(friendId);
                     } else if (type === 'removeChat') {
-                      await hideChatAction(friendId);
+                      const chatId = [user.id, friendId].sort().join('_');
+                      await clearChatHistoryAction(chatId);
                     } else if (type === 'removeFriendship') {
                       await removeFriendshipAction(friendId);
                     }
                     setConfirmAction(null);
                   }}
                   className={`px-4 py-2 text-xs font-semibold rounded-xl transition ${
-                    confirmAction.type === 'removeFriendship'
+                    confirmAction.type === 'removeFriendship' || confirmAction.type === 'removeChat'
                       ? 'bg-rose-500 hover:bg-rose-600 text-white'
                       : confirmAction.type === 'block'
                       ? 'bg-amber-500 hover:bg-amber-600 text-zinc-950'

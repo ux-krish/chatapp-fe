@@ -59,7 +59,9 @@ function ChatWindow() {
     setTypingIndicator, typingStatus, leaveGroup, addGroupMembers, friends,
     replyingTo, setReplyingTo, editMessage, deleteMessage, pinMessage, reactMessage,
     pinChatAction, unpinChatAction, blockUserAction, unblockUserAction,
-    hideChatAction, removeFriendshipAction
+    hideChatAction,
+    removeFriendshipAction,
+    clearChatHistoryAction
   } = useChat();
   const { startCall } = useCall();
 
@@ -200,7 +202,13 @@ function ChatWindow() {
     const { type, friendId } = confirmAction;
     if (type === 'block') await blockUserAction(friendId);
     if (type === 'unblock') await unblockUserAction(friendId);
-    if (type === 'removeChat') await hideChatAction(friendId);
+    if (type === 'clearChatHistory') {
+      const isOneToOne = !activeChat.groupId;
+      const chatId = isOneToOne
+        ? (user.id < friendId ? `usr_${user.id}_usr_${friendId}` : `usr_${friendId}_usr_${user.id}`)
+        : activeChat.id;
+      await clearChatHistoryAction(chatId);
+    }
     if (type === 'removeFriendship') { await removeFriendshipAction(friendId); selectChat(null); }
     setConfirmAction(null);
     setShowGroupInfo(false);
@@ -479,10 +487,13 @@ function ChatWindow() {
   const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥', '🎉'];
 
   return (
-    <div className="h-full w-full flex flex-col bg-surface/85 backdrop-blur-xl border border-white/40 dark:border-white/10 font-sans relative overflow-hidden">
+    <div className="h-full w-full flex flex-col bg-surface/85 backdrop-blur-xl border border-outline-variant/60 font-sans relative overflow-hidden chat-bg" data-bg-pattern={chatBgPattern}>
 
       {/* 2. CHAT WINDOW HEADER */}
-      <div className="p-4 glass-light border-b border-white/40 dark:border-white/5 backdrop-blur-2xl flex items-center justify-between z-20">
+      <div
+        className="px-4 pt-[env(safe-area-inset-top)] glass-light border-none backdrop-blur-2xl flex items-center justify-between z-20"
+        style={{ height: 'calc(68px + env(safe-area-inset-top))' }}
+      >
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => selectChat(null)}
@@ -559,7 +570,7 @@ function ChatWindow() {
               </button>
 
               {showChatMenu && (
-                <div className="absolute right-0 top-10 w-52 glass-strong border border-white/40 dark:border-white/10 rounded-2xl shadow-elev4 py-1.5 z-50 text-on-surface">
+                <div className="absolute right-0 top-10 w-52 bg-surface/98 dark:bg-surface-container/98 border border-outline rounded-2xl shadow-elev4 py-1.5 z-50 text-on-surface">
                   {/* Pin / Unpin */}
                   <button
                     onClick={() => {
@@ -586,16 +597,16 @@ function ChatWindow() {
                     {activeChat.isBlocked ? 'Unblock User' : 'Block User'}
                   </button>
 
-                  {/* Remove Chat */}
+                  {/* Delete Chat */}
                   <button
                     onClick={() => {
-                      setConfirmAction({ type: 'removeChat', friendId: activeChat.id, friendName: activeChat.displayName });
+                      setConfirmAction({ type: 'clearChatHistory', friendId: activeChat.id, friendName: activeChat.displayName });
                       setShowChatMenu(false);
                     }}
-                    className="w-full px-3 py-2 text-xs text-on-surface hover:bg-surface-container-high transition flex items-center gap-2"
+                    className="w-full px-3 py-2 text-xs text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 transition flex items-center gap-2"
                   >
-                    <EyeOff className="h-3.5 w-3.5 text-on-surface-faint" />
-                    Remove Chat
+                    <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                    Delete Chat
                   </button>
 
                   <div className="border-t border-outline-variant my-1" />
@@ -655,7 +666,8 @@ function ChatWindow() {
       })()}
 
       {/* 3. MESSAGES SCROLL LIST */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 chat-bg relative" data-bg-pattern={chatBgPattern}>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 relative">
+        <div className="max-w-4xl mx-auto w-full flex flex-col space-y-3 min-h-full justify-end">
 
         {messages.map((msg) => {
           const isMe = msg.senderId === user.id;
@@ -666,7 +678,7 @@ function ChatWindow() {
             // It's a system notice
             return (
               <div key={msg.id} className="flex justify-center my-2">
-                <span className="px-3 py-1 bg-surface-container/75 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline/60 rounded-full text-[9px] text-on-surface-muted tracking-wider uppercase font-medium">
+                <span className="px-3 py-1 bg-surface-container/75 backdrop-blur-xl border border-outline-variant rounded-full text-[9px] text-on-surface-muted tracking-wider uppercase font-medium">
                   {msg.content}
                 </span>
               </div>
@@ -678,7 +690,7 @@ function ChatWindow() {
           if (isSystem && isGroup) {
             return (
               <div key={msg.id} className="flex justify-center my-2 w-full">
-                <span className="px-3 py-1 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/60 border border-outline/40 rounded-full text-[9px] text-on-surface-muted font-medium text-center max-w-[80%]">
+                <span className="px-3 py-1 bg-surface-container/85 backdrop-blur-xl border border-outline-variant rounded-full text-[9px] text-on-surface-muted font-medium text-center max-w-[80%]">
                   {msg.content}
                 </span>
               </div>
@@ -703,7 +715,7 @@ function ChatWindow() {
                     }
                   }
                 }}
-                className={`relative max-w-[75%] py-2.5 px-4 shadow-lg flex flex-col transition-all duration-300 hover-pop ${isHighlighted ? 'ring-2 ring-emerald-500/60 scale-[1.02] bg-emerald-500/10' : ''
+                className={`relative max-w-[75%] py-2.5 px-4 shadow-lg flex flex-col transition-all duration-300 ${isHighlighted ? 'ring-2 ring-emerald-500/60 scale-[1.02] bg-emerald-500/10' : ''
                   } ${isMe
                     ? 'bg-gradient-to-br from-emerald-600/90 to-emerald-700 text-white border border-emerald-500/20 rounded-2xl rounded-tr-sm shadow-emerald-950/20 bubble-out'
                     : 'bg-zinc-900/95 backdrop-blur-md border border-zinc-850/80 text-zinc-100 rounded-2xl rounded-tl-sm shadow-black/10 bubble-in'
@@ -1000,7 +1012,7 @@ function ChatWindow() {
 
                       {/* Glassmorphic Dropdown Actions Menu */}
                       {activeMenuMessageId === msg.id && (
-                        <div className={`message-dropdown-container absolute z-40 w-36 p-1.5 glass-strong border border-white/30 dark:border-white/10 bg-surface-container/70 border border-outline rounded-xl shadow-2xl flex flex-col gap-0.5 backdrop-blur-md ${isMe ? 'right-0 top-8' : 'left-0 top-8'
+                        <div className={`message-dropdown-container absolute z-40 w-36 p-1.5 bg-surface/98 dark:bg-surface-container/98 border border-outline rounded-xl shadow-2xl flex flex-col gap-0.5 backdrop-blur-md ${isMe ? 'right-0 top-8' : 'left-0 top-8'
                           }`}>
                           {/* Emojis Reaction Row inside Dropdown */}
                           <div className="flex justify-between items-center border-b border-outline/60 pb-1.5 pt-0.5 px-1 mb-1 gap-0.5">
@@ -1084,6 +1096,7 @@ function ChatWindow() {
         )}
 
         <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* 4. CHAT INPUT ATTACHMENT MENU / QUICK ACTION MENU */}
@@ -1121,7 +1134,7 @@ function ChatWindow() {
 
       {/* Threaded Reply Preview Card */}
       {replyingTo && (
-        <div className="mx-4 mb-2 p-3 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10/90 border border-outline/80 rounded-2xl flex items-center justify-between backdrop-blur-md z-10 border-l-4 border-l-emerald-500 shadow-lg">
+        <div className="mx-4 mb-2 p-3 bg-surface-container/85 backdrop-blur-xl border border-outline-variant rounded-2xl flex items-center justify-between backdrop-blur-md z-10 border-l-4 border-l-emerald-500 shadow-lg">
           <div className="flex items-center gap-2 min-w-0 pl-1">
             <div className="text-left min-w-0">
               <span className="text-[9px] font-bold text-emerald-400 block leading-tight font-sans">
@@ -1147,25 +1160,26 @@ function ChatWindow() {
         </div>
       )}
 
-      {/* 5. BOTTOM TEXT ENTRY BOX — matches chat header glass surface */}
-      <form
-        onSubmit={handleSend}
-        className="mx-4 mb-4 mt-1 px-4 py-2.5 glass-light border border-white/25 dark:border-white/5 rounded-2xl backdrop-blur-2xl flex items-center gap-2.5 z-20 shadow-lg shadow-black/5"
-      >
+      {/* 5. BOTTOM TEXT ENTRY BOX — Modern Integrated Composer */}
+      <div className="w-full max-w-4xl mx-auto px-4 z-20">
+        <form
+          onSubmit={handleSend}
+          className="mb-4 mt-1 h-14 bg-transparent border border-outline rounded-2xl flex items-center gap-2.5 px-3 relative shadow-md transition-all duration-200 input-glow-ring"
+          style={{ marginBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+        >
         <button
           type="button"
           onClick={() => {
             setShowAttachMenu(prev => !prev);
             setShowEmojiPicker(false);
           }}
-          className={`p-2.5 text-on-surface-muted hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-150 flex-shrink-0 hover-wiggle ${showAttachMenu ? 'bg-emerald-500/15 text-emerald-400' : ''}`}
+          className={`p-2 text-on-surface-muted hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition flex-shrink-0 hover-wiggle ${showAttachMenu ? 'bg-emerald-500/15 text-emerald-400' : ''}`}
           title="Attach media"
         >
           <Paperclip className="h-5 w-5" />
         </button>
 
-        <div className="flex-1 relative input-glow-ring rounded-2xl">
-          <div className="input-glow-ring__inner flex items-center w-full pl-4 pr-11 py-3 rounded-2xl">
+        <div className="flex-1 relative flex items-center">
           <AnimatePresence>
             {showMentionDropdown && filteredMembers.length > 0 && (
               <motion.div
@@ -1173,7 +1187,7 @@ function ChatWindow() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute bottom-full left-0 mb-3 w-72 max-h-60 glass-strong border border-white/30 dark:border-white/10 bg-surface-container/70 backdrop-blur-md border border-outline/80 rounded-2xl shadow-2xl overflow-y-auto z-50 py-2 custom-scrollbar"
+                className="absolute bottom-full left-0 mb-3 w-72 max-h-60 bg-surface-container/95 border border-outline rounded-2xl shadow-2xl overflow-y-auto z-50 py-2 custom-scrollbar"
               >
                 <div className="px-3 py-1 text-[10px] font-bold text-on-surface-muted uppercase tracking-wider border-b border-outline/40 mb-1">
                   Mention Group Member
@@ -1190,7 +1204,7 @@ function ChatWindow() {
                       onMouseEnter={() => setMentionSelectedIndex(idx)}
                       className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition duration-150 ${isSelected
                         ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500'
-                        : 'text-on-surface-variant hover:bg-surface-container-high/45 backdrop-blur-md border border-white/10 dark:border-white/5'
+                        : 'text-on-surface-variant hover:bg-surface-container-high/45 border-l-2 border-transparent'
                         }`}
                     >
                       {member.avatarUrl ? (
@@ -1200,7 +1214,7 @@ function ChatWindow() {
                           className="h-6 w-6 rounded-full object-cover border border-outline"
                         />
                       ) : (
-                        <div className="h-6 w-6 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 border border-outline-variant/80 flex items-center justify-center font-bold text-[10px] text-on-surface-muted uppercase">
+                        <div className="h-6 w-6 rounded-full bg-surface-container-high/85 border border-outline-variant flex items-center justify-center font-bold text-[10px] text-on-surface-muted uppercase">
                           {getInitials(member.displayName)}
                         </div>
                       )}
@@ -1219,13 +1233,6 @@ function ChatWindow() {
             )}
           </AnimatePresence>
 
-          {/* Searchable categorized Emoji Picker popover anchored to Smile button */}
-          {showEmojiPicker && (
-            <div className="absolute bottom-full right-0 mb-3 z-50">
-              <EmojiPicker onSelect={handleEmojiSelect} />
-            </div>
-          )}
-
           <input
             ref={inputRef}
             type="text"
@@ -1233,20 +1240,27 @@ function ChatWindow() {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={inputText.trim() ? '' : 'Type a message…'}
-            className="block flex-1 min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-on-surface placeholder-on-surface-faint text-sm transition-all duration-200"
+            className="block w-full bg-transparent border-0 px-2 py-1.5 focus:outline-none focus:ring-0 text-on-surface placeholder-on-surface-muted/50 text-sm"
           />
+        </div>
 
+        <div className="relative flex items-center flex-shrink-0">
+          {showEmojiPicker && (
+            <div className="absolute bottom-full right-0 mb-3 z-50">
+              <EmojiPicker onSelect={handleEmojiSelect} />
+            </div>
+          )}
           <button
             type="button"
             onClick={() => {
               setShowEmojiPicker(prev => !prev);
               setShowAttachMenu(false);
             }}
-            className={`p-1 text-on-surface-muted hover:text-amber-400 transition z-10 ${showEmojiPicker ? 'text-amber-400' : ''}`}
+            className={`p-2 text-on-surface-muted hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition ${showEmojiPicker ? 'text-amber-400 bg-amber-500/10' : ''}`}
+            title="Emojis"
           >
             <Smile className="h-5 w-5" />
           </button>
-          </div>
         </div>
 
         {/* Send button with gradient blob, shine, and confetti burst */}
@@ -1270,7 +1284,8 @@ function ChatWindow() {
           <Send className="h-5 w-5 relative z-10" strokeWidth={2.4} />
           <span aria-hidden="true" className="absolute inset-0 rounded-2xl confetti-host pointer-events-none" />
         </button>
-      </form>
+        </form>
+      </div>
 
       {/* 7. FULLSCREEN LIGHTBOX FOR IMAGES */}
       <AnimatePresence>
@@ -1284,7 +1299,7 @@ function ChatWindow() {
               <button
                 type="button"
                 onClick={() => handleDownload(lightboxImage, 'image.png')}
-                className="p-2 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 text-white hover:text-emerald-400 rounded-full border border-outline hover:bg-surface-container-high/80 backdrop-blur-md border border-white/20 dark:border-white/5 transition duration-150 shadow-lg"
+                className="p-2 bg-surface-container/85 backdrop-blur-xl border border-outline text-white hover:text-emerald-400 rounded-full hover:bg-surface-container-high/80 transition duration-150 shadow-lg"
                 title="Download image"
               >
                 <Download className="h-5 w-5" />
@@ -1321,7 +1336,7 @@ function ChatWindow() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="w-full max-w-xs h-full bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border-l border-outline p-6 flex flex-col justify-between overflow-y-auto"
+              className="w-full max-w-xs h-full bg-surface-container/85 backdrop-blur-xl border-l border-outline p-6 flex flex-col justify-between overflow-y-auto"
             >
               {isGroup ? (
                 // GROUP INFO SIDEBAR
@@ -1541,24 +1556,24 @@ function ChatWindow() {
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-3xl shadow-2xl"
+              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-outline rounded-2xl shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-4">
                 {confirmAction.type === 'block' && <Ban className="h-5 w-5 text-amber-500" />}
                 {confirmAction.type === 'unblock' && <Ban className="h-5 w-5 text-emerald-500" />}
-                {confirmAction.type === 'removeChat' && <EyeOff className="h-5 w-5 text-on-surface-muted" />}
+                {confirmAction.type === 'clearChatHistory' && <Trash2 className="h-5 w-5 text-rose-500" />}
                 {confirmAction.type === 'removeFriendship' && <UserMinus className="h-5 w-5 text-rose-500" />}
                 <h3 className="text-sm font-bold text-white">
                   {confirmAction.type === 'block' && 'Block User'}
                   {confirmAction.type === 'unblock' && 'Unblock User'}
-                  {confirmAction.type === 'removeChat' && 'Remove Chat'}
+                  {confirmAction.type === 'clearChatHistory' && 'Delete Chat'}
                   {confirmAction.type === 'removeFriendship' && 'Remove Friend'}
                 </h3>
               </div>
               <p className="text-xs text-on-surface-muted mb-6 leading-relaxed">
                 {confirmAction.type === 'block' && `Are you sure you want to block ${confirmAction.friendName}? You will no longer receive messages from them.`}
                 {confirmAction.type === 'unblock' && `Are you sure you want to unblock ${confirmAction.friendName}?`}
-                {confirmAction.type === 'removeChat' && `Remove the chat history with ${confirmAction.friendName} from your sidebar?`}
+                {confirmAction.type === 'clearChatHistory' && `Are you sure you want to delete all chat history with ${confirmAction.friendName} from your end? This action is permanent.`}
                 {confirmAction.type === 'removeFriendship' && `Remove ${confirmAction.friendName} from your friends list? This will also delete your chat history.`}
               </p>
               <div className="flex gap-3">
@@ -1570,7 +1585,7 @@ function ChatWindow() {
                 </button>
                 <button
                   onClick={handleConfirmChatAction}
-                  className={`flex-1 py-2.5 px-4 font-semibold rounded-xl text-xs transition ${confirmAction.type === 'removeFriendship' || confirmAction.type === 'block'
+                  className={`flex-1 py-2.5 px-4 font-semibold rounded-xl text-xs transition ${confirmAction.type === 'removeFriendship' || confirmAction.type === 'block' || confirmAction.type === 'clearChatHistory'
                     ? 'bg-rose-500 hover:bg-rose-400 text-white'
                     : 'bg-emerald-500 hover:bg-emerald-400 text-zinc-950'
                     }`}
@@ -1591,7 +1606,7 @@ function ChatWindow() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-white/30 dark:border-white/10 border border-outline rounded-3xl shadow-2xl relative"
+              className="w-full max-w-sm p-6 bg-surface-container/85 backdrop-blur-xl border border-outline rounded-2xl shadow-2xl relative"
             >
               <button
                 onClick={() => {
